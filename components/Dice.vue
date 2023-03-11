@@ -19,32 +19,32 @@
         <div class="dice" :class="{'useBGmap' : useBGmap}">
             <div :class="DiceState.spinning ? 'spin' : 'perspective'" class="cube">
                 <div :class="(DiceState.face === 1 || DiceState.spinning) ? 'lightFacing' : ''"
-                :style="!useBGmap ? 'background-image: url(/images/' + dummyImages[1 - 1] + ')' : ''"
+                :style="!useBGmap ? 'background-image: url(images/' + dummyImages[1 - 1] + ')' : ''"
                 class="front"></div>
                 <div v-if="useBGmap" class="front filler"></div>
 
                 <div :class="(DiceState.face === 6 || DiceState.spinning) ? 'lightFacing' : '' "
-                :style="!useBGmap ? 'background-image: url(/images/' + dummyImages[6 - 1] + ')' : ''"
+                :style="!useBGmap ? 'background-image: url(images/' + dummyImages[6 - 1] + ')' : ''"
                 class="back"></div>
                 <div v-if="useBGmap" class="back filler"></div>
 
                 <div :class="(DiceState.face === 5 || DiceState.spinning) ? 'lightFacing' : '' "
-                :style="!useBGmap ? 'background-image: url(/images/' + dummyImages[5 - 1] + ')' : ''"
+                :style="!useBGmap ? 'background-image: url(images/' + dummyImages[5 - 1] + ')' : ''"
                 class="top"></div>
                 <div v-if="useBGmap" class="top filler"></div>
 
                 <div :class="(DiceState.face === 2 || DiceState.spinning) ? 'lightFacing' : '' "
-                :style="!useBGmap ? 'background-image: url(/images/' + dummyImages[2 - 1] + ')' : ''"
+                :style="!useBGmap ? 'background-image: url(images/' + dummyImages[2 - 1] + ')' : ''"
                 class="bottom"></div>
                 <div v-if="useBGmap" class="bottom filler"></div>
 
                 <div :class="(DiceState.face === 3 || DiceState.spinning) ? 'lightFacing' : '' "
-                :style="!useBGmap ? 'background-image: url(/images/' + dummyImages[3 - 1] + ')' : ''"
+                :style="!useBGmap ? 'background-image: url(images/' + dummyImages[3 - 1] + ')' : ''"
                 class="left"></div>
                 <div v-if="useBGmap" class="left filler"></div>
 
                 <div :class="(DiceState.face === 4 || DiceState.spinning) ? 'lightFacing' : '' "
-                :style="!useBGmap ? 'background-image: url(/images/' + dummyImages[4 - 1] + ')' : ''"
+                :style="!useBGmap ? 'background-image: url(images/' + dummyImages[4 - 1] + ')' : ''"
                 class="right"></div>
                 <div v-if="useBGmap" class="right filler"></div>
             </div>

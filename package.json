@@ -6,7 +6,7 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist -t true"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.14",
