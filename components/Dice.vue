@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div @click="handleClick()" class="w-full h-full flex flex-col justify-center items-center">
 
         <div :class="!DiceState.hasRolled ? 'enabled' : '' " class="helper">
             <!-- TODO: Maybe use fade transition here instead of class? -->
@@ -11,40 +11,40 @@
             <div>Dice face: {{ DiceState.face }}</div>
             <div>Dice spinning: {{ DiceState.spinning }}</div>
             <div>Use bg map: {{ useBGmap }}</div>
+            <div>mouseCoords: {{ mouseCoords }}</div>
         </div>
 
-        <div class="dice" @click="handleClick()"
-        :class="{'useBGmap' : useBGmap}">
+        <div class="dice" :class="{'useBGmap' : useBGmap}">
             <div :class="DiceState.spinning ? 'spin' : 'perspective'" class="cube">
                 <div :class="(DiceState.face === 1 || DiceState.spinning) ? 'lightFacing' : ''"
                 :style="!useBGmap ? 'background-image: url(/images/' + dummyImages[1 - 1] + ')' : ''"
                 class="front"></div>
-                <div class="front filler"></div>
+                <div v-if="useBGmap" class="front filler"></div>
 
                 <div :class="(DiceState.face === 6 || DiceState.spinning) ? 'lightFacing' : '' "
                 :style="!useBGmap ? 'background-image: url(/images/' + dummyImages[6 - 1] + ')' : ''"
                 class="back"></div>
-                <div class="back filler"></div>
+                <div v-if="useBGmap" class="back filler"></div>
 
                 <div :class="(DiceState.face === 5 || DiceState.spinning) ? 'lightFacing' : '' "
                 :style="!useBGmap ? 'background-image: url(/images/' + dummyImages[5 - 1] + ')' : ''"
                 class="top"></div>
-                <div class="top filler"></div>
+                <div v-if="useBGmap" class="top filler"></div>
 
                 <div :class="(DiceState.face === 2 || DiceState.spinning) ? 'lightFacing' : '' "
                 :style="!useBGmap ? 'background-image: url(/images/' + dummyImages[2 - 1] + ')' : ''"
                 class="bottom"></div>
-                <div class="bottom filler"></div>
+                <div v-if="useBGmap" class="bottom filler"></div>
 
                 <div :class="(DiceState.face === 3 || DiceState.spinning) ? 'lightFacing' : '' "
                 :style="!useBGmap ? 'background-image: url(/images/' + dummyImages[3 - 1] + ')' : ''"
                 class="left"></div>
-                <div class="left filler"></div>
+                <div v-if="useBGmap" class="left filler"></div>
 
                 <div :class="(DiceState.face === 4 || DiceState.spinning) ? 'lightFacing' : '' "
                 :style="!useBGmap ? 'background-image: url(/images/' + dummyImages[4 - 1] + ')' : ''"
                 class="right"></div>
-                <div class="right filler"></div>
+                <div v-if="useBGmap" class="right filler"></div>
             </div>
         </div>
     </div>
@@ -68,8 +68,10 @@ export default {
 
             useBGmap: false,
 
+            currentInteraction: null, // mouse, sensor
+
             DiceState: {
-                face: 1,
+                face: 6,
                 spinning: false,
                 accelerometer: [0.3, 0.25],
                 hasRolled: false
@@ -91,7 +93,9 @@ export default {
                 'dummy-400x400-HappyBoy.jpg',
                 'dummy-400x400-Headphone.jpg',
                 'dummy-400x400-TShirt.jpg'
-            ]
+            ],
+
+            mouseCoords: [ 0, 0 ]
 
         }
 
@@ -102,10 +106,15 @@ export default {
             this.handleKeyDown(e)
         })
 
+        document.addEventListener('mousemove', (e) => {
+            let x = (window.innerWidth / 2 - e.pageX) / -5
+            let y = (window.innerHeight / 2 - e.pageY) / 5
+            this.mouseCoords = [ x, y ]
+            // `rotateY(${x}deg) rotateX(${y}deg)`
+            this.currentInteraction = 'mouse'
+        })
 
-
-
-
+        /*
         try {
 
 
@@ -124,6 +133,7 @@ export default {
 
                         console.log("orientationSensor reading")
                         if (!this.DiceState.spinning) {
+                            this.currentInteraction = 'sensor'
                             this.DiceState.accelerometer = sensorOrientation.quaternion.map((x, i) => {
                                 if (i < 2) {
                                     return Math.round(x * 1000 * 1000) / (1000 * 1000)
@@ -162,6 +172,8 @@ export default {
             })
 
         }
+
+        */
     },
 
 
@@ -240,25 +252,97 @@ export default {
 
             // Calculate perspective rotation with device orientation effect
             const [x, y, z] = this.faceViews[this.DiceState.face - 1]
-            const [ax, ay] = this.DiceState.accelerometer
-            let rx = x + (ax * 40)
+
+            const [ax, ay] = this.mouseCoords //this.DiceState.accelerometer
+            
+            let speedModifier = 0.009
+            let rx = 0
             let ry = 0
             let rz = 0
 
-            if (this.DiceState.face === 5) {
-                ry = y
-                rz = z + (-ay * 40)
+            // FACE 1
+            if (this.DiceState.face === 1) {
+
+                if (this.currentInteraction == 'mouse') {
+                    ry = x + (speedModifier * (ax * 40))
+                    rx = y + (speedModifier * (ay * 40))
+                    rz = z
+                } else if (this.currentInteraction == 'sensor') {
+                    rx = x + (ax * 40)
+                    ry = y + (-ay * 40)
+                    rz = z
+                }
+
+            // FACE 2
             } else if (this.DiceState.face === 2) {
-                ry = y
-                rz = z + (ay * 40)
+
+                if (this.currentInteraction == 'mouse') {
+                    ry = x + (speedModifier * (ax * 40))
+                    rx = y
+                    rz = z + (speedModifier * (ay * 40))
+                } else if (this.currentInteraction == 'sensor') {
+                    rx = x + (ax * 40)
+                    ry = y
+                    rz = z + (ay * 40)
+                }
+
+            
+            // FACE 3
+            } else if (this.DiceState.face === 3) {
+
+                if (this.currentInteraction == 'mouse') {
+                    rx = y + (speedModifier * (ay * 40))
+                    ry = z
+                    rz = x + (speedModifier * (-ax * 40))
+                } else if (this.currentInteraction == 'sensor') {
+                    rx = x + (ax * 40)
+                    ry = y + (-ay * 40)
+                    rz = z
+                }
+
+            // FACE 4
+            } else if (this.DiceState.face === 4) {
+
+                if (this.currentInteraction == 'mouse') {
+                    rx = y + (speedModifier * (ay * 40))
+                    ry = z
+                    rz = x + (speedModifier * (ax * 40))
+
+                } else if (this.currentInteraction == 'sensor') {
+                    rx = x + (ax * 40)
+                    ry = y + (-ay * 40)
+                    rz = z
+                }
+
+
+            // FACE 5
+            } else if (this.DiceState.face === 5) {
+
+                if (this.currentInteraction == 'mouse') {
+                    rx = y
+                    ry = x + (speedModifier * (ax * 40))
+                    rz = z + (speedModifier * (-ay * 40))
+                } else if (this.currentInteraction == 'sensor') {
+                    rx = x + (ax * 40)
+                    ry = y
+                    rz = z + (speedModifier * (-ay * 40))
+                }
+
+            // FACE 6
             } else if (this.DiceState.face === 6) {
-                ry = y + (ay * 40)
-                rz = z
-            } else {
-                ry = y + (-ay * 40)
-                rz = z
+
+                if (this.currentInteraction == 'mouse') {
+                    rx = y + (speedModifier * (ay * 40))
+                    ry = x + (speedModifier * (ax * 40))
+                    rz = z
+                } else if (this.currentInteraction == 'sensor') {
+                    rx = x + (ax * 40)
+                    ry = y + (ay * 40)
+                    rz = z
+                }
             }
 
+            // TODO: We use translate3d throughout app as a trick to fight anti-aliasing. Does it work? Do we need it?
             return 'rotateX(' + rx + 'deg) rotateY(' + ry + 'deg) rotateZ(' + rz + 'deg) translate3d( 0, 0, 0)'
         }
 
