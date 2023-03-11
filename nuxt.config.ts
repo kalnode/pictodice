@@ -3,7 +3,7 @@ export default defineNuxtConfig({
 
     app: {
         pageTransition: { name: 'page', mode: 'out-in' },
-        baseURL: '/photodice/'
+        baseURL: process.env.NODE_ENV === 'production' ? '/photodice/' : '/'
     },
     css: ['@/assets/css/main.css'],
     postcss: {

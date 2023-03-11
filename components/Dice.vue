@@ -13,7 +13,7 @@
             <div>Use bg map: {{ useBGmap }}</div>
             <div>currentInteraction: {{ currentInteraction }}</div>
             <div>sensors: {{ sensors }}</div>
-            <!-- <div class="absolute whitespace-nowrap">mouseCoords: {{ mouseCoords }}</div> -->
+            <!-- <div class="absolute whitespace-nowrap">mouseTouchCoords: {{ mouseTouchCoords }}</div> -->
         </div>
 
         <div class="dice" :class="{'useBGmap' : useBGmap}">
@@ -102,7 +102,7 @@ export default {
                 'dummy-400x400-TShirt.jpg'
             ],
 
-            mouseCoords: [ 0, 0 ]
+            mouseTouchCoords: [ 0, 0 ]
 
         }
 
@@ -121,8 +121,8 @@ export default {
             // let x = e.clientX;
             // let y = e.clientY;
 
-            this.mouseCoords = [ x, y ]
-            //this.currentInteraction = 'mouse'
+            this.mouseTouchCoords = [ x, y ]
+            this.currentInteraction = 'mouse'
         })
 
         document.addEventListener('touchmove', (e) => {
@@ -130,10 +130,11 @@ export default {
             let touch = evt.touches[0] || evt.changedTouches[0]
             let x = touch.pageX
             let y = touch.pageY
-            this.mouseCoords = [ x, y ]
+            this.mouseTouchCoords = [ x, y ]
             this.currentInteraction = 'touch'
         })
 
+        /*
         //navigator.permissions.query({ name: "geolocation" }).then((result) => {
         navigator.permissions.query({ name: 'gyroscope' })
         .then(result => {
@@ -161,25 +162,14 @@ export default {
                 // fallback setup here
             }
         })
+        */
+                
+                if(window.RelativeOrientationSensor) {
+                    const sensorOrientation = new window.RelativeOrientationSensor({ frequency: 60, referenceFrame: 'screen' })
 
-
-            /*
-        try {
-
-
-
-
-            const sensorOrientation = new window.RelativeOrientationSensor({ frequency: 60, referenceFrame: 'screen' })
-            const sensorGyroscope = new Gyroscope({ frequency: 60 })
-            Promise.all([
-                navigator.permissions.query({ name: "accelerometer" }),
-                navigator.permissions.query({ name: "gyroscope" })
-            ])
-            .then((results) => {
-                if (results.every((result) => result.state === "granted")) {
-
-                    console.log("Permissions granted %O", results)
-
+                   // console.log("Permissions granted %O", results)
+                    //sensorOrientation = new window.RelativeOrientationSensor({ frequency: 60, referenceFrame: 'screen' })
+                    this.sensors.orientation = true
                     sensorOrientation.addEventListener('reading', () => {
 
                         console.log("orientationSensor reading")
@@ -193,7 +183,12 @@ export default {
                         }
                     })
                     sensorOrientation.start()
+                }
 
+
+                if (window.Gyroscope) {
+                   const sensorGyroscope = new Gyroscope({ frequency: 60 })
+                    this.sensors.gyro = true
                     sensorGyroscope.addEventListener('reading', () => {
                         console.log("gyroscope reading")
                         if ((sensorGyroscope.x > 9 || sensorGyroscope.z > 4) && !this.DiceState.spinning) {
@@ -201,6 +196,22 @@ export default {
                         }
                     })
                     sensorGyroscope.start()
+                }
+
+
+       /* try {
+
+
+            var sensorOrientation = null
+            var sensorGyroscope = null
+            Promise.all([
+                navigator.permissions.query({ name: "accelerometer" }),
+                navigator.permissions.query({ name: "gyroscope" })
+            ])
+            .then((results) => {
+                if (results.every((result) => result.state === "granted")) {
+
+                  
 
                 } else {
                     console.log("No permissions to use RelativeOrientationSensor.")
@@ -222,6 +233,7 @@ export default {
 
         }
         */
+
 
     },
 
@@ -302,7 +314,7 @@ export default {
             // Calculate perspective rotation with device orientation effect
             const [x, y, z] = this.faceViews[this.DiceState.face - 1]
 
-            const [ax, ay] = this.mouseCoords //this.DiceState.accelerometer
+            const [ax, ay] = this.currentInteraction == 'sensor' ? this.DiceState.accelerometer : this.mouseTouchCoords
             
             let speedModifier = 0.009
             let rx = 0
