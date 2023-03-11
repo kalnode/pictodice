@@ -7,11 +7,13 @@
             <p>Or touch the dice</p>
         </div>
 
-        <div class="my-8">
+        <div class="my-8 overflow-hidden">
             <div>Dice face: {{ DiceState.face }}</div>
             <div>Dice spinning: {{ DiceState.spinning }}</div>
             <div>Use bg map: {{ useBGmap }}</div>
-            <div>mouseCoords: {{ mouseCoords }}</div>
+            <div>currentInteraction: {{ currentInteraction }}</div>
+            <div>sensors: {{ sensors }}</div>
+            <!-- <div class="absolute whitespace-nowrap">mouseCoords: {{ mouseCoords }}</div> -->
         </div>
 
         <div class="dice" :class="{'useBGmap' : useBGmap}">
@@ -68,7 +70,12 @@ export default {
 
             useBGmap: false,
 
-            currentInteraction: null, // mouse, sensor
+            currentInteraction: null, // mouse, touch, sensor
+
+            sensors: {
+                gyro: false,
+                orientation: false
+            },
 
             DiceState: {
                 face: 6,
@@ -109,16 +116,60 @@ export default {
         document.addEventListener('mousemove', (e) => {
             let x = (window.innerWidth / 2 - e.pageX) / -5
             let y = (window.innerHeight / 2 - e.pageY) / 5
+
+            // TODO: Is this better?
+            // let x = e.clientX;
+            // let y = e.clientY;
+
             this.mouseCoords = [ x, y ]
-            // `rotateY(${x}deg) rotateX(${y}deg)`
-            this.currentInteraction = 'mouse'
+            //this.currentInteraction = 'mouse'
         })
 
-        /*
+        document.addEventListener('touchmove', (e) => {
+            let evt = (typeof e.originalEvent === 'undefined') ? e : e.originalEvent
+            let touch = evt.touches[0] || evt.changedTouches[0]
+            let x = touch.pageX
+            let y = touch.pageY
+            this.mouseCoords = [ x, y ]
+            this.currentInteraction = 'touch'
+        })
+
+        //navigator.permissions.query({ name: "geolocation" }).then((result) => {
+        navigator.permissions.query({ name: 'gyroscope' })
+        .then(result => {
+            if (result.state === 'granted') { // <-- this returns true
+
+                    try {
+                        this.gyroscope = new Gyroscope({frequency: 60})
+                        this.gyroscope.addEventListener('reading', e => {
+                            console.log(e)
+                        })
+                        this.gyroscope.start()
+                    } catch(error) {
+                        // Handle construction errors.
+                        if (error.name === 'SecurityError') {
+                            // See the note above about feature policy.
+                            alert('Sensor construction was blocked by a feature policy.')
+                        } else if (error.name === 'ReferenceError') {
+                            alert('Sensor is not supported by the User Agent.')
+                        } else {
+                            alert(error)
+                        }
+                    }
+            } else {
+                alert('No gyroscope or denied, computer assumed, falling back to keyboard.')
+                // fallback setup here
+            }
+        })
+
+
+            /*
         try {
 
 
-            const sensorOrientation = new RelativeOrientationSensor({ frequency: 60, referenceFrame: 'screen' })
+
+
+            const sensorOrientation = new window.RelativeOrientationSensor({ frequency: 60, referenceFrame: 'screen' })
             const sensorGyroscope = new Gyroscope({ frequency: 60 })
             Promise.all([
                 navigator.permissions.query({ name: "accelerometer" }),
@@ -157,8 +208,6 @@ export default {
             })
 
 
-            
-
         } catch (e) {
             console.log("try catch error on sensor reading: %O", e)
             // Try using legacy DeviceOrientationEvent API instead
@@ -172,8 +221,8 @@ export default {
             })
 
         }
-
         */
+
     },
 
 
@@ -263,7 +312,7 @@ export default {
             // FACE 1
             if (this.DiceState.face === 1) {
 
-                if (this.currentInteraction == 'mouse') {
+                if (this.currentInteraction == 'mouse' || this.currentInteraction == 'touch') {
                     ry = x + (speedModifier * (ax * 40))
                     rx = y + (speedModifier * (ay * 40))
                     rz = z
@@ -276,7 +325,7 @@ export default {
             // FACE 2
             } else if (this.DiceState.face === 2) {
 
-                if (this.currentInteraction == 'mouse') {
+                if (this.currentInteraction == 'mouse' || this.currentInteraction == 'touch') {
                     ry = x + (speedModifier * (ax * 40))
                     rx = y
                     rz = z + (speedModifier * (ay * 40))
@@ -290,7 +339,7 @@ export default {
             // FACE 3
             } else if (this.DiceState.face === 3) {
 
-                if (this.currentInteraction == 'mouse') {
+                if (this.currentInteraction == 'mouse' || this.currentInteraction == 'touch') {
                     rx = y + (speedModifier * (ay * 40))
                     ry = z
                     rz = x + (speedModifier * (-ax * 40))
@@ -303,7 +352,7 @@ export default {
             // FACE 4
             } else if (this.DiceState.face === 4) {
 
-                if (this.currentInteraction == 'mouse') {
+                if (this.currentInteraction == 'mouse' || this.currentInteraction == 'touch') {
                     rx = y + (speedModifier * (ay * 40))
                     ry = z
                     rz = x + (speedModifier * (ax * 40))
@@ -318,7 +367,7 @@ export default {
             // FACE 5
             } else if (this.DiceState.face === 5) {
 
-                if (this.currentInteraction == 'mouse') {
+                if (this.currentInteraction == 'mouse' || this.currentInteraction == 'touch') {
                     rx = y
                     ry = x + (speedModifier * (ax * 40))
                     rz = z + (speedModifier * (-ay * 40))
@@ -331,7 +380,7 @@ export default {
             // FACE 6
             } else if (this.DiceState.face === 6) {
 
-                if (this.currentInteraction == 'mouse') {
+                if (this.currentInteraction == 'mouse' || this.currentInteraction == 'touch') {
                     rx = y + (speedModifier * (ay * 40))
                     ry = x + (speedModifier * (ax * 40))
                     rz = z
@@ -343,7 +392,11 @@ export default {
             }
 
             // TODO: We use translate3d throughout app as a trick to fight anti-aliasing. Does it work? Do we need it?
-            return 'rotateX(' + rx + 'deg) rotateY(' + ry + 'deg) rotateZ(' + rz + 'deg) translate3d( 0, 0, 0)'
+            if (this.currentInteraction == 'mouse' || this.currentInteraction == 'sensor') {
+                return 'rotateX(' + rx + 'deg) rotateY(' + ry + 'deg) rotateZ(' + rz + 'deg) translate3d( 0, 0, 0)'
+            } else if (this.currentInteraction == 'touch') {
+                return 'rotateX(' + (-rx) + 'deg) rotateY(' + (-ry) + 'deg) rotateZ(' + rz + 'deg) translate3d( 0, 0, 0)'
+            }
         }
 
     },
