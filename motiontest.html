@@ -18,6 +18,7 @@
         // We call the function on start-up; this seems to work fine
         this.reqPermissionMotion()
 
+        alert("111!")
         var btn_reqPermission = document.getElementById("btn_reqPermission")
         btn_reqPermission.addEventListener("click", () => { this.reqPermissionMotion() })
         var output_sensor_orientation = document.getElementById("output_sensor_orientation")
@@ -31,6 +32,8 @@
             // Check for requestPermission; use it
             // As of today, only Safari iOS uses this (strictly)
             if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+
+                alert("We need motion permission!")
 
                 // Presumably only one permission controls DeviceOrientationEvent and DeviceMotionEvent; we only need to ask for one
                 await DeviceOrientationEvent.requestPermission()
