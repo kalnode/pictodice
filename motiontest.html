@@ -1,0 +1,77 @@
+<html>
+    <body>
+        <button id="btn_reqPermission" style="padding: 2em">Request Permission Manually</button>
+        <div id="output_sensor_orientation"></div>
+        <div id="output_sensor_acceleration"></div>
+        <div id="message"></div>
+    </body>
+    <script>
+
+        // We call the function on start-up; this seems to work fine
+        //reqPermissionMotion()
+
+        var btn_reqPermission = document.getElementById("btn_reqPermission")
+        btn_reqPermission.addEventListener("click", () => { this.reqPermissionMotion() })
+        var output_sensor_orientation = document.getElementById("output_sensor_orientation")
+        var output_sensor_acceleration = document.getElementById("output_sensor_acceleration")
+        var message = document.getElementById("message")
+
+        async function reqPermissionMotion() {
+        
+        console.log("checking permission")
+        
+        // Check for requestPermission; use it
+        // As of today, only Safari iOS uses this (strictly)
+        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+
+            // Presumably only one permission controls DeviceOrientationEvent and DeviceMotionEvent; we only need to ask for one
+            await DeviceOrientationEvent.requestPermission()
+            .catch( (error) => {
+            console.log("Error getting sensor permission: %O", error)
+            return // Exit logic because permission not given
+            })
+        }
+
+        // At this point, any browser using requestPermission means user permission given
+        // For other browsers, presumably they'll automatically prompt the user
+
+        await window.addEventListener('orientation', event => {
+
+            console.log('Device orientation event: %O', event)
+
+            this.sensorOutput.innerHTML =  JSON.stringify(event.alpha.toFixed(2))
+            
+            /*
+            JSON.stringify({
+            x: event.alpha.toFixed(2),
+            y: event.beta.toFixed(2),
+            z: event.gamma.toFixed(2)
+            })
+            */
+
+        })
+
+
+        await window.addEventListener('devicemotion', event => {
+            console.log('Device acceleration event: %O', event)
+
+            this.output_sensor_acceleration.innerHTML = "34t435t435t"
+            /*
+            {
+            x: event.rotationRate.alpha.toFixed(2),
+            y: event.rotationRate.beta.toFixed(2),
+            z: event.rotationRate.gamma.toFixed(2)
+            }
+            */
+
+            if ((event.rotationRate.alpha > 256 || event.rotationRate.beta > 256 || event.rotationRate.gamma > 256)) {
+            this.message.innerHTML = "SHAKEN!"
+            setTimeout(() => {
+                this.message.innerHTML = null
+            }, "2000");
+
+            }
+        })
+        }
+    </script>
+</html>
