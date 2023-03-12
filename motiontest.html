@@ -6,14 +6,14 @@
         <div id="message"></div>
     </body>
     <style>
-        body {
+        button {
             font-size: 18px;
         }
     </style>
     <script>
 
         // We call the function on start-up; this seems to work fine
-        reqPermissionMotion()
+        this.reqPermissionMotion()
 
         var btn_reqPermission = document.getElementById("btn_reqPermission")
         btn_reqPermission.addEventListener("click", () => { this.reqPermissionMotion() })
@@ -32,8 +32,11 @@
                 // Presumably only one permission controls DeviceOrientationEvent and DeviceMotionEvent; we only need to ask for one
                 await DeviceOrientationEvent.requestPermission()
                 .catch( (error) => {
-                console.log("Error getting sensor permission: %O", error)
-                return // Exit logic because permission not given
+                    setTimeout(() => {
+                        this.message.innerHTML = "Error getting sensor permission: %O"
+                    }, "2000");
+                    console.log("Error getting sensor permission: %O", error)
+                    return // Exit logic because permission not given
                 })
             }
 
