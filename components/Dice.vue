@@ -258,27 +258,29 @@ export default {
                     sensorOrientation.start()
                 } else {
                     window.addEventListener('deviceorientation', (e) => {
-                    console.log("legacy deviceorientation reading")
-                    this.currentInteraction = 'sensor'
+                        console.log("legacy deviceorientation reading")
+                        this.currentInteraction = 'sensor'
 
-                    let tilt = e.beta
-                    let turn = e.alpha
-                    let rotate = e.gamma
+                        let tilt = e.beta
+                        let turn = e.alpha
+                        let rotate = e.gamma
 
-                    if (!this.DiceState.spinning) {
-                        const x = tilt / 180 ?? 0
-                        const y = rotate / 90 ?? 0
-                        this.DiceState.accelerometer = [x, y]
-                    }
+                        if (!this.DiceState.spinning) {
+                            const x = tilt / 180 ?? 0
+                            const y = rotate / 90 ?? 0
+                            this.DiceState.accelerometer = [x, y]
+                        }
 
-                    this.sensors.gyrocoords.tilt = tilt.toFixed(2)
-                    this.sensors.gyrocoords.turn = turn.toFixed(2)
-                    this.sensors.gyrocoords.rotate = rotate.toFixed(2)
+                        /*
+                        this.sensors.gyrocoords.tilt = tilt.toFixed(2)
+                        this.sensors.gyrocoords.turn = turn.toFixed(2)
+                        this.sensors.gyrocoords.rotate = rotate.toFixed(2)
 
-                    if ((tilt > 60 || rotate > 50) && !this.DiceState.spinning) {
-                        this.random()
-                    }
-                })
+                        if ((tilt > 60 || rotate > 50) && !this.DiceState.spinning) {
+                            this.random()
+                        }
+                        */
+                    })
                 }
 
            // } catch (e) {
@@ -291,7 +293,7 @@ export default {
 
 
 
-            try {
+           // try {
                 if (window.Gyroscope) {
                     const sensorGyroscope = new Gyroscope({ frequency: 60 })
                     this.sensors.gyro = true
@@ -304,13 +306,15 @@ export default {
                         }
                     })
                     sensorGyroscope.start()
+                } else {
+
                 }
-            } catch (e) {
+           // } catch (e) {
 
 
 
 
-            }
+            //}
 
 
             /*
