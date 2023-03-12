@@ -14,12 +14,14 @@
         </div>
         -->
 
-        <div class="my-8 overflow-hidden">
+        <div class="w-full my-8 overflow-hidden">
+            <div @click="reqPermissionMotion" class="p-2 bg-gray-200 cursor-pointer">Sensor Permission</div>
             <div>Dice face: {{ DiceState.face }}</div>
             <div>Dice spinning: {{ DiceState.spinning }}</div>
             <div>Use bg map: {{ useBGmap }}</div>
             <div>currentInteraction: {{ currentInteraction }}</div>
-            <div>sensors: {{ sensors }}</div>
+            <div class="whitespace-nowrap">sensors: {{ sensors.gyrocoords }}</div>
+            <!-- <div>accel: {{ DiceState.accelerometer }}</div> -->
             <!-- <div class="absolute whitespace-nowrap">mouseTouchCoords: {{ mouseTouchCoords }}</div> -->
         </div>
 
@@ -96,8 +98,14 @@ export default {
             currentInteraction: null, // mouse, touch, sensor
 
             sensors: {
+                permission: false,
                 gyro: false,
-                orientation: false
+                orientation: false,
+                gyrocoords: {
+                    tilt: null,
+                    turn: null,
+                    rotate: null
+                }
             },
 
             DiceState: {
@@ -186,40 +194,53 @@ export default {
             this.currentInteraction = 'touch'
         })
 
-        /*
-        //navigator.permissions.query({ name: "geolocation" }).then((result) => {
-        navigator.permissions.query({ name: 'gyroscope' })
-        .then(result => {
-            if (result.state === 'granted') { // <-- this returns true
+        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+            this.reqPermissionMotion()
+        } else {
+            this.setMotionListeners()
+        }
 
-                    try {
-                        this.gyroscope = new Gyroscope({frequency: 60})
-                        this.gyroscope.addEventListener('reading', e => {
-                            console.log(e)
-                        })
-                        this.gyroscope.start()
-                    } catch(error) {
-                        // Handle construction errors.
-                        if (error.name === 'SecurityError') {
-                            // See the note above about feature policy.
-                            alert('Sensor construction was blocked by a feature policy.')
-                        } else if (error.name === 'ReferenceError') {
-                            alert('Sensor is not supported by the User Agent.')
-                        } else {
-                            alert(error)
+    },
+
+
+    methods: {
+
+        setMotionListeners() {
+
+            /*
+            //navigator.permissions.query({ name: "geolocation" }).then((result) => {
+            navigator.permissions.query({ name: 'gyroscope' })
+            .then(result => {
+                if (result.state === 'granted') { // <-- this returns true
+
+                        try {
+                            this.gyroscope = new Gyroscope({frequency: 60})
+                            this.gyroscope.addEventListener('reading', e => {
+                                console.log(e)
+                            })
+                            this.gyroscope.start()
+                        } catch(error) {
+                            // Handle construction errors.
+                            if (error.name === 'SecurityError') {
+                                // See the note above about feature policy.
+                                alert('Sensor construction was blocked by a feature policy.')
+                            } else if (error.name === 'ReferenceError') {
+                                alert('Sensor is not supported by the User Agent.')
+                            } else {
+                                alert(error)
+                            }
                         }
-                    }
-            } else {
-                alert('No gyroscope or denied, computer assumed, falling back to keyboard.')
-                // fallback setup here
-            }
-        })
-        */
-                
-                if(window.RelativeOrientationSensor) {
+                } else {
+                    alert('No gyroscope or denied, computer assumed, falling back to keyboard.')
+                    // fallback setup here
+                }
+            })
+            */
+            //try {
+                if (window.RelativeOrientationSensor) {
                     const sensorOrientation = new window.RelativeOrientationSensor({ frequency: 60, referenceFrame: 'screen' })
 
-                   // console.log("Permissions granted %O", results)
+                    // console.log("Permissions granted %O", results)
                     //sensorOrientation = new window.RelativeOrientationSensor({ frequency: 60, referenceFrame: 'screen' })
                     this.sensors.orientation = true
                     sensorOrientation.addEventListener('reading', () => {
@@ -235,62 +256,98 @@ export default {
                         }
                     })
                     sensorOrientation.start()
+                } else {
+                    window.addEventListener('deviceorientation', (e) => {
+                    console.log("legacy deviceorientation reading")
+                    this.currentInteraction = 'sensor'
+
+                    let tilt = e.beta
+                    let turn = e.alpha
+                    let rotate = e.gamma
+
+                    if (!this.DiceState.spinning) {
+                        const x = tilt / 180 ?? 0
+                        const y = rotate / 90 ?? 0
+                        this.DiceState.accelerometer = [x, y]
+                    }
+
+                    this.sensors.gyrocoords.tilt = tilt.toFixed(2)
+                    this.sensors.gyrocoords.turn = turn.toFixed(2)
+                    this.sensors.gyrocoords.rotate = rotate.toFixed(2)
+
+                    if ((tilt > 60 || rotate > 50) && !this.DiceState.spinning) {
+                        this.random()
+                    }
+                })
                 }
 
+           // } catch (e) {
 
+             
+
+           // }
+
+
+
+
+
+            try {
                 if (window.Gyroscope) {
-                   const sensorGyroscope = new Gyroscope({ frequency: 60 })
+                    const sensorGyroscope = new Gyroscope({ frequency: 60 })
                     this.sensors.gyro = true
                     sensorGyroscope.addEventListener('reading', () => {
                         console.log("gyroscope reading")
+                        this.sensors.gyrocoords.x = sensorGyroscope.x
+                        this.sensors.gyrocoords.y = sensorGyroscope.z
                         if ((sensorGyroscope.x > 9 || sensorGyroscope.z > 4) && !this.DiceState.spinning) {
                             this.random()
                         }
                     })
                     sensorGyroscope.start()
                 }
+            } catch (e) {
 
 
-       /* try {
 
 
-            var sensorOrientation = null
-            var sensorGyroscope = null
-            Promise.all([
-                navigator.permissions.query({ name: "accelerometer" }),
-                navigator.permissions.query({ name: "gyroscope" })
-            ])
-            .then((results) => {
-                if (results.every((result) => result.state === "granted")) {
-
-                  
-
-                } else {
-                    console.log("No permissions to use RelativeOrientationSensor.")
-                }
-            })
+            }
 
 
-        } catch (e) {
-            console.log("try catch error on sensor reading: %O", e)
-            // Try using legacy DeviceOrientationEvent API instead
-            window.addEventListener('deviceorientation', (e) => {
-                console.log("legacy deviceorientation reading")
-                if (!this.DiceState.spinning) {
-                    const x = e.beta / 180 ?? 0
-                    const y = e.gamma / 90 ?? 0
-                    this.DiceState.accelerometer = [x, y]
-                }
-            })
+            /*
+            try {
 
-        }
-        */
+                var sensorOrientation = null
+                var sensorGyroscope = null
+                Promise.all([
+                    navigator.permissions.query({ name: "accelerometer" }),
+                    navigator.permissions.query({ name: "gyroscope" })
+                ])
+                .then((results) => {
+                    if (results.every((result) => result.state === "granted")) {
 
+                    
 
-    },
+                    } else {
+                        console.log("No permissions to use RelativeOrientationSensor.")
+                    }
+                })
 
+            } catch (e) {
+                console.log("try catch error on sensor reading: %O", e)
+                // Try using legacy DeviceOrientationEvent API instead
+                window.addEventListener('deviceorientation', (e) => {
+                    console.log("legacy deviceorientation reading")
+                    if (!this.DiceState.spinning) {
+                        const x = e.beta / 180 ?? 0
+                        const y = e.gamma / 90 ?? 0
+                        this.DiceState.accelerometer = [x, y]
+                    }
+                })
 
-    methods: {
+            }
+            */
+
+        },
 
         handleKeyDown(e) {
             console.log("func handleKeyDown %O", e)
@@ -337,6 +394,26 @@ export default {
 
         getRandom(max, min) {
             return (Math.floor(Math.random() * (max-min)) + min) * 90;
+        },
+
+        reqPermissionMotion() {
+
+            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                DeviceOrientationEvent.requestPermission()
+                .then(permissionState => {
+                    if (permissionState === 'granted') {
+                        this.sensors.permission = true
+                        this.setMotionListeners()
+                    } else {
+                        this.sensors.permission = "noooo"
+                    }
+                })
+                .catch( (error) => {
+                    console.log("Error getting sensor permission: %O", error)
+                })
+            }
+
+
         }
 
     },
@@ -368,7 +445,7 @@ export default {
 
             const [ax, ay] = this.currentInteraction == 'sensor' ? this.DiceState.accelerometer : this.mouseTouchCoords
             
-            let speedModifier = 0.009
+            let speedModifier = 0.002
             let rx = 0
             let ry = 0
             let rz = 0
