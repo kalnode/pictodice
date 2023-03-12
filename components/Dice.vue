@@ -1,11 +1,18 @@
 <template>
-    <div @click="handleClick()" class="w-full h-full flex flex-col justify-center items-center">
+    <div class="w-full h-full flex flex-col justify-center items-center">
 
+        <!--
+        position: absolute;
+        top: -150px;
+        width: 100%;
+        text-align: center;
+        opacity: 0;
+        transition: opacity .6s ease-out;
         <div :class="!DiceState.hasRolled ? 'enabled' : '' " class="helper">
-            <!-- TODO: Maybe use fade transition here instead of class? -->
             <h1>Shake your phone!</h1>
             <p>Or touch the dice</p>
         </div>
+        -->
 
         <div class="my-8 overflow-hidden">
             <div>Dice face: {{ DiceState.face }}</div>
@@ -16,9 +23,24 @@
             <!-- <div class="absolute whitespace-nowrap">mouseTouchCoords: {{ mouseTouchCoords }}</div> -->
         </div>
 
-        <div class="dice" :class="{'useBGmap' : useBGmap}">
+        <div @click="handleClick()" class="dice cursor-pointer" :class="[
+            DiceState.spinning ? 'spin' : 'perspective',
+            {'useBGmap' : useBGmap}
+        ]
+        ">
             <div :class="DiceState.spinning ? 'spin' : 'perspective'" class="cube">
-                <div :class="(DiceState.face === 1 || DiceState.spinning) ? 'lightFacing' : ''"
+
+                <div v-for="(face, facename, index) in Die.faces" :key="'face-'+index"
+                :class="[
+                    facename,
+                    (DiceState.face === index+1 || DiceState.spinning) ? 'lightFacing' : ''
+                ]"
+                :style="!useBGmap ? 'background-image: url(images/' + dummyImages[index] + ')' : ''">
+                </div>
+
+                <!--
+                <div
+                :class="(DiceState.face === 1 || DiceState.spinning) ? 'lightFacing' : ''"
                 :style="!useBGmap ? 'background-image: url(images/' + dummyImages[1 - 1] + ')' : ''"
                 class="front"></div>
                 <div v-if="useBGmap" class="front filler"></div>
@@ -47,6 +69,7 @@
                 :style="!useBGmap ? 'background-image: url(images/' + dummyImages[4 - 1] + ')' : ''"
                 class="right"></div>
                 <div v-if="useBGmap" class="right filler"></div>
+                -->
             </div>
         </div>
     </div>
@@ -82,6 +105,35 @@ export default {
                 spinning: false,
                 accelerometer: [0.3, 0.25],
                 hasRolled: false
+            },
+
+            Die: {
+                faces: {
+                    'front': {
+                        orientation: [0, 0, 0],
+                        image: null //this.dummyImages[0]
+                    },
+                    'back': {
+                        orientation: [90, 0, 0],
+                        image: null //this.dummyImages[1]
+                    },
+                    'top': {
+                        orientation: [0, 90, 0],
+                        image: null //this.dummyImages[2]
+                    },
+                    'bottom': {
+                        orientation: [0, -90, 0],
+                        image: null //this.dummyImages[3]
+                    },
+                    'left': {
+                        orientation: [-90, 0, 0],
+                        image: null //this.dummyImages[4]
+                    },
+                    'right': {
+                        orientation: [-180, 0, 0],
+                        image: null //this.dummyImages[5]
+                    }
+                }
             },
 
             faceViews: [
@@ -419,12 +471,14 @@ export default {
 
 <style scoped>
 
+/* DIE FOUNDATION */
 .dice {
     perspective: 800px;
     perspective-origin: 50% 100px;
     background-color: transparent;
 }
 
+/* DIE SHADOW */
 .dice::before {
     content: "";
     display: block;
@@ -439,54 +493,67 @@ export default {
     transform: v-bind('diceBG_transform');
 }
 
-.helper {
-    position: absolute;
-    top: -150px;
-    width: 100%;
-    text-align: center;
-    opacity: 0;
-    transition: opacity .6s ease-out;
-}
-
-.helper.enabled {
-    opacity: 1;
-}
-
-.helper * {
-    margin: 0;
-}
-
-@keyframes softBlink {
-    0%   { opacity: 0.5; }
-    50%  { opacity: 1;   }
-    100% { opacity: 0.5; }
-}
-
-h1 {
-    line-height: 1.3;
-    font-size: 1.2rem;
-    opacity: 0.8;
-    animation: softBlink 1s linear 3s infinite;
-}
-
-p {
-    opacity: 0.5;
-}
-
+/* SPIN ANIMATION */
 @keyframes spin {
-    from { transform: rotateX(0deg)           rotateY(30deg) rotateZ(0deg); }
-    to   { transform: rotateX(calc(360deg * 4)) rotateY(calc(360deg * 2))  rotateZ(calc(360deg * 1.2)); }
+    from { transform: rotateX(0deg)             rotateY(30deg)             rotateZ(0deg); }
+    to   { transform: rotateX(calc(360deg * 3)) rotateY(calc(360deg * 2))  rotateZ(calc(360deg * 0.5)); }
     /* TODO: Check this calc, correct? */
 }
 
+
+
+@keyframes bounce {
+
+    /*
+    from { transform: scale(2); }
+    to   { transform: scale(1); }
+    */
+
+
+
+    0% {
+        transform: scale(0.5) rotateY(20deg)
+    }
+    40% {
+        transform: scale(1.1)
+    }
+    50% {
+        transform: scale(0.9)
+    }
+    60% {
+        transform: scale(1.05)
+    }
+    70% {
+        transform: scale(0.95)
+    }
+    80% {
+        transform: scale(1.02)
+    }
+    90% {
+        transform: scale(0.98) rotateY(0)
+    }
+    100% {
+        transform: scale(1)
+    }
+
+
+
+}
+
+
+
+
+/* DIE ACTUAL */
 .cube {
     position: relative;
     width: 200px;
     height: 200px;
     transform-style: preserve-3d;
 
-    /* Is this needed? */
-    transition: transform 3s cubic-bezier(0, .82, .47, 1);
+    /* This helps smooth out the ending of a spin */
+    transition: transform 2s cubic-bezier(0, .82, .47, 1);
+
+    /* stuff that may help anti-aliasing */
     will-change: transform;
     box-shadow: 0 0 0 1px transparent;
     border: 1px solid rgba(0, 0, 0, 0.1);
@@ -496,12 +563,23 @@ p {
 .cube.spin {
 
     /* This time (e.g. 2s) needs to match the timeout for when spinner ends in code */
-    animation: spin 1.97s linear;
-    transform: v-bind('cubeTransformSpinning');
+    /* animation: spin 1s linear, bounce 1s cubic-bezier(0, .82, .47, 1) 1s; */
+    animation: spin 1.99s linear;
+    /*     animation: spin 1.97s linear; */
+
+    /* TODO: Look into timing function, any improvements to be had?*/
+    /* animation-timing-function: cubic-bezier(0.280, 0.840, 0.420, 1); */
+
+    /* TODO: Is this needed? */
+    /* transform: v-bind('cubeTransformSpinning'); */
 }
 
+.dice.perspective {
+    animation: bounce 0.4s linear;
+}
 .cube.perspective {
     transform: v-bind('cubeTransformPerspective');
+    /* animation: bounce 1s cubic-bezier(0, .82, .47, 1) 2s; */
 }
 
 
