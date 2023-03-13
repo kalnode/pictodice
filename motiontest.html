@@ -3,34 +3,34 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
     <body>
-        <button id="btn_reqPermission" style="padding: 2em">Request Permission Manually</button>
+        <button id="btn_reqPermission" style="display: none;padding: 2em">Hey, we need sensor permission!</button>
         <div id="output_sensor_orientation"></div>
         <div id="output_sensor_acceleration"></div>
         <div id="message"></div>
     </body>
-    <style>
-        button {
-            font-size: 18px;
-        }
-    </style>
+
     <script>
 
-        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-            // show user a modal
-            if (confirm("Hey, we need motion permissions")){
-                this.reqPermissionMotion()
-            }
-        } else {
-            // We call the function on start-up; this seems to work fine
-            this.reqPermissionMotion()
-        }
-
-        //window.alert("111!")
         var btn_reqPermission = document.getElementById("btn_reqPermission")
         btn_reqPermission.addEventListener("click", () => { this.reqPermissionMotion() })
         var output_sensor_orientation = document.getElementById("output_sensor_orientation")
         var output_sensor_acceleration = document.getElementById("output_sensor_acceleration")
         var message = document.getElementById("message")
+
+        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+            // show user a modal
+           // if (confirm("Hey, we need motion permissions")){
+            //    this.reqPermissionMotion()
+           // }
+
+           btn_reqPermission.style.display = "block"
+
+
+        } else {
+            // We call the function on start-up; this seems to work fine
+            this.reqPermissionMotion()
+        }
+
 
         async function reqPermissionMotion() {
         
