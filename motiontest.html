@@ -15,10 +15,17 @@
     </style>
     <script>
 
-        // We call the function on start-up; this seems to work fine
-        this.reqPermissionMotion()
+        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+            // show user a modal
+            if (confirm("Hey, we need motion permissions")){
+                this.reqPermissionMotion()
+            }
+        } else {
+            // We call the function on start-up; this seems to work fine
+            this.reqPermissionMotion()
+        }
 
-        window.alert("111!")
+        //window.alert("111!")
         var btn_reqPermission = document.getElementById("btn_reqPermission")
         btn_reqPermission.addEventListener("click", () => { this.reqPermissionMotion() })
         var output_sensor_orientation = document.getElementById("output_sensor_orientation")
@@ -29,21 +36,23 @@
         
             console.log("checking permission")
 
+            this.message.innerHTML = "checking permission"
             setTimeout(() => {
-                        this.message.innerHTML = "checking permission"
+                        this.message.innerHTML = null
                     }, "2000");
             
             // Check for requestPermission; use it
             // As of today, only Safari iOS uses this (strictly)
             if (typeof DeviceOrientationEvent.requestPermission === 'function') {
 
-                alert("We need motion permission!")
+                //alert("We need motion permission!")
 
                 // Presumably only one permission controls DeviceOrientationEvent and DeviceMotionEvent; we only need to ask for one
                 await DeviceOrientationEvent.requestPermission()
                 .catch( (error) => {
+                    this.message.innerHTML = "Error getting sensor permission"
                     setTimeout(() => {
-                        this.message.innerHTML = "Error getting sensor permission"
+                        this.message.innerHTML = null
                     }, "2000");
                     console.log("Error getting sensor permission: %O", error)
                     return // Exit logic because permission not given
