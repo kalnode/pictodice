@@ -12,8 +12,8 @@
 
         var btn_reqPermission = document.getElementById("btn_reqPermission")
         btn_reqPermission.addEventListener("click", () => { this.reqPermissionMotion() })
-        var output_status = document.getElementById("status")
-        var output_message = document.getElementById("message")
+        var output_status = document.getElementById("output_status")
+        var output_message = document.getElementById("output_message")
 
         if (typeof DeviceOrientationEvent.requestPermission === 'function') {
 
@@ -56,7 +56,6 @@
                 console.log('Device orientation event: %O', event)
                 this.output_message.innerHTML = "Orientation event!"
             })
-
 
             await window.addEventListener('devicemotion', event => {
                 console.log('Device acceleration event: %O', event)
