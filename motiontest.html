@@ -4,99 +4,68 @@
     </head>
     <body>
         <button id="btn_reqPermission" style="display: none;padding: 2em">Hey, we need sensor permission!</button>
-        <div id="output_sensor_orientation"></div>
-        <div id="output_sensor_acceleration"></div>
-        <div id="message"></div>
+        <div id="output_status"></div>
+        <div id="output_message"></div>
     </body>
 
     <script>
 
         var btn_reqPermission = document.getElementById("btn_reqPermission")
         btn_reqPermission.addEventListener("click", () => { this.reqPermissionMotion() })
-        var output_sensor_orientation = document.getElementById("output_sensor_orientation")
-        var output_sensor_acceleration = document.getElementById("output_sensor_acceleration")
-        var message = document.getElementById("message")
+        var output_status = document.getElementById("status")
+        var output_message = document.getElementById("message")
 
         if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-            // show user a modal
-           // if (confirm("Hey, we need motion permissions")){
-            //    this.reqPermissionMotion()
-           // }
 
-           btn_reqPermission.style.display = "block"
+            // requestPermission exists, so we presume browser wants explicit user permission.
+            // As of today, only iOS Safari uses this.
 
-
+            // Show a control to the user
+            btn_reqPermission.style.display = "block"
         } else {
-            // We call the function on start-up; this seems to work fine
+
+            // All other browsers
             this.reqPermissionMotion()
         }
 
-
         async function reqPermissionMotion() {
         
-            console.log("checking permission")
-
-            this.message.innerHTML = "checking permission"
-            setTimeout(() => {
-                        this.message.innerHTML = null
-                    }, "2000");
-            
+            console.log("Checking permission")
+            this.output_message.innerHTML = "Checking permission"
+           
             // Check for requestPermission; use it
-            // As of today, only Safari iOS uses this (strictly)
             if (typeof DeviceOrientationEvent.requestPermission === 'function') {
 
-                //alert("We need motion permission!")
-
-                // Presumably only one permission controls DeviceOrientationEvent and DeviceMotionEvent; we only need to ask for one
+                // Presumably only one permission controls DeviceOrientationEvent and DeviceMotionEvent, so we'll only ask for one
                 await DeviceOrientationEvent.requestPermission()
                 .catch( (error) => {
-                    this.message.innerHTML = "Error getting sensor permission"
-                    setTimeout(() => {
-                        this.message.innerHTML = null
-                    }, "2000");
                     console.log("Error getting sensor permission: %O", error)
+                    this.output_message.innerHTML = "ERROR"
+                    this.output_status.innerHTML = "No sensor permission"
                     return // Exit logic because permission not given
                 })
             }
 
-            // At this point, any browser using requestPermission means user permission given
-            // For other browsers, presumably they'll automatically prompt the user
+            this.output_message.innerHTML = "SUCCESS"
+            this.output_status.innerHTML = "Sensor permission allowed!"
+
+            // Here we invoke listeners.
+            // For non-requestPermission browsers, presumably they'll automatically prompt the user when we invoke a listener.
 
             await window.addEventListener('orientation', event => {
-
                 console.log('Device orientation event: %O', event)
-
-                this.sensorOutput.innerHTML =  JSON.stringify(event)
-                
-                /*
-                JSON.stringify({
-                x: event.alpha.toFixed(2),
-                y: event.beta.toFixed(2),
-                z: event.gamma.toFixed(2)
-                })
-                */
-
+                this.output_message.innerHTML = "Orientation event!"
             })
 
 
             await window.addEventListener('devicemotion', event => {
                 console.log('Device acceleration event: %O', event)
 
-                this.output_sensor_acceleration.innerHTML = JSON.stringify(event.rotationRate.alpha.toFixed(2))
-                /*
-                {
-                x: event.rotationRate.alpha.toFixed(2),
-                y: event.rotationRate.beta.toFixed(2),
-                z: event.rotationRate.gamma.toFixed(2)
-                }
-                */
-
                 if ((event.rotationRate.alpha > 256 || event.rotationRate.beta > 256 || event.rotationRate.gamma > 256)) {
-                this.message.innerHTML = "SHAKEN!"
-                setTimeout(() => {
-                    this.message.innerHTML = null
-                }, "2000");
-
+                    this.output_message.innerHTML = "SHAKEN!"
+                    setTimeout(() => {
+                        this.message.innerHTML = null
+                    }, "2000")
                 }
             })
         }
