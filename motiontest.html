@@ -18,7 +18,7 @@
         // We call the function on start-up; this seems to work fine
         this.reqPermissionMotion()
 
-        alert("111!")
+        window.alert("111!")
         var btn_reqPermission = document.getElementById("btn_reqPermission")
         btn_reqPermission.addEventListener("click", () => { this.reqPermissionMotion() })
         var output_sensor_orientation = document.getElementById("output_sensor_orientation")
