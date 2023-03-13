@@ -28,6 +28,10 @@
         async function reqPermissionMotion() {
         
             console.log("checking permission")
+
+            setTimeout(() => {
+                        this.message.innerHTML = "checking permission"
+                    }, "2000");
             
             // Check for requestPermission; use it
             // As of today, only Safari iOS uses this (strictly)
@@ -39,7 +43,7 @@
                 await DeviceOrientationEvent.requestPermission()
                 .catch( (error) => {
                     setTimeout(() => {
-                        this.message.innerHTML = "Error getting sensor permission: %O"
+                        this.message.innerHTML = "Error getting sensor permission"
                     }, "2000");
                     console.log("Error getting sensor permission: %O", error)
                     return // Exit logic because permission not given
