@@ -1,13 +1,6 @@
 <template>
-    <div class="w-full h-full flex flex-col justify-center items-center">
-        <h1 class="text-3xl font-bold underline">Welcome to the homepage</h1>
-
-        <Alert>
-            This is an auto-imported component.
-        </Alert>
-
+    <div class="noSelect noHighlight w-full h-full flex flex-col justify-center items-center">
         <Dice />
-
     </div>
 </template>
 <script setup>

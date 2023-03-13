@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Pictodice</string>
+    <string name="title_activity_main">Pictodice</string>
+    <string name="package_name">com.pictodice.app</string>
+    <string name="custom_url_scheme">com.pictodice.app</string>
+</resources>

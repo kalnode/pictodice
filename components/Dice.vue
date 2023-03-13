@@ -14,32 +14,42 @@
         </div>
         -->
 
-        <div class="w-full my-8 overflow-hidden">
-            <div @click="reqPermissionMotion" class="p-2 bg-gray-200 cursor-pointer">Sensor Permission</div>
+        {{ DiceState.spinning }}
+
+        <div v-if="showSensorPermissionExperience">
+            <div @click="setMotionListeners" class="p-2 bg-gray-200 cursor-pointer">Request Sensor Permission</div>
+        </div>
+
+        <!-- DEV TOOLS -->
+        <div v-if="showDevTools" class="w-full my-8 overflow-hidden">
+            <div>{{ devOutput_motionEvent }}</div>
+            <div>Dice face: {{ DiceState.face }}</div>
+            <div>currentInteraction: {{ currentInteraction }}</div>
             <div>Dice face: {{ DiceState.face }}</div>
             <div>Dice spinning: {{ DiceState.spinning }}</div>
             <div>Use bg map: {{ useBGmap }}</div>
-            <div>currentInteraction: {{ currentInteraction }}</div>
             <div class="whitespace-nowrap">sensors: {{ sensors.gyrocoords }}</div>
             <!-- <div>accel: {{ DiceState.accelerometer }}</div> -->
             <!-- <div class="absolute whitespace-nowrap">mouseTouchCoords: {{ mouseTouchCoords }}</div> -->
         </div>
 
-        <div @click="handleClick()" class="dice cursor-pointer" :class="[
-            DiceState.spinning ? 'spin' : 'perspective',
+        <!-- DIE -->
+        <div id="dieParent" @click="handleClick()" class="die cursor-pointer" :class="[
+            DiceState.spinning ? 'spinning' : DiceState.hasRolled ? 'standing' : '',
             {'useBGmap' : useBGmap}
         ]
         ">
-            <div :class="DiceState.spinning ? 'spin' : 'perspective'" class="cube">
+            <div id="dieInner" class="cube">
 
-                <div v-for="(face, facename, index) in Die.faces" :key="'face-'+index"
+                <div v-for="(face, index) in Die.faces" :key="'face-'+index"
                 :class="[
-                    facename,
+                    face.name,
                     (DiceState.face === index+1 || DiceState.spinning) ? 'lightFacing' : ''
                 ]"
                 :style="!useBGmap ? 'background-image: url(images/' + dummyImages[index] + ')' : ''">
                 </div>
 
+                <!-- OLD WAY of building faces -->
                 <!--
                 <div
                 :class="(DiceState.face === 1 || DiceState.spinning) ? 'lightFacing' : ''"
@@ -74,10 +84,13 @@
                 -->
             </div>
         </div>
+
     </div>
 </template>
 
 <script>
+
+import { Motion } from '@capacitor/motion'
 
 export default {
     name: "Dice",
@@ -92,30 +105,53 @@ export default {
 
     data() {
         return {
+            showDevTools:false,
+            showSensorPermissionExperience: false,
 
             useBGmap: false,
 
-            currentInteraction: null, // mouse, touch, sensor
-
-            sensors: {
-                permission: false,
-                gyro: false,
-                orientation: false,
-                gyrocoords: {
-                    tilt: null,
-                    turn: null,
-                    rotate: null
-                }
-            },
-
             DiceState: {
-                face: 6,
+                face: 1, // TODO: If we start with any face other than 1, on page load the cube transform to that face doesn't apply, we just see face 1 (default cube non-transformed orientation). As soon as you move the mouse, the cube spins to the correct face we specify here in config.
                 spinning: false,
-                accelerometer: [0.3, 0.25],
-                hasRolled: false
+                accelerometer: [0, 0], // old: [0.3, 0.25],
+                hasRolled: false // TODO: For very first roll after page load, let's try to make the random function NOT land on "1" right away.
             },
 
             Die: {
+                faces: [
+                    {
+                        name: 'front',
+                        orientation: [0, 0, 0],
+                        image: null //this.dummyImages[0]
+                    },
+                    {
+                        name:'back',
+                        orientation: [90, 0, 0],
+                        image: null //this.dummyImages[1]
+                    },
+                    {
+                        name: 'top',
+                        orientation: [0, 90, 0],
+                        image: null //this.dummyImages[2]
+                    },
+                    {
+                        name: 'bottom',
+                        orientation: [0, -90, 0],
+                        image: null //this.dummyImages[3]
+                    },
+                    {
+                        name: 'left',
+                        orientation: [-90, 0, 0],
+                        image: null //this.dummyImages[4]
+                    },
+                    {
+                        name: 'right',
+                        orientation: [-180, 0, 0],
+                        image: null //this.dummyImages[5]
+                    }
+                ]
+
+                /*
                 faces: {
                     'front': {
                         orientation: [0, 0, 0],
@@ -142,16 +178,8 @@ export default {
                         image: null //this.dummyImages[5]
                     }
                 }
+                */
             },
-
-            faceViews: [
-                [0, 0, 0],
-                [90, 0, 0],
-                [0, 90, 0],
-                [0, -90, 0],
-                [-90, 0, 0],
-                [-180, 0, 0]
-            ],
 
             dummyImages: [
                 'dummy-400x400-BodyLanguage.jpg',
@@ -162,41 +190,91 @@ export default {
                 'dummy-400x400-TShirt.jpg'
             ],
 
-            mouseTouchCoords: [ 0, 0 ]
+
+            // FOR OLD-WAY of rendering faces
+            faceViews: [
+                [0, 0, 0],
+                [90, 0, 0],
+                [0, 90, 0],
+                [0, -90, 0],
+                [-90, 0, 0],
+                [-180, 0, 0]
+            ],
+
+
+            // INTERACTIONS
+
+            accelerationHandler: null,
+            orientationHandler: null,
+            currentInteraction: null, // mouse, touch, sensor
+            mouseTouchCoords: [ 1, 1 ],
+
+            sensors: {
+                permission: false,
+                gyro: false,
+                orientation: false,
+                gyrocoords: {
+                    tilt: null,
+                    turn: null,
+                    rotate: null
+                }
+            },
+
+            devOutput_motionEvent: null
 
         }
 
     },
 
     mounted() {
+
+        // Directly listen for cube animation events (e.g. spin),
+        // this way browser animation events dictate everything; more natural.
+        let dieParent = document.getElementById("dieParent")
+        //cubeDiv.addEventListener("animationstart", myStartFunction)
+        dieParent.addEventListener("animationend", () => {
+            this.DiceState.spinning = false
+        })
+
         document.addEventListener('keydown', (e) => {
             this.handleKeyDown(e)
         })
 
         document.addEventListener('mousemove', (e) => {
-            let x = (window.innerWidth / 2 - e.pageX) / -5
-            let y = (window.innerHeight / 2 - e.pageY) / 5
+            // Basic way of allowing sensors to take priority; basically we ignore this if sensors are firing
+            if (!this.currentInteraction != 'sensor') {
+                let x = (window.innerWidth / 2 - e.pageX) / -5
+                let y = (window.innerHeight / 2 - e.pageY) / 5
 
-            // TODO: Is this better?
-            // let x = e.clientX;
-            // let y = e.clientY;
+                // TODO: Is this better?
+                // let x = e.clientX;
+                // let y = e.clientY;
 
-            this.mouseTouchCoords = [ x, y ]
-            this.currentInteraction = 'mouse'
+                this.mouseTouchCoords = [ x, y ]
+                this.currentInteraction = 'mouse'
+            }
         })
 
         document.addEventListener('touchmove', (e) => {
-            let evt = (typeof e.originalEvent === 'undefined') ? e : e.originalEvent
-            let touch = evt.touches[0] || evt.changedTouches[0]
-            let x = touch.pageX
-            let y = touch.pageY
-            this.mouseTouchCoords = [ x, y ]
-            this.currentInteraction = 'touch'
+
+            // Basic way of allowing sensors to take priority; basically we ignore this if sensors are firing
+            if (this.currentInteraction != 'sensor') {
+                let evt = (typeof e.originalEvent === 'undefined') ? e : e.originalEvent
+                let touch = evt.touches[0] || evt.changedTouches[0]
+                let x = touch.pageX
+                let y = touch.pageY
+                this.mouseTouchCoords = [ x, y ]
+                this.currentInteraction = 'touch'
+            }
         })
 
+        // If browser has requestPermission, we invoke request permission experience.
+        // Seems like only iOS Safari is strict about this, and requires explicit user ui input to display the native permission dialog.
         if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-            this.reqPermissionMotion()
+            this.showSensorPermissionExperience = true
         } else {
+
+            // All other browsers
             this.setMotionListeners()
         }
 
@@ -205,7 +283,141 @@ export default {
 
     methods: {
 
-        setMotionListeners() {
+        handleKeyDown(e) {
+            console.log("func handleKeyDown %O", e)
+            if (e.code === 'Space') {
+                this.getRandomDieFace()
+            }
+        },
+
+        handleClick() {
+            console.log("func handleClick()")
+            this.getRandomDieFace()
+        },
+
+        getRandomDieFace() {
+            // Todo: integrate this.Die.faces length here
+            this.rollToFace(Math.floor(Math.random() * 6 + 1))
+        },
+
+        rollToFace(face) {
+            console.log("func roll(), face: %O", face)
+
+            /*
+            // TODO: Return to original shortform, like this:
+            this.setState({
+                face: 1,
+                spinning: true,
+                hasRolled: true
+            })
+            */
+            this.DiceState.face = face
+            this.DiceState.spinning = true
+            this.DiceState.hasRolled = true
+
+            // NOTE: Spin is finished via trigger of animationend; see code.
+
+        },
+
+
+
+        // ---------------------------------------------
+        // MOTION LISTENERS
+        // ---------------------------------------------
+
+        async setMotionListeners() {
+
+            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                await DeviceOrientationEvent.requestPermission()
+                .then(permissionState => {
+
+                    if (permissionState === 'granted') {
+                        this.showSensorPermissionExperience = false
+                    } else {
+
+                    }
+
+                })
+                .catch( (error) => {
+                    this.showSensorPermissionExperience = false
+                    console.log("Error getting sensor permission: %O", error)
+                    return
+                })
+            }
+
+
+            this.orientationHandler = await Motion.addListener('orientation', event => {
+
+                console.log('Device orientation event: %O', event)
+
+                this.devOutput_motionEvent = {
+                    x: event.alpha.toFixed(2),
+                    y: event.beta.toFixed(2),
+                    z: event.gamma.toFixed(2)
+                }
+
+                this.currentInteraction = 'sensor'
+
+                if (!this.DiceState.spinning) {
+                    let tilt = event.beta
+                    let turn = event.alpha
+                    let rotate = event.gamma
+
+                    const x = tilt / 180 ?? 0
+                    const y = rotate / 90 ?? 0
+                    this.DiceState.accelerometer = [x, y]
+                }
+                
+            })
+            
+            
+            this.accelerationHandler = await Motion.addListener('accel', event => {
+
+                console.log('Device acceleration event: %O', event)
+
+                this.devOutput_motionEvent = {
+                    x: event.rotationRate.alpha.toFixed(2),
+                    y: event.rotationRate.beta.toFixed(2),
+                    z: event.rotationRate.gamma.toFixed(2)
+                }
+
+                this.currentInteraction = 'sensor'
+
+                if ((event.rotationRate.alpha > 256 || event.rotationRate.beta > 256 || event.rotationRate.gamma > 256) && !this.DiceState.spinning) {
+                    this.getRandomDieFace()
+                }
+            })
+
+        },
+
+        stopMotionListeners() {
+            // Stop the acceleration listener
+            // OLD CODE
+            /*
+            const stopAcceleration = () => {
+                if (accelerationHandler) {
+                    accelerationHandler.remove()
+                }
+            }
+            */
+        },
+
+        destroyListeners() {
+            // TODO: Make this proper. Also, prob want to trigger this in Vue's beforeDestroy state.
+
+            /*
+            // Old code:
+            const removeListeners = () => {
+                Motion.removeAllListeners()
+            }
+            */
+        },
+
+        setMotionListenersEXPERIMENTAL() {
+
+            // EARLIER CODE, very messy
+
+            // Below may be more optimal in future, but there may be browser support issues.
 
             /*
             //navigator.permissions.query({ name: "geolocation" }).then((result) => {
@@ -213,29 +425,29 @@ export default {
             .then(result => {
                 if (result.state === 'granted') { // <-- this returns true
 
-                        try {
-                            this.gyroscope = new Gyroscope({frequency: 60})
-                            this.gyroscope.addEventListener('reading', e => {
-                                console.log(e)
-                            })
-                            this.gyroscope.start()
-                        } catch(error) {
-                            // Handle construction errors.
-                            if (error.name === 'SecurityError') {
-                                // See the note above about feature policy.
-                                alert('Sensor construction was blocked by a feature policy.')
-                            } else if (error.name === 'ReferenceError') {
-                                alert('Sensor is not supported by the User Agent.')
-                            } else {
-                                alert(error)
-                            }
+                    try {
+                        this.gyroscope = new Gyroscope({frequency: 60})
+                        this.gyroscope.addEventListener('reading', e => {
+                            console.log(e)
+                        })
+                        this.gyroscope.start()
+                    } catch(error) {
+                        // Handle construction errors.
+                        if (error.name === 'SecurityError') {
+                            // See the note above about feature policy.
+                            alert('Sensor construction was blocked by a feature policy.')
+                        } else if (error.name === 'ReferenceError') {
+                            alert('Sensor is not supported by the User Agent.')
+                        } else {
+                            alert(error)
                         }
+                    }
                 } else {
                     alert('No gyroscope or denied, computer assumed, falling back to keyboard.')
                     // fallback setup here
                 }
             })
-            */
+
             //try {
                 if (window.RelativeOrientationSensor) {
                     const sensorOrientation = new window.RelativeOrientationSensor({ frequency: 60, referenceFrame: 'screen' })
@@ -271,27 +483,22 @@ export default {
                             this.DiceState.accelerometer = [x, y]
                         }
 
-                        /*
-                        this.sensors.gyrocoords.tilt = tilt.toFixed(2)
-                        this.sensors.gyrocoords.turn = turn.toFixed(2)
-                        this.sensors.gyrocoords.rotate = rotate.toFixed(2)
 
-                        if ((tilt > 60 || rotate > 50) && !this.DiceState.spinning) {
-                            this.random()
-                        }
-                        */
+                        //this.sensors.gyrocoords.tilt = tilt.toFixed(2)
+                        //this.sensors.gyrocoords.turn = turn.toFixed(2)
+                        //this.sensors.gyrocoords.rotate = rotate.toFixed(2)
+
+                        //if ((tilt > 60 || rotate > 50) && !this.DiceState.spinning) {
+                        //    this.getRandomDieFace()
+                        //}
+
                     })
                 }
 
            // } catch (e) {
 
-             
 
            // }
-
-
-
-
 
            // try {
                 if (window.Gyroscope) {
@@ -302,7 +509,7 @@ export default {
                         this.sensors.gyrocoords.x = sensorGyroscope.x
                         this.sensors.gyrocoords.y = sensorGyroscope.z
                         if ((sensorGyroscope.x > 9 || sensorGyroscope.z > 4) && !this.DiceState.spinning) {
-                            this.random()
+                            this.getRandomDieFace()
                         }
                     })
                     sensorGyroscope.start()
@@ -310,9 +517,6 @@ export default {
 
                 }
            // } catch (e) {
-
-
-
 
             //}
 
@@ -353,106 +557,56 @@ export default {
 
         },
 
-        handleKeyDown(e) {
-            console.log("func handleKeyDown %O", e)
-            if (e.code === 'Space') {
-                this.random()
-            }
-        },
-
-        handleClick() {
-            console.log("func handleClick()")
-            this.random()
-        },
-
-        random() {
-            console.log("func random()")
-
-            // Todo: integrate dicefaces length here
-            this.roll(Math.floor(Math.random() * 6 + 1))
-        },
-
-
-
-        roll(face) {
-            console.log("func roll(), face: %O", face)
-            /*
-            // TODO: Return to original shortform, like this:
-            this.setState({
-                face: 1,
-                spinning: true,
-                hasRolled: true
-            })
-            */
-
-            this.DiceState.face = face
-            this.DiceState.spinning = true
-            this.DiceState.hasRolled = true
-
-            // After X seconds, set the face and stop spinning
-            setTimeout(() => {
-                //this.DiceState.face = face
-                this.DiceState.spinning = false
-            }, 2000)
-        },
-
-        getRandom(max, min) {
-            return (Math.floor(Math.random() * (max-min)) + min) * 90;
-        },
-
-        reqPermissionMotion() {
-
-            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-                DeviceOrientationEvent.requestPermission()
-                .then(permissionState => {
-                    if (permissionState === 'granted') {
-                        this.sensors.permission = true
-                        this.setMotionListeners()
-                    } else {
-                        this.sensors.permission = "noooo"
-                    }
-                })
-                .catch( (error) => {
-                    console.log("Error getting sensor permission: %O", error)
-                })
-            }
-
-
-        }
-
     },
 
 
     computed: {
 
-        diceBG_BorderRadius() {
+        css_dieShadow_BorderRadius() {
             return this.DiceState.spinning ? '50%' : '10px'
         },
 
-        diceBG_Shadow() {
+        css_dieShadow_Blur() {
             return this.DiceState.spinning ? 'blur(80px)' : 'blur(20px)'
         },
 
-        diceBG_transform() {
+        css_dieShadow_Transform() {
             return 'translateZ(' + (this.DiceState.spinning ? '-50' : '0') + 'px) translate3d( 0, 0, 0)'
         },
 
-        cubeTransformSpinning() {
-            const [x, y, z] = this.faceViews[this.DiceState.face - 1]
+        css_cubeTransformSpinning() {
+            const [x, y, z] = this.Die.faces[this.DiceState.face - 1].orientation
             return 'rotateX(' + x + 'deg) rotateY(' + y + 'deg) rotateZ(' + z + 'deg) translate3d( 0, 0, 0)'
         },
 
-        cubeTransformPerspective() {
+        css_cubeTransformStanding() {
 
-            // Calculate perspective rotation with device orientation effect
-            const [x, y, z] = this.faceViews[this.DiceState.face - 1]
-
-            const [ax, ay] = this.currentInteraction == 'sensor' ? this.DiceState.accelerometer : this.mouseTouchCoords
+            // FOR REGULAR DIE STATE
             
+            // Calculates die 3d perspective
+
+            // Desktop: Mousing user will see cube follow the mouse
+            // Mobile: If sensors allowed, cube will follow rotation of device
+            // Worse-cast: Cube has no perspective transform
+
+            const [x, y, z] = this.Die.faces[this.DiceState.face - 1].orientation
+
+            let [ax, ay] = [0,0]
+            if (this.currentInteraction == 'sensor') {
+                ax = this.DiceState.accelerometer[0]
+                ay = this.DiceState.accelerometer[1]
+            } else if (this.currentInteraction == 'mouse' || this.currentInteraction == 'touch') {
+                ax = this.mouseTouchCoords[0]
+                ay = this.mouseTouchCoords[1]
+             }
+
             let speedModifier = 0.002
             let rx = 0
             let ry = 0
             let rz = 0
+
+            // BELOW are modifiers per-face
+            // TODO: Make a nice algorithm for this, instead of so many lines
 
             // FACE 1
             if (this.DiceState.face === 1) {
@@ -536,6 +690,7 @@ export default {
                 }
             }
 
+            // FINALLY, we pass values, and perform flipping if we need to (based on input method)
             // TODO: We use translate3d throughout app as a trick to fight anti-aliasing. Does it work? Do we need it?
             if (this.currentInteraction == 'mouse' || this.currentInteraction == 'sensor') {
                 return 'rotateX(' + rx + 'deg) rotateY(' + ry + 'deg) rotateZ(' + rz + 'deg) translate3d( 0, 0, 0)'
@@ -544,7 +699,7 @@ export default {
             }
         }
 
-    },
+    }
 
 }
 
@@ -552,15 +707,20 @@ export default {
 
 <style scoped>
 
-/* DIE FOUNDATION */
-.dice {
+
+/* -------------------------------- */
+/* DIE FOUNDATION                   */
+/* -------------------------------- */
+
+/* MAIN PARENT */
+.die {
     perspective: 800px;
     perspective-origin: 50% 100px;
     background-color: transparent;
 }
 
 /* DIE SHADOW */
-.dice::before {
+.die::before {
     content: "";
     display: block;
     position: absolute;
@@ -569,100 +729,98 @@ export default {
     background: rgba(0, 0, 0, 1);
     transition: filter 0.05s ease-in-out, border-radius 0.05s ease-in-out, transform 0.05s ease-in-out;
     /* todo: What;'s the best way to do dynamic variables? Should we do it in the template? Or, if this way, is computed() the best, or not? */
-    filter: v-bind('diceBG_Shadow');
-    border-radius: v-bind('diceBG_BorderRadius');
-    transform: v-bind('diceBG_transform');
+    filter: v-bind('css_dieShadow_Blur');
+    border-radius: v-bind('css_dieShadow_BorderRadius');
+    transform: v-bind('css_dieShadow_Transform');
 }
 
-/* SPIN ANIMATION */
-@keyframes spin {
-    from { transform: rotateX(0deg)             rotateY(30deg)             rotateZ(0deg); }
-    to   { transform: rotateX(calc(360deg * 3)) rotateY(calc(360deg * 2))  rotateZ(calc(360deg * 0.5)); }
-    /* TODO: Check this calc, correct? */
-}
+/* DIE BOUNCE */
+.die.standing {
 
+    /* Bounce effect. Occurs on page render and any time cube stops spinning.
+    We do the bounce here on the entire die, as opposed to the inner cube,
+    because the inner cube already has complex rotation transformation. This way is cleaner. */
 
-
-@keyframes bounce {
-
-    /*
-    from { transform: scale(2); }
-    to   { transform: scale(1); }
+    /* TODO: Ideally this line lives plainly in .dice, but for some reason it's not reactive that way.
+    The bounce would only occur once, on page load. Having a reactive class "standing" with the rule here, makes
+    bounce occur on page load AND after every spin, as desired.
     */
 
+    animation: bounce 0.4s linear;
+}
 
-
-    0% {
-        transform: scale(0.5) rotateY(20deg)
-    }
-    40% {
-        transform: scale(1.1)
-    }
-    50% {
-        transform: scale(0.9)
-    }
-    60% {
-        transform: scale(1.05)
-    }
-    70% {
-        transform: scale(0.95)
-    }
-    80% {
-        transform: scale(1.02)
-    }
-    90% {
-        transform: scale(0.98) rotateY(0)
-    }
-    100% {
-        transform: scale(1)
-    }
-
-
-
+/* DIE FLYING IN AIR */
+.die.spinning {
+    animation: grow 2s linear;
 }
 
 
-
-
-/* DIE ACTUAL */
+/* INNER CUBE */
 .cube {
     position: relative;
     width: 200px;
     height: 200px;
     transform-style: preserve-3d;
 
-    /* This helps smooth out the ending of a spin */
-    transition: transform 2s cubic-bezier(0, .82, .47, 1);
+    /* When not spinning, we dynamically adjust perspective according to input (mouse, touch, device rotation, etc) */
+    transform: v-bind('css_cubeTransformStanding');
 
-    /* stuff that may help anti-aliasing */
+    /* TODO: Earlier in dev, this seems to help smooth out the ending of a spin, however on iOS Safari it fuck's with the spin animation that's already occurring. */
+    /*
+    transition: transform 2s cubic-bezier(0, .82, .47, 1);
+    */
+
+    /* Stuff that may help anti-aliasing, according to internet */
     will-change: transform;
     box-shadow: 0 0 0 1px transparent;
     border: 1px solid rgba(0, 0, 0, 0.1);
     outline: 1px solid transparent;
 }
 
-.cube.spin {
+.spinning .cube {
 
-    /* This time (e.g. 2s) needs to match the timeout for when spinner ends in code */
-    /* animation: spin 1s linear, bounce 1s cubic-bezier(0, .82, .47, 1) 1s; */
-    animation: spin 1.99s linear;
-    /*     animation: spin 1.97s linear; */
+    /* This time (e.g. 2s) needs to closely match the timeout for when spinner ends in code */
+    animation: spin 2s linear;
 
     /* TODO: Look into timing function, any improvements to be had?*/
     /* animation-timing-function: cubic-bezier(0.280, 0.840, 0.420, 1); */
 
-    /* TODO: Is this needed? */
-    /* transform: v-bind('cubeTransformSpinning'); */
+    /* TODO: Is this needed? Do we want to allow dynamic perspective transform during a spin? */
+    /* transform: v-bind('css_cubeTransformSpinning'); */
 }
 
-.dice.perspective {
-    animation: bounce 0.4s linear;
-}
-.cube.perspective {
-    transform: v-bind('cubeTransformPerspective');
-    /* animation: bounce 1s cubic-bezier(0, .82, .47, 1) 2s; */
+
+/* -------------------------------- */
+/* ANIMATIONS                       */
+/* -------------------------------- */
+
+/* SPIN ANIMATION */
+@keyframes spin {
+    from { transform: rotateX(0deg)             rotateY(30deg)             rotateZ(0deg); }
+    to   { transform: rotateX(calc(360deg * 3)) rotateY(calc(360deg * 2))  rotateZ(calc(360deg * 0.5)); }
+    /* TODO: Check this calc; is it the best? Shall we make a computed so we can make a more sophisticated thing with randomization? */
 }
 
+@keyframes grow {
+    0%   { transform: scale(1) }
+    50%  { transform: scale(1.4) }
+    100% { transform: scale(1) }
+}
+
+@keyframes bounce {
+    0%   { transform: scale(1.03) }
+    20%  { transform: scale(1) }
+    40%  { transform: scale(1.02) }
+    60%  { transform: scale(1) }
+    80%  { transform: scale(1.01) }
+    100% { transform: scale(1) }
+}
+
+
+
+/* -------------------------------- */
+/* CUBE FACES                       */
+/* -------------------------------- */
 
 .cube div {
     position: absolute;
@@ -674,17 +832,19 @@ export default {
     justify-content: center;
     backface-visibility: hidden;
     transform-origin: center;
-    /* opacity: 0.35; */
-    /* Helps smooth out anti-aliasing */
+
+    /* Smooth out anti-aliasing a little; works */
     filter: blur(0.01px);
 }
 
+/* In the case of using a mapped image, we apply that here */
 .useBGmap .cube div {
     background-image: url("/dice_texture.svg");
     background-size: 415%;
     border-radius: 30px;
 }
 
+/* Old code, attempt to lighten up faces that were visible to the user. This was before we make picture faces */
 .cube div.lightFacing {
     background-color: hsl(0, 0%, 95%);
 }
@@ -692,7 +852,6 @@ export default {
 .cube div:not(.lightFacing) {
     background-color: hsl(0, 0%, 80%);
 }
-
 
 /* TODO: Possibly don't need this? Is it just a backup if no image faces are loaded? */
 .cube .filler {

@@ -1,3 +1,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Removes ability to select element. E.g. On desktop, drag-hilight content, and observe noselect elements are not selectable */
+.noSelect {
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Old versions of Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
+}
+
+/* In some browsers/devices, removes the 'blue flash' hilight when user taps/clicks an element */
+/* Not widely compatible. Seems to be effective in Android Chrome though, where the 'blue flash' is very noticeable. iPhone Safari doesn't have 'blue flash' to start with. */
+.noHighlight {
+    -webkit-tap-highlight-color: transparent;
+}

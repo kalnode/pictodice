@@ -1,0 +1,6 @@
+{
+  "appId": "com.pictodice.app",
+  "appName": "Pictodice",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}
