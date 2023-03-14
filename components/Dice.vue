@@ -1,3 +1,8 @@
+<script setup>
+// STORE
+import { useMyAlertsStore } from '@/stores/myStore'
+const store = useMyAlertsStore()
+</script>
 <template>
     <div class="w-full h-full flex flex-col justify-center items-center">
 
@@ -39,12 +44,12 @@
         ">
             <div id="dieInner" class="cube">
 
-                <div v-for="(face, index) in Die.faces" :key="'face-'+index"
+                <div v-for="(image, index) in store.dice[0].images" :key="'face-'+index"
                 :class="[
-                    face.name,
+                    Die.faces[index].name, //face.name,
                     (DiceState.face === index+1 || DiceState.spinning) ? 'lightFacing' : ''
                 ]"
-                :style="!useBGmap ? 'background-image: url(images/' + dummyImages[index] + ')' : ''">
+                :style="!useBGmap ? 'background-image: url(images/' + image + ')' : ''">
                 </div>
 
                 <!-- OLD WAY of building faces -->
