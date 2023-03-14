@@ -1,8 +1,4 @@
 <script setup>
-// STORE
-import { useMyAlertsStore } from '@/stores/myStore'
-const store = useMyAlertsStore()
-
 // TODO: Double check if this is correct. Because <Nav> occurs outside of <NuxtPage />, we need this import to make useRoute() reactive, otherwise it never changes after initial landing.
 import { useRoute } from 'vue-router'
 const route = useRoute()
@@ -13,10 +9,6 @@ const route = useRoute()
         <NuxtLink to="/">
             Pictodice
         </NuxtLink>
-
-
-        <!-- DEV TEST for pinia -->
-        <!-- {{ store.name }} -->
     </h1>
 </template>
 

@@ -40,6 +40,10 @@
     </div>
 </template>
 <script>
+// LOCAL STORAGE
+import { Preferences } from '@capacitor/preferences'
+// For native mobile (iOS, Android), this uses storage made available to any app, and is protected.
+// For web, this plugin uses localStorage (which is volatile, in that it may be cleared by the browser or user)
 
 export default {
 
@@ -52,6 +56,13 @@ export default {
 
     mounted() {
 
+        // Testing classic localStorage
+        // console.log("initiliazeLocalStorage init value is: %O", this.allowMotionSensors )
+        // let { value } = window.localStorage.getItem('CapacitorStorage')
+        // console.log("window.localStorage value is: %O", value )
+        //let { value } = await Preferences.get({ key: 'allowMotionSensors' })
+        // this.store.setPermission(value)
+        // console.log("initiliazeLocalStorage value is: %O", value )
 
         let gradientBackground = document.getElementById("gradientBackground")
         let gradientMouse = document.getElementById("gradientMouse")
@@ -74,11 +85,7 @@ export default {
 
         })
 
-
         this.setHeaderPadding()
-
-
-
 
     },
 
@@ -89,7 +96,7 @@ export default {
             let topSafeAreaInsetTemp = getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top")
 
             this.safeAreaInset = parseInt(topSafeAreaInsetTemp.slice(0, -2))
-            console.log("this.topSafeAreaInsetTemp: %O", this.topSafeAreaInsetTemp)
+            //console.log("this.topSafeAreaInsetTemp: %O", this.topSafeAreaInsetTemp)
 
         }
     }

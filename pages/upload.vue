@@ -1,6 +1,6 @@
 <script setup>
 // STORE
-import { useMyAlertsStore } from '@/stores/myStore'
+import { useMyAlertsStore } from '~/stores/myStore'
 const store = useMyAlertsStore()
 </script>
 <template>

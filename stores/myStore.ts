@@ -1,5 +1,13 @@
+// TODO: What's this for?
 import { resolveDirective } from 'nuxt/dist/app/compat/capi'
+
 import { defineStore } from 'pinia'
+
+// LOCAL STORAGE
+import { Preferences } from '@capacitor/preferences'
+// For native mobile (iOS, Android), this uses storage made available to any app, and is protected.
+// For web, this plugin uses localStorage (which is volatile, in that it may be cleared by the browser or user)
+
 
 // You can name the return value of `defineStore()` anything you want,
 // but it's best to use the name of the store and surround it with `use`
@@ -10,8 +18,17 @@ import { defineStore } from 'pinia'
 // DEFINE STORE
 export const useMyAlertsStore = defineStore('myAlerts', {
     state: () => ({
-        count: 0,
-        name: false,
+
+        allowMotionSensors: true,
+        userInteractedWithPermissionPrompt: false,
+
+        /*
+        allowMotionSensors44: async () => {
+            let { value } = await Preferences.get({ key: 'allowMotionSensors' })
+            return value
+        },
+        */
+        //allowMotionSensors44: Preferences.get({ key: 'allowMotionSensors' })
 
         dice: [
             {
@@ -31,17 +48,73 @@ export const useMyAlertsStore = defineStore('myAlerts', {
                 images: null
             }
         ],
-        
+
     }),
+
     getters: {
-        doubleCount: (state) => state.count * 2,
+
+        // WORKS
+        //doubleCount: (state) => state.count * 2,
+
+        // TODO: Why does this return "object promise" ???
+        permissionSetting: () => Preferences.get({ key: 'allowMotionSensors' }),
+
+        //WORKS:
+        //permissionSetting2: () => "ferfef",
+
+        // OITHER TEST
+        /*
+        permissionSetting3: () => {
+
+            "sdfv43e"
+
+            const checkName = async () => {
+                const { value } = await Preferences.get({ key: 'allowMotionSensors' })
+                console.log(`Hello ${value}!`)
+            }
+        }
+        */
+        
     },
+
     actions: {
-        increment() {
-            this.count++
+
+        async initiliazeLocalStorage() {
+
+            console.log("initiliazeLocalStorage init value is: %O", this.allowMotionSensors )
+
+            let { value } = await Preferences.get({ key: 'allowMotionSensors' })
+
+            console.log("initiliazeLocalStorage value is: %O", value )
+
+            this.allowMotionSensors = value === "1" ? true : false
+
         },
-        toggleName() {
-            this.name = !this.name
+
+        setPermission(value:boolean) {
+            this.allowMotionSensors = value
         },
+
+        async togglePermission() {
+
+            console.log("togglePermission existing value is: %O", this.allowMotionSensors )
+
+            this.allowMotionSensors = !this.allowMotionSensors
+            
+            // localStorage only allows string values, so we use 1=true, 0=false.
+            let newValue = this.allowMotionSensors === true ? "1" : "0"
+
+            console.log("togglePermission newValue is: %O", newValue )
+
+            await Preferences.set({
+                key: 'allowMotionSensors',
+                value: newValue,
+            })
+
+            console.log("togglePermission DONE SETTING VALUE")
+
+        },
+
+
     },
 })

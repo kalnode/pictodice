@@ -1,6 +1,6 @@
 <script setup>
 // STORE
-import { useMyAlertsStore } from '@/stores/myStore'
+import { useMyAlertsStore } from '~/stores/myStore'
 const store = useMyAlertsStore()
 </script>
 <template>
@@ -18,9 +18,13 @@ const store = useMyAlertsStore()
             <p>Or touch the dice</p>
         </div>
         -->
-        <div v-if="showSensorPermissionExperience" class="absolute bottom-2">
-            <div @click="setMotionListeners" class="p-2 bg-gray-200 cursor-pointer">Request Sensor Permission</div>
+
+        <div v-if="showSensorPermissionExperience" class="flex justify-center space-x-2 items-center absolute top-4 mt-12 mx-4 z-50 pointer-events-auto bg-yellow-200 text-xs p-2 text-orange-800">
+            <div>It's better with motion sensors enabled</div>
+            <div @click="checkMotionPermission()" class="p-2 bg-orange-600 text-white cursor-pointer pointer-events-auto">Allow</div>
+            <div @click="showSensorPermissionExperience = false" class="test-xl font-bold p-2 rounded-full cursor-pointer pointer-events-auto">X</div>
         </div>
+
 
         <!-- DEV TOOLS -->
         <div v-if="showDevTools" class="w-full my-8 overflow-hidden">
@@ -229,7 +233,8 @@ export default {
 
     },
 
-    mounted() {
+    // TODO: Affirm that async on mounted() is ok
+    async mounted() {
 
         // Directly listen for cube animation events (e.g. spin),
         // this way browser animation events dictate everything; more natural.
@@ -273,15 +278,7 @@ export default {
             }
         })
 
-        // If browser has requestPermission, we invoke request permission experience.
-        // Seems like only iOS Safari is strict about this, and requires explicit user ui input to display the native permission dialog.
-        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-            this.showSensorPermissionExperience = true
-        } else {
-
-            // All other browsers
-            this.setMotionListeners()
-        }
+        await this.checkMotionPermission()
 
     },
 
@@ -330,26 +327,36 @@ export default {
         // MOTION LISTENERS
         // ---------------------------------------------
 
-        async setMotionListeners() {
+        async checkMotionPermission() {
 
+            // Any browser using requestPermission
             if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+
+                // Technically, this acts as "check permission" in the device.
+                // If previously granted, user will see no prompts and listeners get setup.
+                // If error, we show special UI to the user
                 await DeviceOrientationEvent.requestPermission()
                 .then(permissionState => {
-
-                    if (permissionState === 'granted') {
+                    if (permissionState == 'granted') {
                         this.showSensorPermissionExperience = false
+                        this.setMotionListeners()
                     } else {
-
+                        // TODO: Record in app that they didn't give permission; for future reference
                     }
-
                 })
                 .catch( (error) => {
-                    this.showSensorPermissionExperience = false
                     console.log("Error getting sensor permission: %O", error)
-                    return
+                    this.showSensorPermissionExperience = true
                 })
+
+            // All other browsers
+            } else {
+                this.setMotionListeners()
             }
 
+        },
+
+        async setMotionListeners() {
 
             this.orientationHandler = await Motion.addListener('orientation', event => {
 

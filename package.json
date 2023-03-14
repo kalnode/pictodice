@@ -18,8 +18,10 @@
   "dependencies": {
     "@capacitor/android": "^4.7.0",
     "@capacitor/core": "^4.7.0",
+    "@capacitor/dialog": "^4.1.0",
     "@capacitor/ios": "^4.7.0",
     "@capacitor/motion": "^4.0.2",
+    "@capacitor/preferences": "^4.0.2",
     "@pinia/nuxt": "^0.4.7",
     "gh-pages": "^5.0.0",
     "pinia": "^2.0.33"

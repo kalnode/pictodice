@@ -1,13 +1,10 @@
 <script setup>
 
-// STORE
-import { useMyAlertsStore } from '@/stores/myStore'
-const store = useMyAlertsStore()
-
 // ROUTER
 // TODO: Double check if this is correct. Because <Nav> occurs outside of <NuxtPage />, we need this import to make useRoute() reactive, otherwise it never changes after initial landing.
 import { useRoute } from 'vue-router'
 const route = useRoute()
+
 </script>
 
 <template>
@@ -24,9 +21,6 @@ const route = useRoute()
                     <li class="p-2 rounded bg-orange-700 text-white"><NuxtLink to="/about">About</NuxtLink></li>
                 </ul>
                 -->
-
-                <!-- DEV TEST for pinia -->
-                <!-- {{ store.name }} || <button @click="store.toggleName()" class="pointer-events-auto">Toggle</button> -->
 
                 <div class="flex justify-between items-center m-2">
 
@@ -77,16 +71,6 @@ const route = useRoute()
         </header>
     </div>
 </template>
-
-<script>
-export default {
-    name: "Navigation",
-
-    props: {
-
-    }
-}
-</script>
 
 
 <style scoped></style>
