@@ -11,5 +11,10 @@ module.exports = {
     theme: {
         extend: {}
     },
-    plugins: []
+    plugins: [],
+    future: {
+
+        // Disables hover on mobile
+        hoverOnlyWhenSupported: true,
+    },
 }

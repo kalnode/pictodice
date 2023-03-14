@@ -13,15 +13,13 @@
             <p>Or touch the dice</p>
         </div>
         -->
-
-        {{ DiceState.spinning }}
-
-        <div v-if="showSensorPermissionExperience">
+        <div v-if="showSensorPermissionExperience" class="absolute bottom-2">
             <div @click="setMotionListeners" class="p-2 bg-gray-200 cursor-pointer">Request Sensor Permission</div>
         </div>
 
         <!-- DEV TOOLS -->
         <div v-if="showDevTools" class="w-full my-8 overflow-hidden">
+            <div>{{ DiceState.spinning }}</div>
             <div>{{ devOutput_motionEvent }}</div>
             <div>Dice face: {{ DiceState.face }}</div>
             <div>currentInteraction: {{ currentInteraction }}</div>
@@ -34,7 +32,7 @@
         </div>
 
         <!-- DIE -->
-        <div id="dieParent" @click="handleClick()" class="die cursor-pointer" :class="[
+        <div id="dieParent" ref="dieParent"  @click="handleClick()" class="die cursor-pointer" :class="[
             DiceState.spinning ? 'spinning' : DiceState.hasRolled ? 'standing' : '',
             {'useBGmap' : useBGmap}
         ]
@@ -231,20 +229,21 @@ export default {
         // Directly listen for cube animation events (e.g. spin),
         // this way browser animation events dictate everything; more natural.
         let dieParent = document.getElementById("dieParent")
+        //let dieParent = this.$refs.dieParent //document.getElementById("dieParent")
         //cubeDiv.addEventListener("animationstart", myStartFunction)
         dieParent.addEventListener("animationend", () => {
             this.DiceState.spinning = false
         })
 
-        document.addEventListener('keydown', (e) => {
-            this.handleKeyDown(e)
+        document.addEventListener('keydown', (event) => {
+            this.handleKeyDown(event)
         })
 
-        document.addEventListener('mousemove', (e) => {
+        document.addEventListener('mousemove', (event) => {
             // Basic way of allowing sensors to take priority; basically we ignore this if sensors are firing
             if (!this.currentInteraction != 'sensor') {
-                let x = (window.innerWidth / 2 - e.pageX) / -5
-                let y = (window.innerHeight / 2 - e.pageY) / 5
+                let x = (window.innerWidth / 2 - event.pageX) / -5
+                let y = (window.innerHeight / 2 - event.pageY) / 5
 
                 // TODO: Is this better?
                 // let x = e.clientX;
@@ -253,6 +252,7 @@ export default {
                 this.mouseTouchCoords = [ x, y ]
                 this.currentInteraction = 'mouse'
             }
+
         })
 
         document.addEventListener('touchmove', (e) => {
@@ -598,26 +598,33 @@ export default {
             } else if (this.currentInteraction == 'mouse' || this.currentInteraction == 'touch') {
                 ax = this.mouseTouchCoords[0]
                 ay = this.mouseTouchCoords[1]
-             }
+            }
 
+            // TODO: We need a scale modifier for mouse (and probably touch) coords such that, depending on the size of the viewport, we change the 
+            // angle modifier.
+            // EXAMPLE: Make PC browser narrow, and observe mouse hardly has an effect on perspective.
+            // Now, make viewport super large, and observe mouse movement nicely changes cube perspective.
+
+            let angleModifier = 40
             let speedModifier = 0.002
             let rx = 0
             let ry = 0
             let rz = 0
 
             // BELOW are modifiers per-face
-            // TODO: Make a nice algorithm for this, instead of so many lines
+            // TODO: Make a nice algorithm for this, instead of so many lines.
+            // Also, now it's confusing because a lot of flipping of x,y,z occurs.
 
             // FACE 1
             if (this.DiceState.face === 1) {
 
                 if (this.currentInteraction == 'mouse' || this.currentInteraction == 'touch') {
-                    ry = x + (speedModifier * (ax * 40))
-                    rx = y + (speedModifier * (ay * 40))
+                    ry = x + (speedModifier * (ax * angleModifier))
+                    rx = y + (speedModifier * (ay * angleModifier))
                     rz = z
                 } else if (this.currentInteraction == 'sensor') {
-                    rx = x + (ax * 40)
-                    ry = y + (-ay * 40)
+                    rx = x + (ax * angleModifier)
+                    ry = y + (-ay * angleModifier)
                     rz = z
                 }
 
@@ -625,13 +632,13 @@ export default {
             } else if (this.DiceState.face === 2) {
 
                 if (this.currentInteraction == 'mouse' || this.currentInteraction == 'touch') {
-                    ry = x + (speedModifier * (ax * 40))
+                    ry = x + (speedModifier * (ax * angleModifier))
                     rx = y
-                    rz = z + (speedModifier * (ay * 40))
+                    rz = z + (speedModifier * (ay * angleModifier))
                 } else if (this.currentInteraction == 'sensor') {
-                    rx = x + (ax * 40)
+                    rx = x + (ax * angleModifier)
                     ry = y
-                    rz = z + (ay * 40)
+                    rz = z + (ay * angleModifier)
                 }
 
             
@@ -639,12 +646,12 @@ export default {
             } else if (this.DiceState.face === 3) {
 
                 if (this.currentInteraction == 'mouse' || this.currentInteraction == 'touch') {
-                    rx = y + (speedModifier * (ay * 40))
+                    rx = y + (speedModifier * (ay * angleModifier))
                     ry = z
-                    rz = x + (speedModifier * (-ax * 40))
+                    rz = x + (speedModifier * (-ax * angleModifier))
                 } else if (this.currentInteraction == 'sensor') {
-                    rx = x + (ax * 40)
-                    ry = y + (-ay * 40)
+                    rx = x + (ax * angleModifier)
+                    ry = y + (-ay * angleModifier)
                     rz = z
                 }
 
@@ -652,13 +659,13 @@ export default {
             } else if (this.DiceState.face === 4) {
 
                 if (this.currentInteraction == 'mouse' || this.currentInteraction == 'touch') {
-                    rx = y + (speedModifier * (ay * 40))
+                    rx = y + (speedModifier * (ay * angleModifier))
                     ry = z
-                    rz = x + (speedModifier * (ax * 40))
+                    rz = x + (speedModifier * (ax * angleModifier))
 
                 } else if (this.currentInteraction == 'sensor') {
-                    rx = x + (ax * 40)
-                    ry = y + (-ay * 40)
+                    rx = x + (ax * angleModifier)
+                    ry = y + (-ay * angleModifier)
                     rz = z
                 }
 
@@ -668,24 +675,24 @@ export default {
 
                 if (this.currentInteraction == 'mouse' || this.currentInteraction == 'touch') {
                     rx = y
-                    ry = x + (speedModifier * (ax * 40))
-                    rz = z + (speedModifier * (-ay * 40))
+                    ry = x + (speedModifier * (ax * angleModifier))
+                    rz = z + (speedModifier * (-ay * angleModifier))
                 } else if (this.currentInteraction == 'sensor') {
                     rx = x + (ax * 40)
                     ry = y
-                    rz = z + (speedModifier * (-ay * 40))
+                    rz = z + (speedModifier * (-ay * angleModifier))
                 }
 
             // FACE 6
             } else if (this.DiceState.face === 6) {
 
                 if (this.currentInteraction == 'mouse' || this.currentInteraction == 'touch') {
-                    rx = y + (speedModifier * (ay * 40))
-                    ry = x + (speedModifier * (ax * 40))
+                    rx = y + (speedModifier * (ay * angleModifier))
+                    ry = x + (speedModifier * (ax * angleModifier))
                     rz = z
                 } else if (this.currentInteraction == 'sensor') {
-                    rx = x + (ax * 40)
-                    ry = y + (ay * 40)
+                    rx = x + (ax * angleModifier)
+                    ry = y + (ay * angleModifier)
                     rz = z
                 }
             }
@@ -919,4 +926,6 @@ export default {
 .useBGmap .right {
     background-position: 99% 50%;
 }
+
+
 </style>
