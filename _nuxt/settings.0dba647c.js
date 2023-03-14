@@ -1,0 +1,1 @@
+import{_ as e}from"./_plugin-vue_export-helper.c27b6911.js";import{o as t,a as s,b as o}from"./entry.f7de2476.js";const c={},n={class:"w-full h-full flex flex-col justify-center items-center"},r=o("h1",null,"Settings",-1),_=[r];function l(a,f){return t(),s("div",n,_)}const m=e(c,[["render",l]]);export{m as default};
