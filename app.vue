@@ -9,12 +9,14 @@
 
 </script>
 <template>
-    <div class="w-full h-full noSelect noHighlight" :style="[
+    <div class="w-full h-full flex flex-col noSelect noHighlight" :style="[
         'padding-top:'+safeAreaInset.top+'px',
         'padding-bottom:'+safeAreaInset.bottom+'px'
     ]">
 
-        <header id="Header" class="absolute z-50 w-full flex justify-center p-2">
+        <header id="Header"
+        :class="route.name == 'index' ? 'absolute z-50' : ''"
+        class="w-full flex justify-center p-2">
             <h1 class="text-3xl font-bold uppercase text-teal-700 hover:text-teal-200 hover:scale-110 transition-transform">
                 <transition name="fade" mode="out-in">
                     <NuxtLink :to="route.name == 'index' ? '/' : route.name" :key="'title-'+route.name">
@@ -27,7 +29,7 @@
 
         <!-- {{ safeAreaInset }} -->
 
-        <main class="w-full h-full">
+        <main class="w-full h-full flex-1">
             <!-- TODO: Look into page-key; why/what -->
             <NuxtPage id="Content" page-key="static" class="w-full h-full" />
             <!-- :page-key="'pagekey-'+route.name" -->

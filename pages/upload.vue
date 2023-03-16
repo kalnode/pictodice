@@ -21,7 +21,7 @@ definePageMeta({
             </div>
         </div>
 
-        <div>
+        <div class="overflow-auto">
             <div class="flex justify-center items-center flex-wrap">
                 <div v-for="(image, index) in store.dice[store.currentDie].images" :key="'slot-'+index"
                 @click="store.dice[store.currentDie].type === 'custom' ? imageClicked(index) : ''"
