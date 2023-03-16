@@ -1,4 +1,6 @@
 {
+  "name": "pictodice",
+  "version": "0.5.0",
   "private": true,
   "scripts": {
     "build": "nuxt build",
@@ -6,6 +8,10 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
+    "capacitor sync": "npx cap sync",
+    "capacitor open Android Studio": "npx cap open android",
+    "cap open & run Android Studio": "npx cap run android -l --external",
+    "capacitor:copy:before": "capacitor-sync-version android ios",
     "deploy": "gh-pages -d dist -t true"
   },
   "devDependencies": {
@@ -26,6 +32,7 @@
     "@capacitor/preferences": "^4.0.2",
     "@ionic/pwa-elements": "^3.1.1",
     "@pinia/nuxt": "^0.4.7",
+    "capacitor-sync-version": "^1.0.6",
     "daisyui": "^2.51.4",
     "gh-pages": "^5.0.0",
     "pinia": "^2.0.33"
