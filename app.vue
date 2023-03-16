@@ -9,7 +9,10 @@
 
 </script>
 <template>
-    <div class="w-screen h-screen noSelect noHighlight" :style="'padding-top:'+safeAreaInset+'px'">
+    <div class="w-full h-full noSelect noHighlight" :style="[
+        'padding-top:'+safeAreaInset.top+'px',
+        'padding-bottom:'+safeAreaInset.bottom+'px'
+    ]">
 
         <header id="Header" class="absolute z-50 w-full flex justify-center p-2">
             <h1 class="text-3xl font-bold uppercase text-teal-700 hover:text-teal-200 hover:scale-110 transition-transform">
@@ -86,7 +89,9 @@ export default {
 
     data() {
         return {
-            safeAreaInset: null,
+            safeAreaInset: {
+
+            },
         }
 
     },
@@ -132,10 +137,20 @@ export default {
 
         setHeaderPadding() {
 
-            let topSafeAreaInsetTemp = getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top")
+            let safeAreaInsetTemp = {
+                top: getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top"),
+                bottom: getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-bottom")
+            }
 
-            this.safeAreaInset = parseInt(topSafeAreaInsetTemp.slice(0, -2))
-            //console.log("this.topSafeAreaInsetTemp: %O", this.topSafeAreaInsetTemp)
+            console.log("safeAreaInsetTemp is: %O", safeAreaInsetTemp)
+
+            let stringMod = parseInt(safeAreaInsetTemp.top.slice(0, -2))
+            console.log("this.topSafeAreaInsetTemp: %O", stringMod)
+
+            this.safeAreaInset.top = parseInt(safeAreaInsetTemp.top.slice(0, -2))
+            this.safeAreaInset.bottom = parseInt(safeAreaInsetTemp.bottom.slice(0, -2))
+
+
 
         }
     }
@@ -148,6 +163,11 @@ body {
     width: 100%;
     height: 100%;
     position: fixed;
+}
+
+html,body, #__nuxt, #__layout{
+  height:100%!important;
+  width: 100%!important;
 }
 
 .page-enter-active,

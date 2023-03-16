@@ -1,7 +1,7 @@
 <script setup>
 // STORE
 //import { usePhotodiceAppStore } from '~/stores/myStore'
-import ImageSelectorVue from '~~/components/ImageSelector.vue'
+import ImageSelectorVue from '~/components/ImageSelector.vue'
 //const store = usePhotodiceAppStore()
 
 definePageMeta({
@@ -27,7 +27,7 @@ definePageMeta({
                 @click="store.dice[store.currentDie].type === 'custom' ? imageClicked(index) : ''"
                 :class="store.dice[store.currentDie].type === 'custom' ? 'cursor-pointer hover:scale-105' : ''"
                 class="w-40 md:w-48 h-40 md:h-48 border m-2 md:m-4 bg-white flex justify-center items-center overflow-hidden transition-transform">
-                    <img v-if="image.url != ''" :src="image.url" class="w-full h-full object-cover object-center" />
+                    <img v-if="image.url != ''" :src="'./'+image.url" class="w-full h-full object-cover object-center" />
                     <div v-else class="flex justify-center items-center bg-white w-full h-full">Add</div>
                 </div>
             </div>

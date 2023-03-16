@@ -360,7 +360,7 @@ export default {
 
             this.orientationHandler = await Motion.addListener('orientation', event => {
 
-                console.log('Device orientation event: %O', event)
+                //console.log('Device orientation event: %O', event)
 
                 this.devOutput_motionEvent = {
                     x: event.alpha.toFixed(2),
@@ -385,7 +385,7 @@ export default {
             
             this.accelerationHandler = await Motion.addListener('accel', event => {
 
-                console.log('Device acceleration event: %O', event)
+                //console.log('Device acceleration event: %O', event)
 
                 this.devOutput_motionEvent = {
                     x: event.rotationRate.alpha.toFixed(2),
