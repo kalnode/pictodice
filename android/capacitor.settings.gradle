@@ -13,9 +13,3 @@ project(':capacitor-filesystem').projectDir = new File('../node_modules/@capacit
 
 include ':capacitor-preferences'
 project(':capacitor-preferences').projectDir = new File('../node_modules/@capacitor/preferences/android')
-
-include ':capawesome-capacitor-app-update'
-project(':capawesome-capacitor-app-update').projectDir = new File('../node_modules/@capawesome/capacitor-app-update/android')
-
-include ':capacitor-app-update'
-project(':capacitor-app-update').projectDir = new File('../node_modules/capacitor-app-update/android')

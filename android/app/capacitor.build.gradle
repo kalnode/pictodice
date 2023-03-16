@@ -13,8 +13,6 @@ dependencies {
     implementation project(':capacitor-dialog')
     implementation project(':capacitor-filesystem')
     implementation project(':capacitor-preferences')
-    implementation project(':capawesome-capacitor-app-update')
-    implementation project(':capacitor-app-update')
 
 }
 
