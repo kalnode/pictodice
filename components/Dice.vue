@@ -330,12 +330,12 @@ export default {
         async checkMotionPermission() {
 
             // Any browser using requestPermission
-            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+            if (window.DeviceOrientationEvent && typeof window.DeviceOrientationEvent.requestPermission === 'function') {
 
                 // Technically, this acts as "check permission" in the device.
                 // If previously granted, user will see no prompts and listeners get setup.
                 // If error, we show special UI to the user
-                await DeviceOrientationEvent.requestPermission()
+                await window.DeviceOrientationEvent.requestPermission()
                 .then(permissionState => {
                     if (permissionState == 'granted') {
                         this.showSensorPermissionExperience = false
