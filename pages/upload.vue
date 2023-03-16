@@ -11,7 +11,7 @@ definePageMeta({
 <template>
     <div class="w-full h-full flex flex-col justify-center items-center">
 
-        <div class="flex flex-wrap justify-center">
+        <div class="flex flex-wrap justify-center px-6 mb-4">
             <div v-for="(die, index) in store.dice" :key="'die-'+index"
             @click="store.currentDie = index"
             :class="store.currentDie == index ? 'border-orange-700' : 'border-transparent'" 
@@ -21,12 +21,12 @@ definePageMeta({
             </div>
         </div>
 
-        <div class="overflow-auto">
-            <div class="flex justify-center items-center flex-wrap">
+        <div class="overflow-auto px-10">
+            <div class="flex justify-center items-center flex-wrap pb-48">
                 <div v-for="(image, index) in store.dice[store.currentDie].images" :key="'slot-'+index"
                 @click="store.dice[store.currentDie].type === 'custom' ? imageClicked(index) : ''"
                 :class="store.dice[store.currentDie].type === 'custom' ? 'cursor-pointer hover:scale-105' : ''"
-                class="w-40 md:w-48 h-40 md:h-48 border m-2 md:m-4 bg-white flex justify-center items-center overflow-hidden transition-transform">
+                class="w-28 sm:w-32 md:w-48 h-28 sm:h-32 md:h-48 border m-2 md:m-4 bg-white flex justify-center items-center overflow-hidden transition-transform">
                     <img v-if="image.url != ''" :src="'./'+image.url" class="w-full h-full object-cover object-center" />
                     <div v-else class="flex justify-center items-center bg-white w-full h-full">Add</div>
                 </div>

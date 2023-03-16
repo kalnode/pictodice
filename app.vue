@@ -36,7 +36,7 @@
             <!--  page-key="static" -->
         </main>
 
-        <nav class="z-50 absolute bottom-0 w-full">
+        <nav class="z-50 absolute bottom-0 w-full pointer-events-none">
             <Navigation id="Navigation" class="w-full" />
         </nav>
 
