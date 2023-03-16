@@ -2,12 +2,24 @@
     // TODO: Double check if this is correct. Because <Nav> occurs outside of <NuxtPage />, we need this import to make useRoute() reactive, otherwise it never changes after initial landing.
     import { useRoute } from 'vue-router'
     const route = useRoute()
+        import { usePhotodiceAppStore } from '~/stores/app'
+        const store = usePhotodiceAppStore()
+    //const currentPageTitle = route.meta.title
+
+
 </script>
 <template>
     <div class="w-screen h-screen noSelect noHighlight" :style="'padding-top:'+safeAreaInset+'px'">
 
         <header id="Header" class="absolute z-50 w-full flex justify-center p-2">
-            <Logo />
+            <h1 class="text-3xl font-bold uppercase text-teal-700 hover:text-teal-200 hover:scale-110 transition-transform">
+                <transition name="fade" mode="out-in">
+                    <NuxtLink :to="route.name == 'index' ? '/' : route.name" :key="'title-'+route.name">
+                        {{ route.meta.title }}
+                    </NuxtLink>
+                </transition>
+            </h1>
+            <!-- <Logo /> -->
         </header>
 
         <!-- {{ safeAreaInset }} -->
@@ -37,15 +49,40 @@
             <div id="gradientMouse" class="absolute z-50 w-full h-full top-0"></div>
         </div>
 
+        <Modal />
+
     </div>
 </template>
+
 <script>
+
 // LOCAL STORAGE
-import { Preferences } from '@capacitor/preferences'
+//import { Preferences } from '@capacitor/preferences'
 // For native mobile (iOS, Android), this uses storage made available to any app, and is protected.
 // For web, this plugin uses localStorage (which is volatile, in that it may be cleared by the browser or user)
 
 export default {
+
+    setup () {
+
+
+
+
+
+        // TODO: This is currently how we add Ionic PWA Elements to the app. This is necessary so the web version has some nice features, equivaslent to native.
+        // We import this CDN script here, but the more proper way is to import this as a plugin. Dunno how to do that.
+        useHead({
+            script: [
+                {
+                    async: true,
+                    crossorigin: "anonymous",
+                    type: "module",
+                    src: "https://unpkg.com/@ionic/pwa-elements@latest/dist/ionicpwaelements/ionicpwaelements.esm.js"
+                }
+            ]
+        })
+    },
+
 
     data() {
         return {
@@ -57,12 +94,14 @@ export default {
     mounted() {
 
         // Testing classic localStorage
-        // console.log("initiliazeLocalStorage init value is: %O", this.allowMotionSensors )
+        // console.log("getLocalStorage init value is: %O", this.allowMotionSensors )
         // let { value } = window.localStorage.getItem('CapacitorStorage')
         // console.log("window.localStorage value is: %O", value )
         //let { value } = await Preferences.get({ key: 'allowMotionSensors' })
         // this.store.setPermission(value)
-        // console.log("initiliazeLocalStorage value is: %O", value )
+        // console.log("getLocalStorage value is: %O", value )
+
+
 
         let gradientBackground = document.getElementById("gradientBackground")
         let gradientMouse = document.getElementById("gradientMouse")

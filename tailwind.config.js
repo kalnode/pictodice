@@ -11,7 +11,7 @@ module.exports = {
     theme: {
         extend: {}
     },
-    plugins: [],
+    plugins: [require('daisyui')],
     future: {
 
         // Disables hover on mobile

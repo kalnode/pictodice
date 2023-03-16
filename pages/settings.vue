@@ -1,14 +1,33 @@
 <script setup>
 
 // STORE
-import { useMyAlertsStore } from '~/stores/myStore'
-const store = useMyAlertsStore()
+import { usePhotodiceAppStore } from '~/stores/app'
+const store = usePhotodiceAppStore()
+
+definePageMeta({
+    title: 'Settings'
+})
+
+//const title = ref('Settings')
+/*
+useHead({
+    title: title,
+})
+*/
 
 </script>
 
+
 <template>
     <div class="w-full h-full flex flex-col justify-center items-center">
-        <h1>Settings</h1>
+
+        <!--
+        <Head>
+            <Title>{{ title }}</Title>
+            <Meta name="description" :content="title" />
+            <Style type="text/css" children="body { background-color: green; }" />
+        </Head>
+        -->
 
         <div>
             <div>Sensors allowed? {{ store.allowMotionSensors }}</div>
