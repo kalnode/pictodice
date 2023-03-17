@@ -53,7 +53,7 @@ const store = usePhotodiceAppStore()
                     Die.faces[index].name, //face.name,
                     (DiceState.face === index+1 || DiceState.spinning) ? 'lightFacing' : ''
                 ]"
-                :style="!useBGmap ? 'background-image: url(' + image.url + ')' : ''">
+                :style="!useBGmap ? 'background-image: url(images/' + image.url + ')' : ''">
                 </div>
 
                 <!-- OLD WAY of building faces -->

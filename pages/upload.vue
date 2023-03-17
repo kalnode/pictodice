@@ -3,6 +3,10 @@
 //import { usePhotodiceAppStore } from '~/stores/myStore'
 import ImageSelectorVue from '~/components/ImageSelector.vue'
 //const store = usePhotodiceAppStore()
+const config = useRuntimeConfig();
+
+import { useRoute } from 'vue-router'
+const route = useRoute()
 
 definePageMeta({
     title: 'Manage Dice'
@@ -27,7 +31,10 @@ definePageMeta({
                 @click="store.dice[store.currentDie].type === 'custom' ? imageClicked(index) : ''"
                 :class="store.dice[store.currentDie].type === 'custom' ? 'cursor-pointer hover:scale-105' : ''"
                 class="w-28 sm:w-32 md:w-48 h-28 sm:h-32 md:h-48 border m-2 md:m-4 bg-white flex justify-center items-center overflow-hidden transition-transform">
-                    <img v-if="image.url != ''" :src="'./'+image.url" class="w-full h-full object-cover object-center" />
+                    <img v-if="image.url != ''" :src="config.app.baseURL+'images/'+image.url" class="w-full h-full object-cover object-center" />
+                    <!-- `/photodice/images/${image.url}` -->
+                    <!-- require(`@/assets/${props.image}`) -->
+                    <!--  route.baseURL+'/images/'+image.url -->
                     <div v-else class="flex justify-center items-center bg-white w-full h-full">Add</div>
                 </div>
             </div>
@@ -53,8 +60,13 @@ const store = usePhotodiceAppStore()
 
 export default {
     name: "Upload",
-
+    /*
+    generate: {
+        subFolders: false
+      },
+      */
     props: {
+    
 
     },
 

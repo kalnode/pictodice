@@ -2,5 +2,11 @@
   "appId": "com.pictodice.app",
   "appName": "Pictodice",
   "webDir": "dist",
-  "bundledWebRuntime": false
+  "bundledWebRuntime": false,
+  "android": {
+    "allowMixedContent": true
+  },
+  "server": {
+    "cleartext": true
+  }
 }

@@ -30,12 +30,12 @@ export const usePhotodiceAppStore = defineStore('myAlerts', {
                 active: true,
                 images: [
                     // type: static, remote, localStorage
-                    { type: 'static', url: 'images/dummy-400x400-BodyLanguage.jpg' },
-                    { type: 'static', url: 'images/dummy-400x400-CharlesBaudelaire.jpg' },
-                    { type: 'static', url: 'images/dummy-400x400-Eye.jpg' },
-                    { type: 'static', url: 'images/dummy-400x400-HappyBoy.jpg' },
-                    { type: 'static', url: 'images/dummy-400x400-Headphone.jpg' },
-                    { type: 'static', url: 'images/dummy-400x400-Headphone.jpg' }
+                    { type: 'static', url: 'dummy-400x400-BodyLanguage.jpg' },
+                    { type: 'static', url: 'dummy-400x400-CharlesBaudelaire.jpg' },
+                    { type: 'static', url: 'dummy-400x400-Eye.jpg' },
+                    { type: 'static', url: 'dummy-400x400-HappyBoy.jpg' },
+                    { type: 'static', url: 'dummy-400x400-Headphone.jpg' },
+                    { type: 'static', url: 'dummy-400x400-Headphone.jpg' }
                 ]
             },
             {
@@ -44,12 +44,12 @@ export const usePhotodiceAppStore = defineStore('myAlerts', {
                 active: true,
                 images: [
                     // type: static, remote, localStorage
-                    { type: 'static', url: 'images/dummy-400x400-BodyLanguage.jpg' },
-                    { type: 'static', url: 'images/dummy-400x400-CharlesBaudelaire.jpg' },
-                    { type: 'static', url: 'images/dummy-400x400-Eye.jpg' },
-                    { type: 'static', url: 'images/dummy-400x400-HappyBoy.jpg' },
-                    { type: 'static', url: 'images/dummy-400x400-Headphone.jpg' },
-                    { type: 'static', url: 'images/dummy-400x400-Headphone.jpg' }
+                    { type: 'static', url: 'dummy-400x400-BodyLanguage.jpg' },
+                    { type: 'static', url: 'dummy-400x400-CharlesBaudelaire.jpg' },
+                    { type: 'static', url: 'dummy-400x400-Eye.jpg' },
+                    { type: 'static', url: 'dummy-400x400-HappyBoy.jpg' },
+                    { type: 'static', url: 'dummy-400x400-Headphone.jpg' },
+                    { type: 'static', url: 'dummy-400x400-Headphone.jpg' }
                 ]
             },
             {
@@ -58,12 +58,12 @@ export const usePhotodiceAppStore = defineStore('myAlerts', {
                 active: true,
                 images: [
                     // type: static, remote, localStorage
-                    { type: 'static', url: 'images/dummy-400x400-BodyLanguage.jpg' },
-                    { type: 'static', url: 'images/dummy-400x400-CharlesBaudelaire.jpg' },
-                    { type: 'static', url: 'images/dummy-400x400-Eye.jpg' },
-                    { type: 'static', url: 'images/dummy-400x400-HappyBoy.jpg' },
-                    { type: 'static', url: 'images/dummy-400x400-Headphone.jpg' },
-                    { type: 'static', url: 'images/dummy-400x400-Headphone.jpg' }
+                    { type: 'static', url: 'dummy-400x400-BodyLanguage.jpg' },
+                    { type: 'static', url: 'dummy-400x400-CharlesBaudelaire.jpg' },
+                    { type: 'static', url: 'dummy-400x400-Eye.jpg' },
+                    { type: 'static', url: 'dummy-400x400-HappyBoy.jpg' },
+                    { type: 'static', url: 'dummy-400x400-Headphone.jpg' },
+                    { type: 'static', url: 'dummy-400x400-Headphone.jpg' }
                 ]
             },
             {
@@ -72,12 +72,12 @@ export const usePhotodiceAppStore = defineStore('myAlerts', {
                 active: true,
                 images: [
                     // type: static, remote, localStorage
-                    { type: 'static', url: 'images/dummy-400x400-BodyLanguage.jpg' },
-                    { type: 'static', url: 'images/dummy-400x400-CharlesBaudelaire.jpg' },
-                    { type: 'static', url: 'images/dummy-400x400-Eye.jpg' },
-                    { type: 'static', url: 'images/dummy-400x400-HappyBoy.jpg' },
-                    { type: 'static', url: 'images/dummy-400x400-Headphone.jpg' },
-                    { type: 'static', url: 'images/dummy-400x400-Headphone.jpg' }
+                    { type: 'static', url: 'dummy-400x400-BodyLanguage.jpg' },
+                    { type: 'static', url: 'dummy-400x400-CharlesBaudelaire.jpg' },
+                    { type: 'static', url: 'dummy-400x400-Eye.jpg' },
+                    { type: 'static', url: 'dummy-400x400-HappyBoy.jpg' },
+                    { type: 'static', url: 'dummy-400x400-Headphone.jpg' },
+                    { type: 'static', url: 'dummy-400x400-Headphone.jpg' }
                 ]
             },
             {

@@ -6,13 +6,15 @@
     "build": "nuxt build",
     "dev": "NODE_TLS_REJECT_UNAUTHORIZED=0 nuxt dev --https --ssl-cert example.crt --ssl-key example.key",
     "generate": "nuxt generate",
+    "generateWeb": "NODE_ENV=productionweb && nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "capacitor sync": "npx cap sync",
     "capacitor open Android Studio": "npx cap open android",
     "cap open & run Android Studio": "npx cap run android -l --external",
     "capacitor:copy:before": "capacitor-sync-version android ios",
-    "deploy": "gh-pages -d dist -t true"
+    "deploy": "gh-pages -d dist -t true",
+    "clean": "npx nuxi clean"
   },
   "devDependencies": {
     "@capacitor/cli": "^4.7.0",
