@@ -6,7 +6,7 @@
     "build": "nuxt build",
     "dev": "NODE_TLS_REJECT_UNAUTHORIZED=0 nuxt dev --https --ssl-cert example.crt --ssl-key example.key",
     "generate": "nuxt generate",
-    "generateWeb": "NODE_ENV=productionweb && nuxt generate",
+    "generateWeb": "DOTENV_CONFIG_NUXT_WTF=productionweb nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "capacitor sync": "npx cap sync",

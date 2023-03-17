@@ -10,8 +10,8 @@
 </script>
 <template>
     <div class="w-full h-full flex flex-col noSelect noHighlight" :style="[
-        'padding-top:'+safeAreaInset.top+'px',
-        'padding-bottom:'+safeAreaInset.bottom+'px'
+        safeAreaInset.top ? 'padding-top:'+safeAreaInset.top+'px' : '',
+        safeAreaInset.bottom ? 'padding-bottom:'+safeAreaInset.bottom+'px' : ''
     ]">
 
         <header id="Header"
