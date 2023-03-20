@@ -25,7 +25,6 @@ const store = usePhotodiceAppStore()
             <div @click="showSensorPermissionExperience = false" class="test-xl font-bold p-2 rounded-full cursor-pointer pointer-events-auto">X</div>
         </div>
 
-
         <!-- DEV TOOLS -->
         <div v-if="showDevTools" class="w-full my-8 overflow-hidden">
             <div>{{ DiceState.spinning }}</div>
@@ -40,6 +39,10 @@ const store = usePhotodiceAppStore()
             <!-- <div class="absolute whitespace-nowrap">mouseTouchCoords: {{ mouseTouchCoords }}</div> -->
         </div>
 
+        <div class="absolute bottom-4">
+            <div @click="getRandomDieFace()" class="p-4 px-8 rounded-full bg-white hover:bg-gray-100 text-teal-800 hover:scale-105 transition cursor-pointer">ROLL</div>
+        </div>
+
         <!-- DIE -->
         <div id="dieParent" ref="dieParent"  @click="handleClick()" class="die cursor-pointer" :class="[
             DiceState.spinning ? 'spinning' : DiceState.hasRolled ? 'standing' : '',
@@ -47,48 +50,13 @@ const store = usePhotodiceAppStore()
         ]
         ">
             <div id="dieInner" class="cube">
-
                 <div v-for="(image, index) in store.dice[store.currentDie].images" :key="'face-'+index"
                 :class="[
-                    Die.faces[index].name, //face.name,
+                    Die.faces[index].name,
                     (DiceState.face === index+1 || DiceState.spinning) ? 'lightFacing' : ''
                 ]"
-                :style="!useBGmap ? 'background-image: url(images/' + image.url + ')' : ''">
+                :style="!useBGmap ? 'background-image: url(' + (image.type == 'localStorage' ? image.src : 'images/' + image.src) + ')' : ''">
                 </div>
-
-                <!-- OLD WAY of building faces -->
-                <!--
-                <div
-                :class="(DiceState.face === 1 || DiceState.spinning) ? 'lightFacing' : ''"
-                :style="!useBGmap ? 'background-image: url(images/' + dummyImages[1 - 1] + ')' : ''"
-                class="front"></div>
-                <div v-if="useBGmap" class="front filler"></div>
-
-                <div :class="(DiceState.face === 6 || DiceState.spinning) ? 'lightFacing' : '' "
-                :style="!useBGmap ? 'background-image: url(images/' + dummyImages[6 - 1] + ')' : ''"
-                class="back"></div>
-                <div v-if="useBGmap" class="back filler"></div>
-
-                <div :class="(DiceState.face === 5 || DiceState.spinning) ? 'lightFacing' : '' "
-                :style="!useBGmap ? 'background-image: url(images/' + dummyImages[5 - 1] + ')' : ''"
-                class="top"></div>
-                <div v-if="useBGmap" class="top filler"></div>
-
-                <div :class="(DiceState.face === 2 || DiceState.spinning) ? 'lightFacing' : '' "
-                :style="!useBGmap ? 'background-image: url(images/' + dummyImages[2 - 1] + ')' : ''"
-                class="bottom"></div>
-                <div v-if="useBGmap" class="bottom filler"></div>
-
-                <div :class="(DiceState.face === 3 || DiceState.spinning) ? 'lightFacing' : '' "
-                :style="!useBGmap ? 'background-image: url(images/' + dummyImages[3 - 1] + ')' : ''"
-                class="left"></div>
-                <div v-if="useBGmap" class="left filler"></div>
-
-                <div :class="(DiceState.face === 4 || DiceState.spinning) ? 'lightFacing' : '' "
-                :style="!useBGmap ? 'background-image: url(images/' + dummyImages[4 - 1] + ')' : ''"
-                class="right"></div>
-                <div v-if="useBGmap" class="right filler"></div>
-                -->
             </div>
         </div>
 

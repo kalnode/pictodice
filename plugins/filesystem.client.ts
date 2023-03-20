@@ -1,5 +1,5 @@
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem'
-
+//import { Directory, Filesystem, ReaddirResult, ReadFileResult } from '@capacitor/filesystem';
 
 const convertBlobToBase64 = (blob:Blob) =>
 new Promise((resolve, reject) => {
@@ -28,21 +28,33 @@ const writeFile = async (file: { filename: string, data: string, directory: stri
     return fileWork
 }
   
-const readFile = async (filename:string) => {
+const readFile = async (filename:string, currentDirectory:string) => {
 
-   console.log("attempting read file: %O", filename)
+   console.log("attempting read currentDirectory + '/' + filename: %O", currentDirectory + '/' + filename)
     const contents = await Filesystem.readFile({
-        path: filename,
-        //directory: Directory.Documents,
+        path: currentDirectory + '/' + filename,
+        directory: Directory.Documents,
         encoding: Encoding.UTF8
     })
     console.log("readfile contents: %O", contents)
     return contents
 }
+
+const getFileURI = async (filename:string, currentDirectory:string) => {
+
+    console.log("attempting read currentDirectory + '/' + filename: %O", currentDirectory + '/' + filename)
+     const contents = await Filesystem.getUri({
+         path: currentDirectory + '/' + filename,
+         directory: Directory.Documents
+     })
+     console.log("readfile contents: %O", contents)
+     return contents
+ }
+
   
-const deleteFile = async (filename: string) => {
+const deleteFile = async (filename: string, currentDirectory:string) => {
     await Filesystem.deleteFile({
-        path: filename,
+        path: currentDirectory + '/' + filename,
         directory: Directory.Documents
     })
 }
@@ -66,9 +78,9 @@ export default defineNuxtPlugin(() => {
 
             // TODO: Why 'any'? How come Object doesn't work?
             writeFile: (fileToWrite:any) => writeFile(fileToWrite),
-
-            readFile: (filepath:string) => readFile(filepath),
-            deleteFile: (filepath:string) => deleteFile(filepath),
+            getFileURI: (filename:string, currentDirectory:string) => getFileURI(filename, currentDirectory),
+            readFile: (filename:string, currentDirectory:string) => readFile(filename, currentDirectory),
+            deleteFile: (filepath:string, currentDirectory:string) => deleteFile(filepath, currentDirectory),
         }
       }
 

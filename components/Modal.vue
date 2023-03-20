@@ -5,7 +5,7 @@
 
             <!-- Because we maintain modal state externally (in modal store), we don't use the "hidden checkbox" trick used in DaisyUI.
                 Since we're not using the checkbox-trick, that means we can't use labels-that-point-to-it to control state.
-                Which means we can't use DaisyUI's background-click, and we have to make our own -->
+                Which means we can't use DaisyUI's background-click, and we have to make our own. -->
 
             <!-- BACKGROUND DIM -->
             <label class="fixed inset-0 bg-black opacity-5 cursor-pointer" @click="modal.close()"></label>
@@ -16,7 +16,7 @@
                 <label class="btn btn-sm btn-circle absolute right-2 top-2" @click="modal.close()">✕</label>
 
                 <!-- CONTENT -->
-                <component :is="modalContent" v-model="model"></component>
+                <component :is="modalContent" v-bind="{ ...modalContentProps }" v-model="model"></component>
 
                 <!-- ACTIONS, if any -->
                 <div class="modal-action">
@@ -33,9 +33,12 @@
 </template>
 
 <script lang="ts" setup>
+
+    // Component based on tut here: https://dev.to/cloudx/reusable-dynamic-modal-on-vue-3-1k56
+
     import { reactive } from "vue"
     import { storeToRefs } from "pinia"
-    import { useModal } from "@/stores/modal"
+    import { useModal } from "~/stores/modal" // TODO: Why is TS error complaining here?
 
     const modal = useModal()
 
@@ -44,5 +47,5 @@
     //const model = reactive({})
 
     // Convert all state properties to reactive references to be used on modalContent
-    const { isOpen, modalContent, modalActions } = storeToRefs(modal)
+    const { isOpen, modalContent, modalContentProps, modalActions } = storeToRefs(modal)
 </script>

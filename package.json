@@ -1,12 +1,12 @@
 {
   "name": "pictodice",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "private": true,
   "scripts": {
     "build": "nuxt build",
     "dev": "NODE_TLS_REJECT_UNAUTHORIZED=0 nuxt dev --https --ssl-cert example.crt --ssl-key example.key",
     "generate": "nuxt generate",
-    "generateWeb": "DOTENV_CONFIG_NUXT_WTF=productionweb nuxt generate",
+    "generateWeb": "NUXT_WTF=productionweb nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "capacitor sync": "npx cap sync",
@@ -36,8 +36,10 @@
     "@ionic/pwa-elements": "^3.1.1",
     "@pinia/nuxt": "^0.4.7",
     "capacitor-sync-version": "^1.0.6",
+    "cropperjs": "^1.5.13",
     "daisyui": "^2.51.4",
     "gh-pages": "^5.0.0",
+    "jimp": "^0.22.7",
     "pinia": "^2.0.33"
   }
 }

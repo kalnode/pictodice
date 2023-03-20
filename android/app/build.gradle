@@ -4,6 +4,8 @@ def appProperties = new Properties();
 file("app.properties").withInputStream { appProperties.load(it) }
 
 android {
+
+    namespace 'com.pictodice.app'
     compileSdkVersion rootProject.ext.compileSdkVersion
     defaultConfig {
         applicationId "com.pictodice.app"
