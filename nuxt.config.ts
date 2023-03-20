@@ -75,7 +75,12 @@ export default defineNuxtConfig({
           '@pinia/nuxt',
           { autoImports: ['defineStore', 'acceptHMRUpdate'] }
         ],
+        '@vite-pwa/nuxt'
+
     ],
+    pwa: {
+      /* PWA options */
+    }
 
     /*
     imports: {

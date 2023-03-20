@@ -15,10 +15,11 @@
     "capacitor:copy:before": "capacitor-sync-version android ios",
     "cap android buildIcons & splashes": "npx capacitor-assets generate --assetPath /static --iconBackgroundColor '#1bdfd6' --iconBackgroundColorDark '#0e7772' --splashBackgroundColor '#1bdfd6' --splashBackgroundColorDark '#0e7772'",
     "deploy": "gh-pages -d dist -t true",
-    "clean": "npx nuxi clean"
+    "clean nuxt": "npx nuxi clean"
   },
   "devDependencies": {
     "@capacitor/cli": "^4.7.0",
+    "@vite-pwa/nuxt": "^0.0.7",
     "autoprefixer": "^10.4.14",
     "nuxt": "^3.2.3",
     "postcss": "^8.4.21",
