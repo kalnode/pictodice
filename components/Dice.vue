@@ -82,6 +82,7 @@ export default {
         return {
             showDevTools:false,
             showSensorPermissionExperience: false,
+            hasInteracted: false,
 
             useBGmap: false,
 
@@ -218,6 +219,7 @@ export default {
         })
 
         document.addEventListener('mousemove', (event) => {
+            this.hasInteracted ? null : this.hasInteracted = true
             // Basic way of allowing sensors to take priority; basically we ignore this if sensors are firing
             if (!this.currentInteraction != 'sensor') {
                 let x = (window.innerWidth / 2 - event.pageX) / -5
@@ -234,7 +236,7 @@ export default {
         })
 
         document.addEventListener('touchmove', (e) => {
-
+            this.hasInteracted ? null : this.hasInteracted = true
             // Basic way of allowing sensors to take priority; basically we ignore this if sensors are firing
             if (this.currentInteraction != 'sensor') {
                 let evt = (typeof e.originalEvent === 'undefined') ? e : e.originalEvent
@@ -328,6 +330,7 @@ export default {
 
             this.orientationHandler = await Motion.addListener('orientation', event => {
 
+                this.hasInteracted ? null :  this.hasInteracted = true
                 //console.log('Device orientation event: %O', event)
 
                 this.devOutput_motionEvent = {
@@ -353,6 +356,7 @@ export default {
             
             this.accelerationHandler = await Motion.addListener('accel', event => {
 
+                this.hasInteracted ? null :  this.hasInteracted = true
                 //console.log('Device acceleration event: %O', event)
 
                 this.devOutput_motionEvent = {
@@ -578,6 +582,11 @@ export default {
             } else if (this.currentInteraction == 'mouse' || this.currentInteraction == 'touch') {
                 ax = this.mouseTouchCoords[0]
                 ay = this.mouseTouchCoords[1]
+            } 
+
+            if (!this.hasInteracted) {
+                ax = 40
+                ay = 40
             }
 
             // TODO: We need a scale modifier for mouse (and probably touch) coords such that, depending on the size of the viewport, we change the 
@@ -598,7 +607,7 @@ export default {
             // FACE 1
             if (this.DiceState.face === 1) {
 
-                if (this.currentInteraction == 'mouse' || this.currentInteraction == 'touch') {
+                if (!this.currentInteraction || this.currentInteraction == 'mouse' || this.currentInteraction == 'touch') {
                     ry = x + (speedModifier * (ax * angleModifier))
                     rx = y + (speedModifier * (ay * angleModifier))
                     rz = z
@@ -679,7 +688,7 @@ export default {
 
             // FINALLY, we pass values, and perform flipping if we need to (based on input method)
             // TODO: We use translate3d throughout app as a trick to fight anti-aliasing. Does it work? Do we need it?
-            if (this.currentInteraction == 'mouse' || this.currentInteraction == 'sensor') {
+            if (!this.currentInteraction || this.currentInteraction == 'mouse' || this.currentInteraction == 'sensor') {
                 return 'rotateX(' + rx + 'deg) rotateY(' + ry + 'deg) rotateZ(' + rz + 'deg) translate3d( 0, 0, 0)'
             } else if (this.currentInteraction == 'touch') {
                 return 'rotateX(' + (-rx) + 'deg) rotateY(' + (-ry) + 'deg) rotateZ(' + rz + 'deg) translate3d( 0, 0, 0)'
@@ -701,7 +710,7 @@ export default {
 
 /* MAIN PARENT */
 .die {
-    perspective: 800px;
+    /* perspective: 800px; */
     perspective-origin: 50% 100px;
     background-color: transparent;
 }
