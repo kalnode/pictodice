@@ -256,14 +256,12 @@ export default {
     methods: {
 
         handleKeyDown(e) {
-            console.log("func handleKeyDown %O", e)
             if (e.code === 'Space') {
                 this.getRandomDieFace()
             }
         },
 
         handleClick() {
-            console.log("func handleClick()")
             this.getRandomDieFace()
         },
 
@@ -273,8 +271,6 @@ export default {
         },
 
         rollToFace(face) {
-            console.log("func roll(), face: %O", face)
-
             /*
             // TODO: Return to original shortform, like this:
             this.setState({
@@ -288,7 +284,6 @@ export default {
             this.DiceState.hasRolled = true
 
             // NOTE: Spin is finished via trigger of animationend; see code.
-
         },
 
 

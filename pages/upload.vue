@@ -95,7 +95,7 @@ export default {
                     label: "Crop Image",
                     callback: (transformedImage) => {
                         // Image has been transformed
-                        this.saveImage(dataFromView, index)
+                        this.saveImage(transformedImage, index)
                         modal.close()
                     }
                 }]

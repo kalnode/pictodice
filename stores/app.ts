@@ -162,30 +162,41 @@ export const usePhotodiceAppStore = defineStore('PhotoDiceApp', {
             return new Promise ( async (resolve, reject) => {
 
                 let { value } = await Preferences.get({ key: 'customDie' })
-                let payload = JSON.parse(value as string)
-                this.currentDie = parseInt(payload.currentDie)
 
-                for (var image of payload.images) {
+                if (value) {
+                    let payload = JSON.parse(value as string)
+                    this.currentDie = parseInt(payload.currentDie)
 
-                    if (image.filename) {
+                    if (payload && payload.images) {
+                        for (var image of payload.images) {
 
-                        // This works, but is correct to do this? Does it only work because of coincidence, that this logic only triggers later in lifecycles?
-                        const { $readFile } = useNuxtApp()
+                            if (image.filename) {
 
-                        // TODO: Annoying Typescript error; muting it here.
-                        // @ts-ignore
-                        let readFile = await $readFile(image.filename, 'images')
+                                // This works, but is correct to do this? Does it only work because of coincidence, that this logic only triggers later in lifecycles?
+                                const { $readFile } = useNuxtApp()
 
-                        // @ts-ignore
-                        const blobURI = URL.createObjectURL(readFile.data)
+                                // TODO: Annoying Typescript error; muting it here.
+                                // @ts-ignore
+                                let readFile = await $readFile(image.filename, 'images')
 
-                        image.src = blobURI
+                                // @ts-ignore
+                                const blobURI = URL.createObjectURL(readFile.data)
+
+                                image.src = blobURI
+                            }
+                        }
+
+                        this.dice[4].images = payload.images
+
+                        resolve(payload)
                     }
+
+                    reject()
+
                 }
 
-                this.dice[4].images = payload.images
+                reject()
 
-                resolve(payload)
             })
         },
 

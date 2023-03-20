@@ -57,13 +57,10 @@ export default {
     },
 
     mounted() {
-        console.log("MOUNTING CROPPER this.imageSrc %O", this.imageSrc)
         if (this.imageSrc) {
             //this.imageSrc2 = this.imageSrc
             this.openCropper()
         }
-
-        
     },
 
     methods: {
