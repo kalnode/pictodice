@@ -1,7 +1,7 @@
 <script setup>
-// STORE
-import { usePhotodiceAppStore } from '~/stores/app'
-const store = usePhotodiceAppStore()
+    import { usePhotodiceAppStore } from '~/stores/app'
+    const store = usePhotodiceAppStore()
+    const config = useRuntimeConfig()
 </script>
 <template>
     <div class="w-full h-full flex flex-col justify-center items-center">
@@ -53,9 +53,18 @@ const store = usePhotodiceAppStore()
                 <div v-for="(image, index) in store.dice[store.currentDie].images" :key="'face-'+index"
                 :class="[
                     Die.faces[index].name,
-                    (DiceState.face === index+1 || DiceState.spinning) ? 'lightFacing' : ''
+                    (DiceState.face === index+1 || DiceState.spinning) ? 'lightFacing' : '',
+                    image.type == 'text' ? 'bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-800 to-violet-900 text-white' : 'bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-gray-100 to-gray-300 text-black'
                 ]"
-                :style="!useBGmap ? 'background-image: url(' + (image.type == 'localStorage' ? image.src : 'images/' + image.src) + ')' : ''">
+                class="border-2 border-white">
+                <!-- :style="!image.type == 'text' && !useBGmap ? 'background-image: url(' + (image.type == 'localStorage' ? image.src : 'images/' + image.src) + ')' : ''"> -->
+                <!-- bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-gray-100 to-gray-300 -->
+
+                    <img v-if="image.type && image.src != '' && image.type != 'text'"
+                    :src="image.type == 'localStorage' ? image.src : config.app.baseURL+'images/'+image.src"
+                    class="relative w-full h-full object-cover object-center" />
+
+                    <span v-if="image.type == 'text'" class="p-2 text-2xl text-center font-bold italic uppercase">{{ image.src }}</span>
                 </div>
             </div>
         </div>
@@ -95,96 +104,20 @@ export default {
 
             Die: {
                 faces: [
-                    {
-                        name: 'front',
-                        orientation: [0, 0, 0],
-                        image: null //this.dummyImages[0]
-                    },
-                    {
-                        name:'back',
-                        orientation: [90, 0, 0],
-                        image: null //this.dummyImages[1]
-                    },
-                    {
-                        name: 'top',
-                        orientation: [0, 90, 0],
-                        image: null //this.dummyImages[2]
-                    },
-                    {
-                        name: 'bottom',
-                        orientation: [0, -90, 0],
-                        image: null //this.dummyImages[3]
-                    },
-                    {
-                        name: 'left',
-                        orientation: [-90, 0, 0],
-                        image: null //this.dummyImages[4]
-                    },
-                    {
-                        name: 'right',
-                        orientation: [-180, 0, 0],
-                        image: null //this.dummyImages[5]
-                    }
+                    { name: 'front', orientation: [0, 0, 0] },
+                    { name:'back', orientation: [90, 0, 0] },
+                    { name: 'top', orientation: [0, 90, 0] },
+                    { name: 'bottom', orientation: [0, -90, 0] },
+                    { name: 'left', orientation: [-90, 0, 0] },
+                    { name: 'right', orientation: [-180, 0, 0] }
                 ]
-
-                /*
-                faces: {
-                    'front': {
-                        orientation: [0, 0, 0],
-                        image: null //this.dummyImages[0]
-                    },
-                    'back': {
-                        orientation: [90, 0, 0],
-                        image: null //this.dummyImages[1]
-                    },
-                    'top': {
-                        orientation: [0, 90, 0],
-                        image: null //this.dummyImages[2]
-                    },
-                    'bottom': {
-                        orientation: [0, -90, 0],
-                        image: null //this.dummyImages[3]
-                    },
-                    'left': {
-                        orientation: [-90, 0, 0],
-                        image: null //this.dummyImages[4]
-                    },
-                    'right': {
-                        orientation: [-180, 0, 0],
-                        image: null //this.dummyImages[5]
-                    }
-                }
-                */
             },
 
-            dummyImages: [
-                'dummy-400x400-BodyLanguage.jpg',
-                'dummy-400x400-CharlesBaudelaire.jpg',
-                'dummy-400x400-Eye.jpg',
-                'dummy-400x400-HappyBoy.jpg',
-                'dummy-400x400-Headphone.jpg',
-                'dummy-400x400-TShirt.jpg'
-            ],
-
-
-            // FOR OLD-WAY of rendering faces
-            faceViews: [
-                [0, 0, 0],
-                [90, 0, 0],
-                [0, 90, 0],
-                [0, -90, 0],
-                [-90, 0, 0],
-                [-180, 0, 0]
-            ],
-
-
             // INTERACTIONS
-
             accelerationHandler: null,
             orientationHandler: null,
             currentInteraction: null, // mouse, touch, sensor
             mouseTouchCoords: [ 1, 1 ],
-
             sensors: {
                 permission: false,
                 gyro: false,
@@ -195,7 +128,6 @@ export default {
                     rotate: null
                 }
             },
-
             devOutput_motionEvent: null
 
         }
@@ -836,6 +768,7 @@ export default {
 }
 
 /* Old code, attempt to lighten up faces that were visible to the user. This was before we make picture faces */
+/*
 .cube div.lightFacing {
     background-color: hsl(0, 0%, 95%);
 }
@@ -843,6 +776,7 @@ export default {
 .cube div:not(.lightFacing) {
     background-color: hsl(0, 0%, 80%);
 }
+*/
 
 /* TODO: Possibly don't need this? Is it just a backup if no image faces are loaded? */
 .cube .filler {

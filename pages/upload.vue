@@ -23,15 +23,20 @@
             <div class="flex justify-center items-center flex-wrap pb-48">
                 <div v-for="(image, index) in store.dice[store.currentDie].images" :key="'slot-'+index"
                 @click="store.dice[store.currentDie].type === 'custom' ? imageClicked(index) : ''"
-                :class="store.dice[store.currentDie].type === 'custom' ? 'cursor-pointer hover:scale-105' : ''"
+                :class="[
+                    store.dice[store.currentDie].type === 'custom' ? 'cursor-pointer hover:scale-105' : '',
+                    image.type == 'text' ? 'bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-800 to-violet-900 text-white' : 'bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-gray-100 to-gray-300 text-black'
+                ]"
                 class="relative w-28 sm:w-32 md:w-48 h-28 sm:h-32 md:h-48 border m-2 md:m-4 bg-white flex justify-center items-center overflow-hidden transition-transform">
 
                     <div v-if="image.type && image.src != '' && image.type == 'localStorage'"
                     @click.stop.self="deleteImage(index)" class="w-10 h-10 absolute top-1 right-1 z-50 flex justify-center items-center font-bold rounded-full shadow bg-white hover:bg-gray-100 p-2 hover:scale-110 transition">X</div>
 
-                    <img v-if="image.type && image.src != ''"
+                    <img v-if="image.type && image.src != '' && image.type != 'text'"
                     :src="image.type == 'localStorage' ? image.src : config.app.baseURL+'images/'+image.src"
                     class="relative w-full h-full object-cover object-center" />
+
+                    <span v-else-if="image.type == 'text'" class="p-2 text-base md:text-2xl text-center font-bold italic uppercase">{{ image.src }}</span>
 
                     <div v-else class="flex justify-center items-center bg-white w-full h-full text-3xl font-bold">+</div>
                 </div>

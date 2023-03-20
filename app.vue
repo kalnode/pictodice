@@ -21,10 +21,12 @@
 
     // APP TYPE & VERSION
     if (Capacitor.isNativePlatform()) {
+
         store.app.type = 'native'
+        store.app.subtype = Capacitor.getPlatform()
 
         // We get actual version number from app store resource (a CapacitorJS resource)
-        store.app.version = $getCurrentAppVersion()
+        //store.app.version = $getCurrentAppVersion()
     } else {
 
         // TODO:
@@ -36,6 +38,7 @@
         console.log("app.vue APP VERSION: %O", APP_VERSION)
 
         store.app.type = 'web'
+        store.app.subtype = Capacitor.getPlatform()
 
         // We get version from package.json, which is passed here within APP_VERSION
         store.app.version = APP_VERSION
@@ -105,8 +108,11 @@ export default {
 
     setup () {
 
-        // TODO: This is currently how we add Ionic PWA Elements to the app. This is necessary so the web version has some nice features, equivaslent to native.
+        // TODO: This is currently how we add Ionic PWA Elements to the app.
+        // Seemingly this adds some features equivalent to native. Added this on presumption it would help the select-a-file experience for end-users on web.
         // We import this CDN script here, but the more proper way is to import this as a plugin. Dunno how to do that.
+        // TODO: I don't think we're actually leveraging this in any way.
+        // See: https://capacitorjs.com/docs/web/pwa-elements
         useHead({
             script: [
                 {

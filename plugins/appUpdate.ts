@@ -1,6 +1,7 @@
 // FOR NATIVE MOBILE APP instances only
 
 import { AppUpdate, AppUpdateInfo } from '@capawesome/capacitor-app-update'
+import { NativeSettings, AndroidSettings, IOSSettings } from 'capacitor-native-settings';
 import { Capacitor } from '@capacitor/core'
 
 // We check whether there's a new version of the app on relative app store
@@ -8,6 +9,24 @@ import { Capacitor } from '@capacitor/core'
 
 const isNativePlatform = async () => {
     return await Capacitor.isNativePlatform()
+}
+
+
+
+const openAndroid = async (option:string) => {
+    if (Capacitor.getPlatform() === 'android') {
+        return await NativeSettings.openAndroid({
+            option: AndroidSettings.ApplicationDetails
+        })
+    }
+}
+
+const openIOS = async (option:string) => {
+    if (Capacitor.getPlatform() === 'ios') {
+        return await NativeSettings.openIOS({
+            option: IOSSettings.App
+        })
+    }
 }
 
 // UTILITIES
@@ -88,6 +107,8 @@ export default defineNuxtPlugin(() => {
             getCurrentAppVersion: () => getCurrentAppVersion(),
             getAvailableAppVersion: () => getAvailableAppVersion(),
             openAppStore: () => openAppStore(),
+            openAndroid: (option:string) => openAndroid(option),
+            openIOS: (option:string) => openIOS(option)
         }
       }
 

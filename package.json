@@ -13,6 +13,7 @@
     "capacitor open Android Studio": "npx cap open android",
     "cap open & run Android Studio": "npx cap run android -l --external",
     "capacitor:copy:before": "capacitor-sync-version android ios",
+    "cap android buildIcons & splashes": "npx capacitor-assets generate --assetPath /static --iconBackgroundColor '#1bdfd6' --iconBackgroundColorDark '#0e7772' --splashBackgroundColor '#1bdfd6' --splashBackgroundColorDark '#0e7772'",
     "deploy": "gh-pages -d dist -t true",
     "clean": "npx nuxi clean"
   },
@@ -25,6 +26,7 @@
   },
   "dependencies": {
     "@capacitor/android": "^4.7.0",
+    "@capacitor/assets": "^2.0.4",
     "@capacitor/camera": "^4.1.4",
     "@capacitor/core": "^4.7.0",
     "@capacitor/dialog": "^4.1.0",
@@ -35,6 +37,7 @@
     "@capawesome/capacitor-app-update": "^2.1.0",
     "@ionic/pwa-elements": "^3.1.1",
     "@pinia/nuxt": "^0.4.7",
+    "capacitor-native-settings": "^4.0.3",
     "capacitor-sync-version": "^1.0.6",
     "cropperjs": "^1.5.13",
     "daisyui": "^2.51.4",

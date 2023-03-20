@@ -12,12 +12,14 @@ import { Preferences } from '@capacitor/preferences'
 export const usePhotodiceAppStore = defineStore('PhotoDiceApp', {
     state: () => ({
         app: {
-            type: null, //'web','nativeMobile',
+            type: null, //'web','native',
+            subtype: null, // 'web','android', 'ios'
             version: ''
         },
         allowMotionSensors: true,
         userInteractedWithPermissionPrompt: false,
         currentDie: 0,
+        customDie: 5,
 
         dice: [
             {
@@ -26,25 +28,39 @@ export const usePhotodiceAppStore = defineStore('PhotoDiceApp', {
                 active: true,
                 images: [
                     // type: static, remote, localStorage
-                    { type: 'static', src: 'dummy-400x400-BodyLanguage.jpg' },
-                    { type: 'static', src: 'dummy-400x400-CharlesBaudelaire.jpg' },
-                    { type: 'static', src: 'dummy-400x400-Eye.jpg' },
-                    { type: 'static', src: 'dummy-400x400-HappyBoy.jpg' },
-                    { type: 'static', src: 'dummy-400x400-Headphone.jpg' },
-                    { type: 'static', src: 'dummy-400x400-Headphone.jpg' }
+                    { type: 'static', src: '1.png' },
+                    { type: 'static', src: '2.png' },
+                    { type: 'static', src: '3.png' },
+                    { type: 'static', src: '4.png' },
+                    { type: 'static', src: '5.png' },
+                    { type: 'static', src: '6.png' }
                 ]
             },
             {
-                name: 'Exercises',
+                name: 'Magic Answers',
+                type: 'preset', // 'preset' die, or 'custom' for user-made die
+                active: true,
+                images: [
+                    // type: static, remote, localStorage
+                    { type: 'text', src: 'Yes' },
+                    { type: 'text', src: 'No' },
+                    { type: 'text', src: 'Maybe' },
+                    { type: 'text', src: 'Ask again later' },
+                    { type: 'text', src: 'Possibly' },
+                    { type: 'text', src: 'Absolutely' }
+                ]
+            },
+            {
+                name: 'Yoga',
                 type: 'preset',
                 active: true,
                 images: [
-                    { type: 'static', src: 'dummy-400x400-BodyLanguage.jpg' },
-                    { type: 'static', src: 'dummy-400x400-CharlesBaudelaire.jpg' },
-                    { type: 'static', src: 'dummy-400x400-Eye.jpg' },
-                    { type: 'static', src: 'dummy-400x400-HappyBoy.jpg' },
-                    { type: 'static', src: 'dummy-400x400-Headphone.jpg' },
-                    { type: 'static', src: 'dummy-400x400-Headphone.jpg' }
+                    { type: 'static', src: 'yoga1.png' },
+                    { type: 'static', src: 'yoga2.png' },
+                    { type: 'static', src: 'yoga3.png' },
+                    { type: 'static', src: 'yoga4.png' },
+                    { type: 'static', src: 'yoga5.png' },
+                    { type: 'static', src: 'yoga6.png' }
                 ]
             },
             {
@@ -57,7 +73,7 @@ export const usePhotodiceAppStore = defineStore('PhotoDiceApp', {
                     { type: 'static', src: 'dummy-400x400-Eye.jpg' },
                     { type: 'static', src: 'dummy-400x400-HappyBoy.jpg' },
                     { type: 'static', src: 'dummy-400x400-Headphone.jpg' },
-                    { type: 'static', src: 'dummy-400x400-Headphone.jpg' }
+                    { type: 'static', src: 'dummy-400x400-UmbrellaGirl.jpg' }
                 ]
             },
             {
@@ -65,12 +81,12 @@ export const usePhotodiceAppStore = defineStore('PhotoDiceApp', {
                 type: 'preset',
                 active: true,
                 images: [
-                    { type: 'static', src: 'dummy-400x400-BodyLanguage.jpg' },
-                    { type: 'static', src: 'dummy-400x400-CharlesBaudelaire.jpg' },
-                    { type: 'static', src: 'dummy-400x400-Eye.jpg' },
-                    { type: 'static', src: 'dummy-400x400-HappyBoy.jpg' },
-                    { type: 'static', src: 'dummy-400x400-Headphone.jpg' },
-                    { type: 'static', src: 'dummy-400x400-Headphone.jpg' }
+                    { type: 'static', src: 'emoticon1.png' },
+                    { type: 'static', src: 'emoticon2.png' },
+                    { type: 'static', src: 'emoticon3.png' },
+                    { type: 'static', src: 'emoticon4.png' },
+                    { type: 'static', src: 'emoticon5.png' },
+                    { type: 'static', src: 'emoticon6.png' }
                 ]
             },
             {
@@ -154,7 +170,7 @@ export const usePhotodiceAppStore = defineStore('PhotoDiceApp', {
             let allowMotionSensors = await Preferences.get({ key: 'allowMotionSensors' })
             this.allowMotionSensors = allowMotionSensors.value === "1" ? true : false
             let customDie = await Preferences.get({ key: 'customDie' })
-            this.dice[4] = JSON.parse(customDie.value as string)
+            this.dice[this.customDie] = JSON.parse(customDie.value as string)
         },
 
         async getLocalStorage_CustomDice() {
@@ -186,7 +202,7 @@ export const usePhotodiceAppStore = defineStore('PhotoDiceApp', {
                             }
                         }
 
-                        this.dice[4].images = payload.images
+                        this.dice[this.customDie].images = payload.images
 
                         resolve(payload)
                     }
@@ -202,7 +218,7 @@ export const usePhotodiceAppStore = defineStore('PhotoDiceApp', {
 
         async updateLocalStorage() {
             return new Promise ( async (resolve, reject) => {
-                await Preferences.set({ key: 'customDie', value: JSON.stringify({ currentDie: this.currentDie, images: this.dice[4].images }) })
+                await Preferences.set({ key: 'customDie', value: JSON.stringify({ currentDie: this.currentDie, images: this.dice[this.customDie].images }) })
                 .then( () => {
                     resolve
                 })
