@@ -51,6 +51,10 @@
 
             <!-- -->
 
+            <NuxtLink to="/privacy" class="p-3 text-lg bg-white text-black rounded m-1">
+                Privacy Policy
+            </NuxtLink>
+
             <div>
                 App version: <span v-html="store.app.version"></span>
             </div>
