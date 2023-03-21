@@ -28,7 +28,7 @@
         store.app.subtype = Capacitor.getPlatform()
 
         // We get actual version number from app store resource (a CapacitorJS resource)
-        //store.app.version = $getCurrentAppVersion()
+        store.app.version = $getAvailableAppVersion()
     } else {
 
         // TODO:

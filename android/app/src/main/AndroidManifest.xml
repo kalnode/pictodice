@@ -35,4 +35,8 @@
     <!-- Need to read/write image files (e.g. write to app's local storage, and read back on suibsequent app session)-->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <!-- May be needed for proper submission to app store -->
+    <!-- Related to advertising -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove"/>
 </manifest>
