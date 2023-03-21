@@ -18,7 +18,7 @@ const route = useRoute()
                     <div class="pointer-events-auto">
                         <transition name="fade" mode="out-in">
                             <div v-if="route.name == 'index'" :key="'LinkUpload'" class="p-2 rounded text-teal-700 hover:text-teal-200 hover:scale-110 transition-transform">
-                                <NuxtLink to="/upload">
+                                <NuxtLink to="/upload" class="block p-1.5">
                                     <svg class="w-16 h-auto" fill="currentColor" version="1.1" viewBox="0 0 512 326.31" xmlns="http://www.w3.org/2000/svg">
                                         <path d="m124.39 146.03h-102.76c-5.7344 0-11.238-2.2786-15.297-6.3381-4.0543-4.0543-6.333-9.5574-6.333-15.297v-102.76c0-5.7394 2.2786-11.243 6.333-15.302 4.0593-4.0543 9.5624-6.3331 15.297-6.3331h102.76c5.7394 0 11.243 2.2786 15.297 6.3331 4.0593 4.0593 6.3381 9.5624 6.3381 15.302v102.76c0 5.7394-2.2786 11.243-6.3381 15.297-4.0543 4.0593-9.5574 6.3381-15.297 6.3381z" />
                                         <path d="m307.42 146.03h-102.76c-5.7344 0-11.238-2.2786-15.297-6.3381-4.0593-4.0543-6.3381-9.5574-6.3381-15.297v-102.76c0-5.7394 2.2786-11.243 6.3381-15.302 4.0593-4.0543 9.5624-6.3331 15.297-6.3331h102.76c5.7394 0 11.243 2.2786 15.297 6.3331 4.0593 4.0593 6.3381 9.5624 6.3381 15.302v102.76c0 5.7394-2.2786 11.243-6.3381 15.297-4.0543 4.0593-9.5574 6.3381-15.297 6.3381z" />
@@ -31,7 +31,7 @@ const route = useRoute()
                                 </NuxtLink>
                             </div>
                             <div v-else :key="'LinkHome'" class="p-2 rounded text-teal-700 hover:text-teal-200 hover:scale-110 transition-transform">
-                                <NuxtLink to="/">
+                                <NuxtLink to="/" class="block p-1.5">
                                     <svg class="w-16 h-auto" fill="currentColor" version="1.1" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
                                         <path d="m0 119.11h392.89v392.89h-392.89zm25.387-25.387 93.726-93.726h374.93l-93.726 93.726zm486.61-75.769v374.93l-93.726 93.726v-374.93z" />
                                     </svg>
@@ -47,7 +47,7 @@ const route = useRoute()
                         <transition name="fade" mode="out-in">
                             <div v-if="route.name != 'about'" class="p-2 rounded text-teal-700 hover:text-teal-200 hover:scale-110 transition-transform">
                                 <!-- TODO: Use a proper named link here instead of to="" -->
-                                <NuxtLink to="/about">
+                                <NuxtLink to="/about" class="block p-1.5">
                                     <!-- QUESTION MARK -->
                                     <svg class="w-16 h-auto" version="1.1" fill="currentColor" viewBox="0 0 384 384" xmlns="http://www.w3.org/2000/svg">
                                         <g transform="matrix(.68571 0 0 .68571 -48.002 -.70711)">

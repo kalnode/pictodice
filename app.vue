@@ -56,13 +56,11 @@
         <header id="Header"
         :class="currentRoute.name == 'index' ? 'absolute z-50' : ''"
         class="w-full flex justify-center p-2">
-            <h1 class="text-3xl font-bold uppercase text-teal-700 hover:text-teal-200 hover:scale-110 transition-transform">
-                <transition name="fade" mode="out-in">
-                    <NuxtLink :to="currentRoute.name == 'index' ? '/' : currentRoute.name" :key="'title-'+currentRoute.name">
-                        {{ currentRoute.meta.title }}
-                    </NuxtLink>
-                </transition>
-            </h1>
+            <transition name="fade" mode="out-in">
+                <NuxtLink :to="currentRoute.name == 'index' ? '/' : currentRoute.name" :key="'title-'+currentRoute.name">
+                    <h1 class="p-1.5 text-3xl font-bold uppercase text-teal-900 hover:text-teal-200 hover:scale-110 transition-transform">{{ currentRoute.meta.title }}</h1>
+                </NuxtLink>
+            </transition>
             <!-- <Logo /> -->
         </header>
 
@@ -148,8 +146,8 @@ export default {
             let mouseYpercentage = Math.round(100 - (event.pageY / windowHeight * 100))
             let mouseXpercentageM = Math.round(event.pageX / windowWidth * 100)
             let mouseYpercentageM = Math.round(event.pageY / windowHeight * 100)
-            gradientBackground.style.backgroundPosition = mouseXpercentage + '% ' + mouseYpercentage + '%'
-            gradientMouse.style.background = 'radial-gradient(circle farthest-side at ' + mouseXpercentageM + '% ' + mouseYpercentageM + '%, rgba(38, 173, 166, .8), transparent)'
+            //gradientBackground.style.backgroundPosition = mouseXpercentage + '% ' + mouseYpercentage + '%'
+            //gradientMouse.style.background = 'radial-gradient(circle farthest-side at ' + mouseXpercentageM + '% ' + mouseYpercentageM + '%, rgba(146, 225, 221, 0.8), transparent)'
         })
 
         this.setHeaderPadding()
@@ -198,7 +196,8 @@ html,body, #__nuxt, #__layout{
     /*
     background: radial-gradient( circle farthest-side at bottom left, rgba(38, 173, 166, .8),  rgba(38, 173, 166, .0001) );
     */
-    background: radial-gradient(circle farthest-side at 28% 99%, rgba(38, 173, 166, 0.24), transparent );
+    /* background: radial-gradient(circle farthest-side at 28% 99%, rgba(38, 173, 166, 0.24), transparent ); */
+    background: radial-gradient(circle farthest-side at 99% 78%, rgba(146, 225, 221, 0.8), transparent);
 
     transition: background .3s ease-in-out;
 }
@@ -207,13 +206,13 @@ html,body, #__nuxt, #__layout{
     background: 
         radial-gradient(
             circle farthest-side at top left,
-            rgba(86, 199, 181, .8), 
-            rgba(86, 199, 181, .0001)
+            rgba(108, 241, 219, 0.8), 
+            rgba(101, 221, 201, 0)
         ),
         radial-gradient(
             farthest-side at bottom left,
-            rgba(133, 208, 213, .8), 
-            rgba(133, 208, 213, .0001)
+            rgba(152, 221, 226, 0.8), 
+            rgba(143, 219, 224, 0)
         ),
         radial-gradient(
             farthest-corner at 0% 50%,
@@ -222,7 +221,7 @@ html,body, #__nuxt, #__layout{
         ),
         radial-gradient(
             closest-side at 100% 0%,
-            rgba(153, 216, 208, .8), 
+            rgba(166, 233, 224, 0.8), 
             rgba(153, 216, 208, .0001)
         ),
         radial-gradient(

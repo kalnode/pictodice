@@ -12,10 +12,10 @@
         <div class="flex flex-wrap justify-center px-6 mb-4">
             <div v-for="(die, index) in store.dice" :key="'die-'+index"
             @click="store.currentDie = index;store.updateLocalStorage()"
-            :class="store.currentDie == index ? 'border-orange-700' : 'border-transparent'" 
-            class="flex items-center p-2 md:p-4 m-1 md:m-2 text-orange-700 bg-orange-200 hover:bg-orange-100 hover:scale-105 transition-transform border-2 rounded cursor-pointer">
+            :class="store.currentDie == index ? 'border-orange-900' : 'border-transparent'" 
+            class="flex items-center p-3 md:p-5 m-1 md:m-2 text-orange-900 bg-orange-100 hover:bg-orange-200 hover:scale-105 transition-transform border-2 rounded cursor-pointer">
                 <span>{{ die.name }}</span>
-                <div v-if="die.icon" v-html="die.icon" class="w-8 h-8" style="margin-right: -0.7em;"></div>
+                <div v-if="die.icon" v-html="die.icon" class="w-6 h-6" style="margin-right: -0.7em;"></div>
             </div>
         </div>
 
