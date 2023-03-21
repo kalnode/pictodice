@@ -16,10 +16,16 @@ const writeFile = async (file: { filename: string, data: string, directory: stri
 
     console.log("writeFile 111: %O", file)
 
+    console.log("dir1 %O", Directory.Data)
+    console.log("dir2 %O", Directory.Documents)
+    console.log("dir3 %O", Directory)
+
     let fileWork = await Filesystem.writeFile({
-        path: file.directory + file.filename,
+        path: file.directory + '/' + file.filename,
         data: file.data,
         directory: Directory.Documents,
+
+        // Need for Web to work
         encoding: Encoding.UTF8
     })
 

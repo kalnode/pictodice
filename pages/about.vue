@@ -55,8 +55,6 @@
                 App version: <span v-html="store.app.version"></span>
             </div>
 
-            {{ store.app }}
-
             <div v-if="store.app.subtype == 'android'">
                 <div @click="$openAndroid('ApplicationDetails') ">
                     Open App Details

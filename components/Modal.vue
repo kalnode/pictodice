@@ -10,20 +10,25 @@
             <!-- BACKGROUND DIM -->
             <label class="fixed inset-0 bg-black opacity-5 cursor-pointer" @click="modal.close()"></label>
 
-            <div class="modal-box relative">
+            <div class="modal-box w-full md:w-auto h-full md:h-auto max-h-screen rounded-none md:rounded-xl relative bg-white text-black">
 
                 <!-- X to close -->
-                <label class="btn btn-sm btn-circle absolute right-2 top-2" @click="modal.close()">✕</label>
+                <label class="btn btn-sm btn-circle absolute right-2 top-2 hover:bg-slate-500 hover:scale-105 transition" @click="modal.close()">✕</label>
 
                 <!-- CONTENT -->
-                <component :is="modalContent" v-bind="{ ...modalContentProps }" v-model="model"></component>
+                <!-- TODO: Here we have a custom @close event that attempts to trigger modelAction 0. This isn't very resilient. What happens with
+                multi-action modals? For now we keep going with "0", which is always the first action. Ideally we should mark what the primary action is and use it as the default.-->
+                <component :is="modalContent" v-bind="{ ...modalContentProps }" v-model="model" @close="modalActions[0].callback(model);modal.close()"></component>
 
                 <!-- ACTIONS, if any -->
-                <div class="modal-action">
+                <!-- TODO: A flag whether we should show an actions toolbar separate from the modal content -->
+                <!--
+                <div class="modal-action absolute bottom bg-white p-1 w-full">
                     <button v-for="(action,index) in modalActions" :key="'action-'+index" class="btn" @click="action.callback(model)">
                         {{ action.label }}
                     </button>
                 </div>
+                -->
 
             </div>
         </div>
@@ -42,9 +47,8 @@
 
     const modal = useModal()
 
-    // Reactive container to save the payload returned by the mounted modalContent
-    // TODO: Where's this used? Why?
-    //const model = reactive({})
+    // Reactive holder to save the payload returned by the mounted modalContent
+    const model = reactive({})
 
     // Convert all state properties to reactive references to be used on modalContent
     const { isOpen, modalContent, modalContentProps, modalActions } = storeToRefs(modal)

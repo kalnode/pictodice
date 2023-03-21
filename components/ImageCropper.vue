@@ -1,16 +1,19 @@
 <template>
-    <div>
+    <div class="w-full h-full flex flex-col justify-center items-center pt-8">
         <!--
             Test controls
         <div @click="destroyCropper()">Destroy</div><div @click="openCropper()">openCropper</div>
         
         <img :src="imageSrc" class="w-8 h-8" />
         -->
+        <div class="flex-1 overflow-hidden">
+            <img v-show="cropperInstance" :src="imageSrc" id="imageToCrop" ref="imageToCrop" style="display: block; max-width: 100%;" />
+        </div>
+
         <div class="w-full flex justify-center items-center space-x-4 my-2">
             <div @click="resetCropper()" class="px-2 py-1 rounded bg-blue-300 cursor-pointer">RESET</div>
             <div @click="cropTheImage()" class="px-2 py-1 rounded bg-blue-300 cursor-pointer">CROP</div>
         </div>
-        <img v-show="cropperInstance" :src="imageSrc" id="imageToCrop" ref="imageToCrop" style="display: block; max-width: 100%;" />
     </div>
 </template>
 
@@ -70,11 +73,11 @@ export default {
                 viewMode: 3,
                 dragMode: 'move',
                 aspectRatio: 1,
-                guides: false,
-                center: false,
+                guides: true,
+                center: true,
                 background: false,
-                cropBoxMovable: false,
-                cropBoxResizable: false,
+                cropBoxMovable: true,
+                cropBoxResizable: true,
                 ready: function () {
                     //croppable = true
                 }
@@ -116,6 +119,7 @@ export default {
             .toBlob((blob) => {
                 console.log("Image cropper crop work final: %O", blob)
                 this.$emit("update:modelValue", blob)
+                this.$emit('close')
                 //this.$emit("croppedImage", blob)
             })
 
@@ -123,10 +127,3 @@ export default {
     }
 }
 </script>
-
-<style>
-.cropper-view-box,
-.cropper-face {
-    border-radius: 50%;
-}
-</style>

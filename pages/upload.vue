@@ -97,7 +97,8 @@ export default {
             modal.open(ImageCropper,
                 { imageSrc: base64Data },
                 [{
-                    label: "Crop Image",
+                    label: "Ok",
+                    actionType: "primary",
                     callback: (transformedImage) => {
                         // Image has been transformed
                         this.saveImage(transformedImage, index)
@@ -119,14 +120,26 @@ export default {
             store.dice[store.currentDie].images[index].src = blobURI
             store.dice[store.currentDie].images[index].filename = filename
 
-            // Save the file (localStorage) so it can be used in the future (e.g. after an app restart)
-            let savedFile = await this.$writeFile({
-                filename: filename,
-                data: cropOutput,
-                directory: 'images/' // directory: Directory.Data,
-            })
 
-            store.setImage({ index: index, src: filename })
+            // Save image file
+            // TODO: For now, we only do this for web version until we can iron-out issues on native mobile.
+            if (store.app.subtype == 'web') {
+                console.log("saveImage() cropOutput is %O", cropOutput)
+
+                //const base64Response = await fetch(`data:image/png;base64,${cropOutput.data}`)
+                //const blob = await base64Response.blob()
+                // console.log("saveImage() blob is %O", blob)
+                // Save the file (localStorage) so it can be used in the future (e.g. after an app restart)
+                let savedFile = await this.$writeFile({
+                    filename: filename,
+                    data: cropOutput,
+                    directory: 'images'
+                })
+
+                console.log("saveImage savedFile response %O", savedFile)
+
+                store.setImage({ index: index, src: filename })
+            }
         },
 
 

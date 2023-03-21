@@ -9,7 +9,9 @@
     const store = usePhotodiceAppStore()
 
     onMounted (async () => {
-        store.getLocalStorage_CustomDice()
+        if (store.app.subtype == 'web') {
+            store.getLocalStorage_CustomDice()
+        }
     })
 
 
