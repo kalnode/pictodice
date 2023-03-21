@@ -27,7 +27,7 @@ export const useModal = defineStore("modal", {
             this.isOpen = true
             this.modalActions = modalActions
             this.modalContentProps = modalContentProps
-            // using markRaw to avoid over performance as reactive is not required
+            // TODO, look into this comment: "using markRaw to avoid over performance as reactive is not required"
             this.modalContent = markRaw(modalContent)
         },
         close() {

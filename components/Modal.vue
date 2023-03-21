@@ -43,12 +43,12 @@
 
     import { reactive } from "vue"
     import { storeToRefs } from "pinia"
-    import { useModal } from "~/stores/modal" // TODO: Why is TS error complaining here?
+    import { useModal } from "~/stores/modal.ts" // TODO: Why is TS error complaining here?
 
     const modal = useModal()
 
     // Reactive holder to save the payload returned by the mounted modalContent
-    const model = reactive({})
+    var model = reactive({})
 
     // Convert all state properties to reactive references to be used on modalContent
     const { isOpen, modalContent, modalContentProps, modalActions } = storeToRefs(modal)

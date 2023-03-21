@@ -120,7 +120,12 @@ export default {
                 console.log("Image cropper crop work final: %O", blob)
                 this.$emit("update:modelValue", blob)
                 this.$emit('close')
-                //this.$emit("croppedImage", blob)
+
+                /* TODO: If this component is used plainly (ie not within a dynamic component like am odal)
+                then we likely want to emit this result like below. So we should prob use a "context_ui" state to check
+                whether we're in a dynamic component (e.g. modal) or plain context.
+                */
+                // this.$emit("croppedImage", blob)
             })
 
         }
