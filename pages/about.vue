@@ -51,7 +51,7 @@
 
             <!-- -->
 
-            <NuxtLink to="/privacy" class="p-3 text-lg bg-white text-black rounded m-1">
+            <NuxtLink to="/privacy" class="inline-block p-3 text-lg bg-white text-black rounded m-1">
                 Privacy Policy
             </NuxtLink>
 
@@ -60,21 +60,21 @@
             </div>
 
             <div v-if="store.app.subtype == 'android'">
-                <div @click="$openAndroid('ApplicationDetails')" class="p-3 text-lg bg-white text-black rounded m-1">
+                <div @click="$openAndroid('ApplicationDetails')" class="inline-block p-3 text-lg bg-white text-black rounded m-1">
                     Open App Details
                 </div>
 
-                <div @click="$openAppStore()" class="p-3 text-lg bg-white text-black rounded m-1">
+                <div @click="$openAppStore()" class="inline-block p-3 text-lg bg-white text-black rounded m-1">
                     Open App Store
                 </div>
             </div>
 
-            <div v-if="store.app.subtype == 'iOS'" class="p-3 text-lg bg-white text-black rounded m-1">
+            <div v-if="store.app.subtype == 'iOS'" class="inline-block p-3 text-lg bg-white text-black rounded m-1">
                 <div @click="$openIOS('App') ">
                     Open App Details
                 </div>
 
-                <div @click="$openAppStore()" class="p-3 text-lg bg-white text-black rounded m-1">
+                <div @click="$openAppStore()" class="inline-block p-3 text-lg bg-white text-black rounded m-1">
                     Open App Store
                 </div>
             </div>
