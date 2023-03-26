@@ -39,7 +39,8 @@
             <!-- <div class="absolute whitespace-nowrap">mouseTouchCoords: {{ mouseTouchCoords }}</div> -->
         </div>
 
-        <div class="absolute bottom-4">
+        <!-- BUTTON: ROLL -->
+        <div id="buttonRoll" class="absolute bottom-6">
             <div @click="getRandomDieFace()" class="p-4 px-8 rounded-full bg-white hover:bg-gray-100 text-teal-800 hover:scale-105 transition cursor-pointer">ROLL</div>
         </div>
 
@@ -180,7 +181,7 @@ export default {
             }
         })
 
-        await this.checkMotionPermission()
+        //await this.checkMotionPermission()
 
     },
 

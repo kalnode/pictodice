@@ -28,7 +28,7 @@
         store.app.subtype = Capacitor.getPlatform()
 
         // We get actual version number from app store resource (a CapacitorJS resource)
-        store.app.version = $getAvailableAppVersion()
+        //store.app.version = $getAvailableAppVersion()
     } else {
 
         // TODO:
@@ -48,13 +48,14 @@
 </script>
 
 <template>
-    <div class="w-full h-full flex flex-col noSelect noHighlight" :style="[
-        safeAreaInset.top ? 'padding-top:'+safeAreaInset.top+'px' : '',
-        safeAreaInset.bottom ? 'padding-bottom:'+safeAreaInset.bottom+'px' : ''
+    <div v-if="safeAreaInset.top" class="relative w-full h-full flex flex-col noSelect noHighlight" :style="[
+        safeAreaInset.top ? 'padding-top:'+(safeAreaInset.top+safeAreaPadding)+'px' : '',
+        safeAreaInset.bottom ? 'padding-bottom:'+(safeAreaInset.bottom+safeAreaPadding)+'px' : ''
     ]">
 
         <header id="Header"
         :class="currentRoute.name == 'index' ? 'absolute z-50' : ''"
+        :style="currentRoute.name == 'index' ? 'top:'+ (safeAreaInset.top+safeAreaPadding) +'px' : ''"
         class="w-full flex justify-center p-2">
             <transition name="fade" mode="out-in">
                 <NuxtLink :to="currentRoute.name == 'index' ? '/' : currentRoute.name" :key="'title-'+currentRoute.name">
@@ -127,7 +128,11 @@ export default {
 
     data() {
         return {
-            safeAreaInset: { }, // TODO: Perhaps keep this in global store?
+            safeAreaInset: {
+                top: null,
+                bottom: null
+            }, // TODO: Perhaps keep this in global store?
+            safeAreaPadding: 0 // pixels, integer
         }
     },
 
@@ -156,12 +161,20 @@ export default {
 
     methods: {
         setHeaderPadding() {
+            /*
             let safeAreaInsetTemp = {
-                top: getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top"),
-                bottom: getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-bottom")
+                top: parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top")), 
+                bottom: parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-bottom"))
             }
-            this.safeAreaInset.top = parseInt(safeAreaInsetTemp.top.slice(0, -2))
-            this.safeAreaInset.bottom = parseInt(safeAreaInsetTemp.bottom.slice(0, -2))
+            */
+
+            //this.safeAreaInset.top = parseInt(safeAreaInsetTemp.top.slice(0, -2))
+           // this.safeAreaInset.bottom = parseInt(safeAreaInsetTemp.bottom.slice(0, -2))
+             this.safeAreaInset.top = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top"))
+            this.safeAreaInset.bottom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-bottom"))
+
+
+            console.log("safeAreaInset is: %O", this.safeAreaInset)
         }
     }
 }

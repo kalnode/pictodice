@@ -56,7 +56,7 @@
             </NuxtLink>
 
             <div>
-                App version: <span v-html="store.app.version"></span>
+                App version: <span v-html="store.app.version"></span> ({{ store.app.type }})
             </div>
 
             <div v-if="store.app.subtype == 'android'">

@@ -62,6 +62,7 @@ export default {
     methods: {
 
         async imageClicked(index) {
+            console.log("Image slot clicked %O", index)
             this.chooseAnImage(index)
         },
 
@@ -80,11 +81,15 @@ export default {
             ])
             */
 
+            console.log("Attempting to open pickImages")
+
             // Method 2: We show a the native image picker right away. On web, this opens file selector.
             const images = await Camera.pickImages({
                 quality: 90,
                 limit: 1 // TODO: Capacitor bug? This seems to have no affect on any device or PC. I'm always able to select multiple on all platforms.
             })
+
+            console.log("pickImages result %O", images)
 
             this.selectedImage = images.photos[0] // TODO: the above "limit:1" doesn't seem to work. We forcefully just choose the first in array for now. It's still a good user experience.
 
