@@ -1,61 +1,12 @@
-<script setup>
-    import { Capacitor } from '@capacitor/core'
-
-    // TODO: Double check if this is correct. Because <Nav> occurs outside of <NuxtPage />, we need this import to make currentRoute reactive, otherwise it never changes after initial landing.
-    import { useRoute } from 'vue-router'
-    const currentRoute = useRoute()
-
-    import { usePhotodiceAppStore } from '~/stores/app'
-    const store = usePhotodiceAppStore()
-
-    onMounted (async () => {
-        if (store.app.subtype == 'web') {
-            store.getLocalStorage_CustomDice()
-        }
-    })
-
-
-    // ------------------------------------------
-    // APP VERSION & TYPE (web vs native)
-    // ------------------------------------------
-
-    const { $getAvailableAppVersion } = useNuxtApp()
-
-    // APP TYPE & VERSION
-    if (Capacitor.isNativePlatform()) {
-
-        store.app.type = 'native'
-        store.app.subtype = Capacitor.getPlatform()
-
-        // We get actual version number from app store resource (a CapacitorJS resource)
-        //store.app.version = $getAvailableAppVersion()
-    } else {
-
-        // TODO:
-        // THIS CRASHES THE SITE!!!
-        // Using the vite variable "APP_VERSION" in console.log text seems to be a problem!
-        //console.log("app.vue APP_VERSION: %O", APP_VERSION)
-
-        // THIS WORKS! We can't use the literal env, even inside a string!?
-        console.log("app.vue APP VERSION: %O", APP_VERSION)
-
-        store.app.type = 'web'
-        store.app.subtype = Capacitor.getPlatform()
-
-        // We get version from package.json, which is passed here within APP_VERSION
-        store.app.version = APP_VERSION
-    }
-</script>
-
 <template>
-    <div v-if="safeAreaInset.top" class="relative w-full h-full flex flex-col noSelect noHighlight" :style="[
-        safeAreaInset.top ? 'padding-top:'+(safeAreaInset.top+safeAreaPadding)+'px' : '',
-        safeAreaInset.bottom ? 'padding-bottom:'+(safeAreaInset.bottom+safeAreaPadding)+'px' : ''
+    <div v-if="appReady" class="relative w-full h-full flex flex-col noSelect noHighlight" :style="[
+        store.safeAreaInset.top ? 'padding-top:'+(store.safeAreaInset.top+store.safeAreaPadding)+'px' : '',
+        store.safeAreaInset.bottom ? 'padding-bottom:'+(store.safeAreaInset.bottom+store.safeAreaPadding)+'px' : ''
     ]">
 
         <header id="Header"
         :class="currentRoute.name == 'index' ? 'absolute z-50' : ''"
-        :style="currentRoute.name == 'index' ? 'top:'+ (safeAreaInset.top+safeAreaPadding) +'px' : ''"
+        :style="currentRoute.name == 'index' ? 'top:'+ (store.safeAreaInset.top+store.safeAreaPadding) +'px' : ''"
         class="w-full flex justify-center p-2">
             <transition name="fade" mode="out-in">
                 <NuxtLink :to="currentRoute.name == 'index' ? '/' : currentRoute.name" :key="'title-'+currentRoute.name">
@@ -74,7 +25,8 @@
         </main>
 
         <!-- NAVIGATION -->
-        <nav class="z-50 absolute bottom-0 w-full pointer-events-none">
+        <nav class="z-40 absolute bottom-0 w-full pointer-events-none"
+        :style="'bottom:'+ (store.safeAreaInset.bottom) +'px'">
             <Navigation id="Navigation" class="w-full" />
         </nav>
 
@@ -104,80 +56,112 @@
     </div>
 </template>
 
-<script>
-export default {
 
-    setup () {
+<script setup>
+import { ref } from 'vue'
+import { Capacitor } from '@capacitor/core'
+import { usePhotodiceAppStore } from '~/stores/app'
 
-        // TODO: This is currently how we add Ionic PWA Elements to the app.
-        // Seemingly this adds some features equivalent to native. Added this on presumption it would help the select-a-file experience for end-users on web.
-        // We import this CDN script here, but the more proper way is to import this as a plugin. Dunno how to do that.
-        // TODO: I don't think we're actually leveraging this in any way.
-        // See: https://capacitorjs.com/docs/web/pwa-elements
-        useHead({
-            script: [
-                {
-                    async: true,
-                    crossorigin: "anonymous",
-                    type: "module",
-                    src: "https://unpkg.com/@ionic/pwa-elements@latest/dist/ionicpwaelements/ionicpwaelements.esm.js"
-                }
-            ]
-        })
-    },
+// TODO: Double check if this is correct. Because <Nav> occurs outside of <NuxtPage />, we need this import to make currentRoute reactive, otherwise it never changes after initial landing.
+import { useRoute } from 'vue-router'
 
-    data() {
-        return {
-            safeAreaInset: {
-                top: null,
-                bottom: null
-            }, // TODO: Perhaps keep this in global store?
-            safeAreaPadding: 0 // pixels, integer
-        }
-    },
-
-    mounted() {
-
-        let gradientBackground = document.getElementById("gradientBackground")
-        let gradientMouse = document.getElementById("gradientMouse")
-
-        document.addEventListener('mousemove', (event) => {
-            // --------------------------------
-            // BACKGROUND GRADIENT MOVEMENT
-            // --------------------------------
-            let windowWidth = window.innerWidth
-            let windowHeight = window.innerHeight
-            let mouseXpercentage = Math.round(100 - (event.pageX / windowWidth * 100))
-            let mouseYpercentage = Math.round(100 - (event.pageY / windowHeight * 100))
-            let mouseXpercentageM = Math.round(event.pageX / windowWidth * 100)
-            let mouseYpercentageM = Math.round(event.pageY / windowHeight * 100)
-            //gradientBackground.style.backgroundPosition = mouseXpercentage + '% ' + mouseYpercentage + '%'
-            //gradientMouse.style.background = 'radial-gradient(circle farthest-side at ' + mouseXpercentageM + '% ' + mouseYpercentageM + '%, rgba(146, 225, 221, 0.8), transparent)'
-        })
-
-        this.setHeaderPadding()
-
-    },
-
-    methods: {
-        setHeaderPadding() {
-            /*
-            let safeAreaInsetTemp = {
-                top: parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top")), 
-                bottom: parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-bottom"))
-            }
-            */
-
-            //this.safeAreaInset.top = parseInt(safeAreaInsetTemp.top.slice(0, -2))
-           // this.safeAreaInset.bottom = parseInt(safeAreaInsetTemp.bottom.slice(0, -2))
-             this.safeAreaInset.top = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top"))
-            this.safeAreaInset.bottom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-bottom"))
+const currentRoute = useRoute()
+const store = usePhotodiceAppStore()
+const appReady = ref(false)
 
 
-            console.log("safeAreaInset is: %O", this.safeAreaInset)
-        }
-    }
+// ------------------------------------------
+// APP VERSION & TYPE (web vs native)
+// ------------------------------------------
+
+const { $getAvailableAppVersion } = useNuxtApp()
+
+// APP TYPE & VERSION
+if (Capacitor.isNativePlatform()) {
+
+    store.app.type = 'native'
+    store.app.subtype = Capacitor.getPlatform()
+
+    // We get actual version number from app store resource (a CapacitorJS resource)
+    //store.app.version = $getAvailableAppVersion()
+} else {
+
+    // TODO:
+    // THIS CRASHES!!!
+    // Using the vite variable "APP_VERSION" in console.log text seems to be a problem!
+    //console.log("app.vue APP_VERSION: %O", APP_VERSION)
+
+    // THIS WORKS! We can't use the literal env, even inside a string!?
+    console.log("APP VERSION: %O", APP_VERSION)
+
+    store.app.type = 'web'
+    store.app.subtype = Capacitor.getPlatform()
+
+    // We get version from package.json, which is passed here within APP_VERSION
+    store.app.version = APP_VERSION
 }
+
+
+// TODO: For web, we import Ionic PWA Elements which delivers some custom abstracted components.
+// Right now we import this here via CDN, but the proper way is to import this as a plugin. Dunno how to do that.
+// TODO2: Are we actually leveraging the features within?
+// See: https://capacitorjs.com/docs/web/pwa-elements
+useHead({
+    script: [
+        {
+            async: true,
+            crossorigin: "anonymous",
+            type: "module",
+            src: "https://unpkg.com/@ionic/pwa-elements@latest/dist/ionicpwaelements/ionicpwaelements.esm.js"
+        }
+    ]
+})
+
+
+onMounted (async () => {
+
+    if (store.app.subtype == 'web') {
+        await store.getLocalStorage_CustomDice()
+        .catch( (error) => { })
+    }
+
+    let gradientBackground = document.getElementById("gradientBackground")
+    let gradientMouse = document.getElementById("gradientMouse")
+
+    document.addEventListener('mousemove', (event) => {
+        // BACKGROUND GRADIENT MOVEMENT
+        let windowWidth = window.innerWidth
+        let windowHeight = window.innerHeight
+        let mouseXpercentage = Math.round(100 - (event.pageX / windowWidth * 100))
+        let mouseYpercentage = Math.round(100 - (event.pageY / windowHeight * 100))
+        let mouseXpercentageM = Math.round(event.pageX / windowWidth * 100)
+        let mouseYpercentageM = Math.round(event.pageY / windowHeight * 100)
+    })
+
+    if (store.app.subtype == 'ios') {
+
+        // TODO: For only iOS native, we seem to need a small timeout before computedStyles are ready (why!?)
+        // Without a timeout, we get "0" for safe-area no matter what, resulting in our title appearing underneath the notch.
+        // Other deploys do not have this issue.
+        setTimeout(() => {
+            setHeaderPadding()
+        }, 100)
+
+    } else {
+        setHeaderPadding()
+    }
+
+})
+
+function setHeaderPadding() {
+    // Get final computed values of safe-area from CSS property values (see main.css).
+    // For convenient use throughout app.
+    store.safeAreaInset.top = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top"))
+    store.safeAreaInset.bottom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-bottom"))
+    getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top")
+    appReady.value = true
+}
+
 </script>
 
 <style>

@@ -11,49 +11,30 @@ new Promise((resolve, reject) => {
     reader.readAsDataURL(blob)
 })
 
-
 const writeFile = async (file: { filename: string, data: string, directory: string }) => {
-
-    console.log("writeFile 111: %O", file)
-
-    console.log("dir1 %O", Directory.Data)
-    console.log("dir2 %O", Directory.Documents)
-    console.log("dir3 %O", Directory)
-
     let fileWork = await Filesystem.writeFile({
         path: file.directory + '/' + file.filename,
         data: file.data,
         directory: Directory.Documents,
-
-        // Need for Web to work
-        encoding: Encoding.UTF8
+        encoding: Encoding.UTF8 // Needed for Web to work
     })
-
-    console.log("writeFile 222: %O", fileWork)
-
     return fileWork
 }
   
 const readFile = async (filename:string, currentDirectory:string) => {
-
-   console.log("attempting read currentDirectory + '/' + filename: %O", currentDirectory + '/' + filename)
     const contents = await Filesystem.readFile({
         path: currentDirectory + '/' + filename,
         directory: Directory.Documents,
         encoding: Encoding.UTF8
     })
-    console.log("readfile contents: %O", contents)
     return contents
 }
 
 const getFileURI = async (filename:string, currentDirectory:string) => {
-
-    console.log("attempting read currentDirectory + '/' + filename: %O", currentDirectory + '/' + filename)
      const contents = await Filesystem.getUri({
          path: currentDirectory + '/' + filename,
          directory: Directory.Documents
      })
-     console.log("readfile contents: %O", contents)
      return contents
  }
 
@@ -72,8 +53,6 @@ const deleteFile = async (filename: string, currentDirectory:string) => {
     const contents = await Filesystem.readFile({
         path: 'file:///var/mobile/Containers/Data/Application/22A433FD-D82D-4989-8BE6-9FC49DEA20BB/Documents/text.txt'
     })
-  
-    console.log('data:', contents)
 }
 
 export default defineNuxtPlugin(() => {

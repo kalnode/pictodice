@@ -9,6 +9,7 @@
 <template>
     <div class="w-full h-full flex flex-col justify-center items-center">
 
+        <!-- CATEGORIES -->
         <div class="flex flex-wrap justify-center px-6 mb-4">
             <div v-for="(die, index) in store.dice" :key="'die-'+index"
             @click="store.currentDie = index;store.updateLocalStorage()"
@@ -19,6 +20,18 @@
             </div>
         </div>
 
+        <!-- LOADING MASK -->
+        <!--
+        Dimmed view + spinner animation telling user stuff is going on. This is to account for potential lag between prompts (native file picker to cropping experience).
+        iOS is the main instigator for this; bad delays and flickering between user steps. NOTE: For web, we disable this because apparently it's very difficult knowing when a user cancels-out of a file picker, thus we're unable to hide this loading state!
+        -->
+        <transition name="fade">
+            <div v-if="loading && store.app.type == 'native'" class="w-full h-full fixed z-50 top-0 bg-black bg-opacity-70 flex justify-center items-center">
+                <Loading class="w-24 h-24" :color="'#ffffff'" />
+            </div>
+        </transition>
+
+        <!-- THUMBNAIL VIEW -->
         <div class="overflow-auto px-10">
             <div class="flex justify-center items-center flex-wrap pb-48">
                 <div v-for="(image, index) in store.dice[store.currentDie].images" :key="'slot-'+index"
@@ -59,58 +72,85 @@ const store = usePhotodiceAppStore()
 export default {
     name: "Upload",
 
+    data() {
+        return {
+            loading: false
+        }
+    },
+
     methods: {
 
         async imageClicked(index) {
             console.log("Image slot clicked %O", index)
-            this.chooseAnImage(index)
+
+            this.loading = true
+            await this.chooseAnImage(index)
+            .then( () => {
+                console.log("after image work 111")
+     
+            })
+            .catch( () => {
+                console.log("after image work 222")        
+     
+            })
+            console.log("after image work 333")
+                                        this.loading = false   
+
         },
 
         async chooseAnImage(index) {
 
-            // Method 1: We show a custom modal with options
-            /*
-            modal.open(ImageSelector, [
-                {
-                    label: "Save",
-                    callback: (dataFromView) => {
-                        console.log(dataFromView)
-                        modal.close()
+            return new Promise ( async (resolve, reject) => {
+
+                // Method 1: We show a custom modal with options
+                /*
+                modal.open(ImageSelector, [
+                    {
+                        label: "Save",
+                        callback: (dataFromView) => {
+                            console.log(dataFromView)
+                            modal.close()
+                        }
                     }
+                ])
+                */
+
+                // Method 2: We show a the native image picker right away.
+                let images = await Camera.pickImages({ //getPhoto
+                    quality: 90,
+                    limit: 1 // TODO: Capacitor bug? This seems to have no affect on any device or PC. I'm always able to select multiple on all platforms.
+                })
+                .catch((e) => {
+                    reject(e)
+                })
+
+                if (images && images.photos && images.photos.length > 0) {
+
+                    this.selectedImage = images.photos[0] // TODO: the above "limit:1" doesn't seem to work. We forcefully just choose the first in array for now. It's still a good user experience.
+
+                    // We use fetch as a convenient/efficient way to convert the file into a blob we can work with
+                    const response = await fetch(this.selectedImage.webPath)
+                    const blob = await response.blob()
+                    let base64Data = await this.$convertBlobToBase64(blob)
+
+                    // With base64 image data, we can perform transformations, like crop (based on user input), resize, filters, etc
+                    modal.open(ImageCropper,
+                        { imageSrc: base64Data },
+                        [{
+                            label: "Ok",
+                            actionType: "primary",
+                            callback: (transformedImage) => {
+                                // Image has been transformed
+                                this.saveImage(transformedImage, index)
+                                modal.close()
+                                resolve("Success")
+                            }
+                        }]
+                    )
+                } else {
+                    reject("No images selected")
                 }
-            ])
-            */
-
-            console.log("Attempting to open pickImages")
-
-            // Method 2: We show a the native image picker right away. On web, this opens file selector.
-            const images = await Camera.pickImages({
-                quality: 90,
-                limit: 1 // TODO: Capacitor bug? This seems to have no affect on any device or PC. I'm always able to select multiple on all platforms.
             })
-
-            console.log("pickImages result %O", images)
-
-            this.selectedImage = images.photos[0] // TODO: the above "limit:1" doesn't seem to work. We forcefully just choose the first in array for now. It's still a good user experience.
-
-            // We use fetch as a convenient/efficient way to convert the file into a blob we can work with
-            const response = await fetch(this.selectedImage.webPath)
-            const blob = await response.blob()
-            let base64Data = await this.$convertBlobToBase64(blob)
-
-            // With base64 image data, we can perform transformations, like crop (based on user input), resize, filters, etc
-            modal.open(ImageCropper,
-                { imageSrc: base64Data },
-                [{
-                    label: "Ok",
-                    actionType: "primary",
-                    callback: (transformedImage) => {
-                        // Image has been transformed
-                        this.saveImage(transformedImage, index)
-                        modal.close()
-                    }
-                }]
-            )
         },
 
 
@@ -125,15 +165,10 @@ export default {
             store.dice[store.currentDie].images[index].src = blobURI
             store.dice[store.currentDie].images[index].filename = filename
 
-
             // Save image file
             // TODO: For now, we only do this for web version until we can iron-out issues on native mobile.
             if (store.app.subtype == 'web') {
-                console.log("saveImage() cropOutput is %O", cropOutput)
 
-                //const base64Response = await fetch(`data:image/png;base64,${cropOutput.data}`)
-                //const blob = await base64Response.blob()
-                // console.log("saveImage() blob is %O", blob)
                 // Save the file (localStorage) so it can be used in the future (e.g. after an app restart)
                 let savedFile = await this.$writeFile({
                     filename: filename,
@@ -141,12 +176,11 @@ export default {
                     directory: 'images'
                 })
 
-                console.log("saveImage savedFile response %O", savedFile)
-
                 store.setImage({ index: index, src: filename })
             }
-        },
 
+            this.loading = false
+        },
 
         async deleteImage(index) {
             let deleteFile = await this.$deleteFile(store.dice[store.currentDie].images[index].filename, 'images')

@@ -19,7 +19,9 @@
         </div>
         -->
 
-        <div v-if="showSensorPermissionExperience" class="flex justify-center space-x-2 items-center absolute top-4 mt-12 mx-4 z-50 pointer-events-auto bg-yellow-200 text-xs p-2 text-orange-800">
+        <div v-if="showSensorPermissionExperience"
+        class="flex justify-center space-x-2 items-center absolute top-4 mt-12 mx-4 z-50 pointer-events-auto bg-yellow-200 text-xs p-2 text-orange-800"
+        :style="'top:'+ (store.safeAreaInset.top+store.safeAreaPadding) +'px'">
             <div>It's better with motion sensors enabled</div>
             <div @click="checkMotionPermission()" class="p-2 bg-orange-600 text-white cursor-pointer pointer-events-auto">Allow</div>
             <div @click="showSensorPermissionExperience = false" class="test-xl font-bold p-2 rounded-full cursor-pointer pointer-events-auto">X</div>
@@ -40,7 +42,8 @@
         </div>
 
         <!-- BUTTON: ROLL -->
-        <div id="buttonRoll" class="absolute bottom-6">
+        <div id="buttonRoll" class="absolute mb-6"
+        :style="'bottom:'+ (store.safeAreaInset.bottom+store.safeAreaPadding) +'px'">
             <div @click="getRandomDieFace()" class="p-4 px-8 rounded-full bg-white hover:bg-gray-100 text-teal-800 hover:scale-105 transition cursor-pointer">ROLL</div>
         </div>
 
@@ -141,8 +144,7 @@ export default {
         // Directly listen for cube animation events (e.g. spin),
         // this way browser animation events dictate everything; more natural.
         let dieParent = document.getElementById("dieParent")
-        //let dieParent = this.$refs.dieParent //document.getElementById("dieParent")
-        //cubeDiv.addEventListener("animationstart", myStartFunction)
+
         dieParent.addEventListener("animationend", () => {
             this.DiceState.spinning = false
         })
@@ -181,7 +183,7 @@ export default {
             }
         })
 
-        //await this.checkMotionPermission()
+        await this.checkMotionPermission()
 
     },
 
@@ -243,7 +245,6 @@ export default {
                     }
                 })
                 .catch( (error) => {
-                    console.log("Error getting sensor permission: %O", error)
                     this.showSensorPermissionExperience = true
                 })
 
@@ -255,6 +256,10 @@ export default {
         },
 
         async setMotionListeners() {
+
+            // NOTE: Firefox shows a deprecation warning with these Capacitor Motion addListener's.
+            // however this may be in error on the part of Firefox. In any case, any change to the
+            // listener declaration needs to occur in the Capactior Motion plugin.
 
             this.orientationHandler = await Motion.addListener('orientation', event => {
 
@@ -285,7 +290,6 @@ export default {
             this.accelerationHandler = await Motion.addListener('accel', event => {
 
                 this.hasInteracted ? null :  this.hasInteracted = true
-                //console.log('Device acceleration event: %O', event)
 
                 this.devOutput_motionEvent = {
                     x: event.rotationRate.alpha.toFixed(2),

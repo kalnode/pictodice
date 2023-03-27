@@ -20,6 +20,11 @@ export const usePhotodiceAppStore = defineStore('PhotoDiceApp', {
         userInteractedWithPermissionPrompt: false,
         currentDie: 0,
         customDie: 5,
+        safeAreaInset: {
+            top: null,
+            bottom: null
+        },
+        safeAreaPadding: 0,
 
         dice: [
             {
@@ -153,13 +158,6 @@ export const usePhotodiceAppStore = defineStore('PhotoDiceApp', {
         // TODO: We can probably blow away this func.
         setImage(payload: {index: number; src: string}) {
             if (this.dice[0] != null && this.dice[0].images != null) {
-                /*
-                console.log("setImage 111 payload.index %O", payload.index)
-                console.log("setImage 222 payload.src %O", payload.src)
-                this.dice[0].images[payload.index].type = 'localStorage'
-                this.dice[0].images[payload.index].src = payload.src
-                console.log("setImage 333 this.dice[0].images[payload.index] %O", this.dice[0].images[payload.index])
-                */
 
                 this.updateLocalStorage()
             }
@@ -173,46 +171,20 @@ export const usePhotodiceAppStore = defineStore('PhotoDiceApp', {
             this.dice[this.customDie] = JSON.parse(customDie.value as string)
         },
 
-        async getLocalStorage_CustomDice() {
-
+        getLocalStorage_CustomDice() {
             return new Promise ( async (resolve, reject) => {
-
-                let { value } = await Preferences.get({ key: 'customDie' })
-
-                if (value) {
+                await Preferences.get({ key: 'customDie' })
+                .then( ({value}) => {
                     let payload = JSON.parse(value as string)
-                    this.currentDie = parseInt(payload.currentDie)
-
                     if (payload && payload.images) {
-                        for (var image of payload.images) {
-
-                            if (image.filename) {
-
-                                // This works, but is correct to do this? Does it only work because of coincidence, that this logic only triggers later in lifecycles?
-                                const { $readFile } = useNuxtApp()
-
-                                // TODO: Annoying Typescript error; muting it here.
-                                // @ts-ignore
-                                let readFile = await $readFile(image.filename, 'images')
-
-                                // @ts-ignore
-                                const blobURI = URL.createObjectURL(readFile.data)
-
-                                image.src = blobURI
-                            }
-                        }
-
-                        this.dice[this.customDie].images = payload.images
-
                         resolve(payload)
+                    } else {
+                        reject("No images found")
                     }
-
+                })
+                .catch( () => {
                     reject()
-
-                }
-
-                reject()
-
+                })
             })
         },
 
