@@ -43,6 +43,11 @@ export interface DieState {
     hasRolled: boolean
 }
 
+export interface DiceSet {
+    name: string,
+    dies: Array<number>
+}
+
 
 // ========================================
 // DEFINE STORE
@@ -72,7 +77,7 @@ export const usePhotodiceAppStore = defineStore('PhotoDiceApp', {
         showPromptMotionPermission: false, // Primarly meant for iOS, where we must explicitly&manually prompt the user for permission request
         hasInteracted: false,
         mouseTouchCoords: [ 1, 1 ], // [x,y] coords of last mouse or touch event
-        currentInteraction:  null, // mouse, touch, sensor  // TODO: How to enforce typing here, inline?
+        currentInteraction: null, // mouse, touch, sensor  // TODO: How to enforce typing here, inline?
         devOutput_motionEvent: null,
         accelerometer: [ 0, 0 ],
         rotationRate: null,
@@ -86,6 +91,22 @@ export const usePhotodiceAppStore = defineStore('PhotoDiceApp', {
         // DICE
         currentDie: 0,
         customDie: 5,
+
+
+        diceSets: <DiceSet[]>[
+            {
+                name: 'Set1',
+                dies: [ 0, 0 ]
+            },
+            {
+                name: 'Set2',
+                dies: [ 0, 2, 1 ]
+            },
+            {
+                name: 'Set3',
+                dies: [ 3, 4 ]
+            }
+        ],
 
         // TODO: Apply type "Die" here. See above "Die" interface.
         dice: [
