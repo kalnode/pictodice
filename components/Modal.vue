@@ -39,11 +39,11 @@
 
 <script lang="ts" setup>
 
-    // Component based on tut here: https://dev.to/cloudx/reusable-dynamic-modal-on-vue-3-1k56
+    // Initially, based on tut here: https://dev.to/cloudx/reusable-dynamic-modal-on-vue-3-1k56
 
     import { reactive } from "vue"
     import { storeToRefs } from "pinia"
-    import { useModal } from "~/stores/modal.ts" // TODO: Why is TS error complaining here?
+    import { useModal } from "~/stores/modal"
 
     const modal = useModal()
 

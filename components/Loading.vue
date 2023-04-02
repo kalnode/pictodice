@@ -3,34 +3,30 @@
         <circle class="path" fill="none" :stroke="color" stroke-width="6" stroke-linecap="round" cx="33" cy="33" r="30"></circle>
     </svg>
 </template>
+<script setup>
 
-<script>
-export default {
-
-    props: {
-        color: {
-            type: String,
-            default: '#000000'
-        },
-        width: {
-            type: String,
-            default: '100%'
-        },
-        height: {
-            type: String,
-            default: '100%'
-        },
-        centered: {
-            type: Boolean,
-            default: true
-        },
-        background: {
-            type: Boolean,
-            default: true
-        }
+const props = defineProps({
+    color: {
+        type: String,
+        default: '#000000'
+    },
+    width: {
+        type: String,
+        default: '100%'
+    },
+    height: {
+        type: String,
+        default: '100%'
+    },
+    centered: {
+        type: Boolean,
+        default: true
+    },
+    background: {
+        type: Boolean,
+        default: true
     }
-
-}
+})
 </script>
 
 <style scoped>

@@ -1,31 +1,93 @@
 // TODO: What's this for?
-import { resolveDirective } from 'nuxt/dist/app/compat/capi'
+//import { resolveDirective } from 'nuxt/dist/app/compat/capi'
 
 import { defineStore } from 'pinia'
 
-// LOCAL STORAGE (universal; device agnostic)
-import { Preferences } from '@capacitor/preferences'
-// For native mobile (iOS, Android), this uses proprietary storage made available to any app, and is protected.
-// For web, this plugin uses standadard browser localStorage, which is in theory  permanent, but more volatile as there's multiple ways this data could be cleared either automatically or by user action (e.g. browser full cache clear, etc)
 
+// ========================================
+// LOCAL STORAGE
+// ========================================
+import { Preferences } from '@capacitor/preferences'
+// Capacitor plugin that provides API for device-agnostic universal local storage.
+// For native mobile (iOS, Android), is uses proprietary storage made available to any app, is better protected, offers much more space (e.g. 50mb)
+// For web, this plugin uses standadard browser localStorage, which is in theory permanent too, but more volatile as there's multiple ways this data could be cleared by user action (e.g. browser full cache clear, etc)
+
+
+// ========================================
+// TYPES
+// ========================================
+
+// TODO: Is there any way to set defaults for boolean items?
+
+export interface Die {
+    name: string
+    type: 'preset' | 'custom'
+    active: boolean
+    images: Array<{
+        type: 'static' | 'remote' | 'localStorage'
+        src: string
+    }>
+
+    // TODO: Finish more-proper "faces" type, and use it app-wide, instead of the above "images".
+    faces: Array<{
+        type: 'image' | 'text'
+        image_type: 'static' | 'remote' | 'localStorage' // TODO: This is possibly not needed, and should be inferred by src and/or filename
+        image_src: string
+        image_filename: string
+    }>
+}
+
+export interface DieState {
+    face: number,
+    spinning: boolean,
+    hasRolled: boolean
+}
+
+
+// ========================================
 // DEFINE STORE
+// ========================================
 export const usePhotodiceAppStore = defineStore('PhotoDiceApp', {
     state: () => ({
+
+        // APP - Only set once, on app load
         app: {
             type: null, //'web','native',
             subtype: null, // 'web','android', 'ios'
             version: ''
         },
-        allowMotionSensors: true,
-        userInteractedWithPermissionPrompt: false,
-        currentDie: 0,
-        customDie: 5,
+
+        // MISC
+        showDevTools: false,
+
+        // LAYOUT
         safeAreaInset: {
             top: null,
             bottom: null
         },
-        safeAreaPadding: 0,
+        safeAreaPadding: 0, // How much extra padding we give away from the viewport bleed edge (if any)
 
+        // INTERACTION
+        allowMotionSensors: true,
+        showPromptMotionPermission: false, // Primarly meant for iOS, where we must explicitly&manually prompt the user for permission request
+        hasInteracted: false,
+        mouseTouchCoords: [ 1, 1 ], // [x,y] coords of last mouse or touch event
+        currentInteraction:  null, // mouse, touch, sensor  // TODO: How to enforce typing here, inline?
+        devOutput_motionEvent: null,
+        accelerometer: [ 0, 0 ],
+        rotationRate: null,
+        // TODO: We need a scale modifier for mouse (and probably touch) coords, such that depending on the size of the viewport, we change the 
+        // angle modifier.
+        // EXAMPLE: Make PC browser narrow, and observe mouse hardly has an effect on perspective.
+        // Now, make viewport super large, and observe mouse movement nicely changes cube perspective.
+        speedModifier: 0.002,
+        angleModifier: 40,
+
+        // DICE
+        currentDie: 0,
+        customDie: 5,
+
+        // TODO: Apply type "Die" here. See above "Die" interface.
         dice: [
             {
                 name: 'Classic Dice',
@@ -117,7 +179,32 @@ export const usePhotodiceAppStore = defineStore('PhotoDiceApp', {
 
     getters: {
 
-        //WORKS:
+
+        // TODO: From Die.vue component, move ax/ay calculations here
+        //ax: () => { },
+        //ay: () => { },
+
+        accelerationComputed: (state) => {
+
+            let ax, ay
+            if (!state.hasInteracted) {
+                // TODO: This is default angles for die. Artifact from early dev. Do we want 40? What's the best here?
+                ax = 40
+                ay = 40
+            } else {
+                if (state.currentInteraction == 'sensor') {
+                    ax = state.accelerometer[0]
+                    ay = state.accelerometer[1]
+                } else if (state.currentInteraction == 'mouse' || state.currentInteraction == 'touch') {
+                    ax = state.mouseTouchCoords[0]
+                    ay = state.mouseTouchCoords[1]
+                } 
+            }
+
+            return { ax, ay }
+        }
+
+        //GETTERS EARLY DEV WORK
         //getterTest: () => 23 + 'dfdfdf'",
 
         // TODO: Why does this return "object promise" ???
@@ -140,14 +227,11 @@ export const usePhotodiceAppStore = defineStore('PhotoDiceApp', {
 
     actions: {
 
-
-        setPermission(value:boolean) {
+        async setMotionPermission(value:boolean) {
             this.allowMotionSensors = value
-        },
 
-        async togglePermission() {
-            this.allowMotionSensors = !this.allowMotionSensors
-            // localStorage only allows string values, so we use 1=true, 0=false.
+            // Local Storage only stores values as strings. We use '1' (on) and '0' (off).
+            // TODO: Add typing for this? ie enforce 1 and 0, etc.
             let newValue = this.allowMotionSensors === true ? "1" : "0"
             await Preferences.set({
                 key: 'allowMotionSensors',
@@ -155,10 +239,14 @@ export const usePhotodiceAppStore = defineStore('PhotoDiceApp', {
             })
         },
 
+        async toggleMotionPermission() {
+            this.allowMotionSensors = !this.allowMotionSensors
+            this.setMotionPermission(this.allowMotionSensors)
+        },
+
         // TODO: We can probably blow away this func.
         setImage(payload: {index: number; src: string}) {
             if (this.dice[0] != null && this.dice[0].images != null) {
-
                 this.updateLocalStorage()
             }
         },
@@ -196,7 +284,6 @@ export const usePhotodiceAppStore = defineStore('PhotoDiceApp', {
                 })
             })
         }
-
 
     }
 })

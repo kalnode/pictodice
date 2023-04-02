@@ -45,7 +45,7 @@
             <!--
             <div>
                 <div>Sensors allowed? {{ store.allowMotionSensors }}</div>
-                <button @click="store.togglePermission()" class="pointer-events-auto p-2 bg-gray-100 rounded">Toggle Sensor Permission</button>
+                <button @click="store.toggleMotionPermission()" class="pointer-events-auto p-2 bg-gray-100 rounded">Toggle Sensor Permission</button>
             </div>
             -->
 

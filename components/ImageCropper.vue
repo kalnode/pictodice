@@ -17,118 +17,97 @@
     </div>
 </template>
 
-<script>
+<script setup>
 import 'cropperjs/dist/cropper.css'
 import Cropper from 'cropperjs'
+import { nextTick, ref } from "vue"
 
-export default {
-    name: "ImageCropper",
+const emit = defineEmits()
 
-    props: {
-        imageSrc: String
-    },
+const props = defineProps({
+    imageSrc: String,
+    context_ui: String
+})
 
-    data() {
-        return {
-            cropperInstance: null,
-            imageSrc2: null
+// TODO: The below const works, but we have to use cropperInstance.value  all over the place, which seems stupid. Is there a better way to store an instance?
+//var cropperInstance = null // Simple var, this works, however is it safe/secure/recommended? Also, when cropper opens, looks like width/height aren't proper.
+const cropperInstance = ref(null)
+
+const imageToCrop = ref(null)
+
+// TODO: Do we need this? Early on, presumed required to expose template ref in script setup
+//defineExpose({ imageToCrop })
+
+/*
+watch(imageSrc, (first, second) => {
+    console.log("Watch ImageCropper imageSrc:", first, second)
+    nextTick( () => {
+        destroyCropper()
+        openCropper()
+    })
+})
+*/
+
+onMounted (() => {
+
+    if (props.imageSrc) {
+        openCropper()
+    }
+})
+
+
+function openCropper() {
+
+    console.log("imageToCrop is %O", imageToCrop.value)
+    let image = imageToCrop.value
+    cropperInstance.value = new Cropper(image, {
+        viewMode: 3,
+        dragMode: 'move',
+        aspectRatio: 1,
+        guides: true,
+        center: true,
+        background: false,
+        cropBoxMovable: true,
+        cropBoxResizable: true,
+        ready: function () {
+            //croppable = true
         }
-    },
+    })
+}
 
-    watch: {
-
-        imageSrc: function(e) {
-            console.log("Cropper got new image %O", e)
-
-            /*
-            if (this.cropperInstance) {
-                console.log("Destroying copperinstance")
-                this.cropperInstance.destroy()
-                this.cropperInstance = null
-                //this.imageSrc2 = null
-                //this.imageSrc2 = this.imageSrc
-                this.openCropper()
-            }
-            */
-            this.$nextTick( () => {
-                this.destroyCropper()
-                this.openCropper()
-            })
-
-
-        }
-    },
-
-    mounted() {
-        if (this.imageSrc) {
-            //this.imageSrc2 = this.imageSrc
-            this.openCropper()
-        }
-    },
-
-    methods: {
-        openCropper() {
-            let image = this.$refs.imageToCrop
-            this.cropperInstance = new Cropper(image, {
-                viewMode: 3,
-                dragMode: 'move',
-                aspectRatio: 1,
-                guides: true,
-                center: true,
-                background: false,
-                cropBoxMovable: true,
-                cropBoxResizable: true,
-                ready: function () {
-                    //croppable = true
-                }
-            })
-        },
-
-        destroyCropper() {
-            console.log("Destroying")
-            if (this.cropperInstance) {
-                this.cropperInstance.destroy()
-                this.cropperInstance = null
-            }
-        },
-
-        resetCropper() {
-            console.log("Resetting")
-            if (this.cropperInstance) {
-                this.cropperInstance.reset()
-            }
-        },
-
-        async cropTheImage() {
-
-            /*
-            cropper.getCroppedCanvas({
-            width: 160,
-            height: 90,
-            minWidth: 256,
-            minHeight: 256,
-            maxWidth: 4096,
-            maxHeight: 4096,
-            fillColor: '#fff',
-            imageSmoothingEnabled: false,
-            imageSmoothingQuality: 'high',
-            });
-            */
-
-            this.cropperInstance.getCroppedCanvas()
-            .toBlob((blob) => {
-                console.log("Image cropper crop work final: %O", blob)
-                this.$emit("update:modelValue", blob)
-                this.$emit('close')
-
-                /* TODO: If this component is used plainly (ie not within a dynamic component like am odal)
-                then we likely want to emit this result like below. So we should prob use a "context_ui" state to check
-                whether we're in a dynamic component (e.g. modal) or plain context.
-                */
-                // this.$emit("croppedImage", blob)
-            })
-
-        }
+function destroyCropper() {
+    console.log("Destroying")
+    if (cropperInstance.value) {
+        cropperInstance.value.destroy()
+        cropperInstance.value = null
     }
 }
+
+function resetCropper() {
+    console.log("Resetting")
+    if (cropperInstance.value) {
+        cropperInstance.value.reset()
+    }
+}
+
+async function cropTheImage() {
+
+    cropperInstance.value.getCroppedCanvas({
+        imageSmoothingEnabled: false,
+        imageSmoothingQuality: 'high'
+    })
+    .toBlob((blob) => {
+        console.log("Image cropper crop work final: %O", blob)
+
+        if (props.context_ui == 'modal') {
+            emit("update:modelValue", blob)
+        } else {
+            this.$emit("croppedImage", blob)
+        }
+
+        emit('close')
+    })
+
+}
+
 </script>
