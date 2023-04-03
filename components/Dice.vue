@@ -16,7 +16,7 @@
         <!-- DIE -->
         <Die :Die="store.dice[store.currentDie]" :DieState="DieState" @click="getRandomDieFace()" />
 
-        {{ DieState }}
+        <!-- {{ DieState }} -->
 
     </div>
 </template>

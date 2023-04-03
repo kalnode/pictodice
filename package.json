@@ -47,6 +47,7 @@
     "@capawesome/capacitor-app-update": "^2.1.0",
     "@ionic/pwa-elements": "^3.1.1",
     "@pinia/nuxt": "^0.4.7",
+    "cannon-es": "^0.20.0",
     "capacitor-native-settings": "^4.0.3",
     "capacitor-sync-version": "^1.0.6",
     "cropperjs": "^1.5.13",
@@ -54,6 +55,7 @@
     "gh-pages": "^5.0.0",
     "jimp": "^0.22.7",
     "mitt": "^3.0.0",
-    "pinia": "^2.0.33"
+    "pinia": "^2.0.33",
+    "three": "^0.151.2"
   }
 }

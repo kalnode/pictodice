@@ -15,7 +15,10 @@ const route = useRoute()
                 <div class="flex justify-between items-center m-2">
 
                     <!-- LEFT -->
-                    <div class="pointer-events-auto">
+                    <div class="relative pointer-events-auto">
+                        <NuxtLink v-if="route.name != 'threedtest'" to="/threedtest" class="absolute block p-1.5" style="top:-100%">
+                            <div class="p-2 px-4 text-sm rounded-full bg-white hover:bg-gray-100 text-teal-800 hover:scale-105 transition cursor-pointer">3d Test</div>
+                        </NuxtLink>
                         <transition name="fade" mode="out-in">
                             <div v-if="route.name == 'index'" :key="'LinkUpload'" class="p-2 rounded text-teal-700 hover:text-teal-200 hover:scale-110 transition-transform">
                                 <NuxtLink to="/upload" class="block p-1.5">
