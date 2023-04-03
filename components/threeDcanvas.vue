@@ -9,10 +9,10 @@
         -->
 
         <!-- BUTTON: ROLL -->
-        <div class="absolute mb-6 pointer-events-auto z-50"
+        <div class="absolute mb-6 pointer-events-auto z-50 flex justify-center"
         :style="'bottom:'+ (store.safeAreaInset.bottom+store.safeAreaPadding) +'px'">
             <div @click="throwDice()" class="p-4 px-8 rounded-full bg-white hover:bg-gray-100 text-teal-800 hover:scale-105 transition cursor-pointer">ROLL</div>
-            <div>Score: <span id="score-result"></span></div>
+            <div class="absolute text-black text-center" style="top:-50%">Score: <span id="score-result"></span></div>
         </div>
     </div>
 </template>
@@ -65,7 +65,7 @@ function initScene() {
     // SCENE
     renderer = new THREE.WebGLRenderer({
         alpha: true,
-        //antialias: true,
+        antialias: true,
         canvas: canvasEl
     })
 
@@ -182,9 +182,9 @@ function createFloor() {
 
 
     /*
-    wallGeometry = new THREE.PlaneGeometry( 300, 300 );
-    wallGeometry.applyMatrix( new THREE.Matrix4().makeRotationX( Math.PI));
-    wallMesh = new THREE.Mesh( wallGeometry, material );
+    wall_Back = new THREE.PlaneGeometry( 300, 300 );
+    wall_Back.applyMatrix( new THREE.Matrix4().makeRotationX( Math.PI));
+    wallMesh = new THREE.Mesh( wall_Back, material );
     wallMesh.castShadow = false;
     wallMesh.receiveShadow = true;
     scene.add(wallMesh);
@@ -204,60 +204,87 @@ function createFloor() {
     */
 
 
+    /*
     const wall2 = new THREE.Mesh(
         new THREE.PlaneGeometry(1000, 1000),
         new THREE.MeshBasicMaterial( { color: 0x0000ff, wireframe: true} )
     )
-
-    let wallGeometry = new THREE.BoxGeometry( 5, 50, 30 );
-    //wallGeometry.rotateY(85)
-
-    let wallMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } );
-    let wall = new THREE.Mesh( wallGeometry, wallMaterial );
-
-    wall.receiveShadow = true
-    //wall.position.y = 3 / 2
-    wall.position.y = 0
-    wall.position.x = -10
-    //wall.rotation.x = Math.PI / 3
-    wall.rotateX(85);
-   // wall.rotateY(44);
-   // wall.rotateZ(77);
-    /*
-    wall.rotation.x = 45
-    wall.rotation.y = 45
-    wall.rotation.z = 45
     */
 
-    wall.quaternion.setFromAxisAngle(new THREE.Vector3(-1, 0, 0), Math.PI * 0.5)
-    scene.add(wall)
+    let walls = {
+        back: {
+            geometry: [5, 50, 30],
+            position: [-10,0,0]
+        },
+        left: {
+            geometry: [50, 5, 30],
+            position: [0,0,30]
+        },
+        right: {
+            geometry: [50, 5, 30],
+            position: [0,0,-30]
+        }
+    }
+
+    let wall_material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } )
+
+    Object.values(walls).forEach(wall => {
+        console.log("Wall loop: %O", wall)
+        let wall_geometry = new THREE.BoxGeometry(...wall.geometry)
+        //wall_Back.rotateY(85)
+        let wall_scene = new THREE.Mesh( wall_geometry, wall_material )
+
+        wall_scene.receiveShadow = true
 
 
+        
+        wall_scene.position.x = wall.position[0]
+        wall_scene.position.y = wall.position[1]
+        wall_scene.position.z = wall.position[2]
+        
+        // WORKS:
+        //wall.position.y = 0
+        //wall.position.x = -10
 
-    let wallShape = new CANNON.Box(new CANNON.Vec3(15 / 2, 3 / 2, 0.5 / 2))
-    let wallBody = new CANNON.Body({
-        type: CANNON.Body.STATIC,
-        shape: new CANNON.Box(new CANNON.Vec3( 5, 50, 30 )), //new CANNON.Plane(),
-        material: new THREE.MeshBasicMaterial( { color: 0x0000ff, wireframe: true } )
+        // TESTING
+        //wall.position.y = 3 / 2
+        //wall.rotation.x = Math.PI / 3
+        //wall_scene.rotateX(85);
+        // wall.rotateY(44);
+        // wall.rotateZ(77);
+        /*
+        wall.rotation.x = 45
+        wall.rotation.y = 45
+        wall.rotation.z = 45
+        */
+
+        wall_scene.quaternion.setFromAxisAngle(new THREE.Vector3(-1, 0, 0), Math.PI * 0.5)
+        scene.add(wall_scene)
+
+        //let wallShape = new CANNON.Box(new CANNON.Vec3(15 / 2, 3 / 2, 0.5 / 2))
+        let wall_body = new CANNON.Body({
+            type: CANNON.Body.STATIC,
+            shape: new CANNON.Box(new CANNON.Vec3(...wall.geometry)), //new CANNON.Plane(),
+            //material: new THREE.MeshBasicMaterial( { color: 0x0000ff, wireframe: true } )
+        })
+        wall_body.position.copy(wall_scene.position)
+        wall_body.quaternion.copy(wall_scene.quaternion)
+        physicsWorld.addBody(wall_body)
+
+        /*
+        let wallShape = new CANNON.Box(new CANNON.Vec3(15 / 2, 3 / 2, 0.5 / 2))
+        let wallBody = new CANNON.Body({
+            type: CANNON.Body.STATIC,
+            mass: 0,
+            shape: wallShape,
+            //material: skyBoxMaterial
+        })
+        wallBody.position.y = 3 / 2
+        wallBody.position.z = -2
+        physicsWorld.addBody(wallBody)
+        */
     })
 
-
-    wallBody.position.copy(wall.position)
-    wallBody.quaternion.copy(wall.quaternion)
-    physicsWorld.addBody(wallBody)
-
-    /*
-    let wallShape = new CANNON.Box(new CANNON.Vec3(15 / 2, 3 / 2, 0.5 / 2))
-    let wallBody = new CANNON.Body({
-        type: CANNON.Body.STATIC,
-        mass: 0,
-        shape: wallShape,
-        //material: skyBoxMaterial
-    })
-    wallBody.position.y = 3 / 2
-    wallBody.position.z = -2
-    physicsWorld.addBody(wallBody)
-    */
 
 
 }
