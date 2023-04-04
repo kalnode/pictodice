@@ -65,7 +65,7 @@ function initScene() {
     // SCENE
     renderer = new THREE.WebGLRenderer({
         alpha: true,
-        antialias: true,
+        antialias: false,
         canvas: canvasEl
     })
 
@@ -78,10 +78,10 @@ function initScene() {
     // CAMERA
     camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000)
 
-    camera.position.set(3, 8, 0);
-    camera.lookAt(0, 0, 0);
-    //camera.position.set(2, 4, 10).multiplyScalar(7);
-    //camera.up.set(0, 0, -1);
+    camera.position.set(0.1, 8, 0)
+    //camera.lookAt(0, 0, 0)
+    //camera.position.set(2, 4, 10).multiplyScalar(7)
+    //camera.up.set(0, 0, -1)
 
     updateScene()
 
@@ -161,14 +161,20 @@ function setLighting() {
 }
 
 function createFloor() {
+
+
+console.log("createFloor container is: %O", container.clientWidth)
+console.log("createFloor container is: %O", container.clientHeight)
+//container.clientWidth / container.clientHeight
+
     const floor = new THREE.Mesh(
-        new THREE.PlaneGeometry(1000, 1000),
+        new THREE.PlaneGeometry(container.clientWidth, container.clientHeight),
         new THREE.ShadowMaterial({
             opacity: 0.1
         })
     )
     floor.receiveShadow = true
-    floor.position.y = -2
+    floor.position.y = 0
     floor.quaternion.setFromAxisAngle(new THREE.Vector3(-1, 0, 0), Math.PI * 0.5)
     scene.add(floor)
 
@@ -212,17 +218,22 @@ function createFloor() {
     */
 
     let walls = {
+
+        
         back: {
-            geometry: [5, 50, 30],
-            position: [-10,0,0]
+            // depth, width, vertical thickness
+            geometry: [6, 50, 30],
+
+            // in-out, vertical, left-right
+            position: [-10,15,0]
         },
         left: {
-            geometry: [50, 5, 30],
-            position: [0,0,30]
+            geometry: [50, 6, 30],
+            position: [12,15,28]
         },
         right: {
-            geometry: [50, 5, 30],
-            position: [0,0,-30]
+            geometry: [50, 6, 30],
+            position: [12,15,-28]
         }
     }
 

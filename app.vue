@@ -5,7 +5,7 @@
     ]">
 
         <header id="Header"
-        :class="currentRoute.name == 'index' ? 'absolute z-50' : ''"
+        :class="currentRoute.name == 'index' || currentRoute.name == 'threedtest' ? 'absolute z-50' : ''"
         :style="currentRoute.name == 'index' ? 'top:'+ (store.safeAreaInset.top+store.safeAreaPadding) +'px' : ''"
         class="w-full flex justify-center p-2">
             <transition name="fade" mode="out-in">
