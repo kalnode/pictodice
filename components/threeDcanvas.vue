@@ -112,7 +112,7 @@ function initScene() {
     // SCENE
     renderer = new THREE.WebGLRenderer({
         alpha: true,
-        antialias: false,
+        antialias: true,
         canvas: canvasEl
     })
     renderer.shadowMap.enabled = true
