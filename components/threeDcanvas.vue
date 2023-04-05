@@ -28,9 +28,13 @@ import * as BufferGeometryUtils from "three/examples/jsm/utils/BufferGeometryUti
 
 const store = usePhotodiceAppStore()
 
-let container, canvasEl, scoreResult, renderer, scene, camera, diceMesh, physicsWorld, controls
+let containerEl, canvasEl, container, scoreResult, renderer, scene, camera, diceMesh, physicsWorld, controls
 
-const params = {
+const fov = 30 // Lower = shallow perspective (easier on eyes, less "3d"); Higher = deep perspective (harsh, more "3d")
+const floorSize = 100 // Arbitrary inner world dimensions; "100" is a nice round number that's better for troubleshooting and head-math. Could be anything, like "1920" (e.g. browser viewport).
+const diceArray = []
+
+const diceParams = {
     numberOfDice: 2,
     segments: 40,
     edgeRadius: 0.07,
@@ -38,27 +42,43 @@ const params = {
     notchDepth: 0.1
 }
 
-const diceArray = []
 
 onMounted ( () => {
 
-    container = document.getElementById("threeDcanvas")
+    containerEl = document.getElementById("threeDcanvas")
     canvasEl = document.getElementById("canvas")
-    scoreResult = document.querySelector("#score-result")
+    scoreResult = document.getElementById("score-result")
 
+    container = {
+        width: containerEl.clientWidth,
+        height: containerEl.clientHeight,
+        aspect: containerEl.clientWidth / containerEl.clientHeight
+    }
+
+    updateContainer()
     initPhysics()
     initScene()
+    updateScene()
 
     window.addEventListener("resize", updateScene)
 
     renderScene()
 
-    console.log("3d canvas 444")
+    throwDice()
+
 })
 
 // =================================
 // FUNCTIONS
 // =================================
+
+function updateContainer() {
+    container = {
+        width: containerEl.clientWidth,
+        height: containerEl.clientHeight,
+        aspect: containerEl.clientWidth / containerEl.clientHeight
+    }
+}
 
 function initScene() {
 
@@ -68,28 +88,24 @@ function initScene() {
         antialias: false,
         canvas: canvasEl
     })
-
     renderer.shadowMap.enabled = true
     renderer.shadowMap.type = THREE.PCFSoftShadowMap
-
+    renderer.setSize(container.width, container.height)
     scene = new THREE.Scene()
 
 
     // CAMERA
-    camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000)
-
-    camera.position.set(0.1, 8, 0)
+    camera = new THREE.PerspectiveCamera(30, container.width / container.height, 1, 2000)
+    camera.position.set(0, 1, 0) // TODO: Why "1" here? If we do all zero's, scene is blank (until first interaction with orbit controls)
     //camera.lookAt(0, 0, 0)
     //camera.position.set(2, 4, 10).multiplyScalar(7)
     //camera.up.set(0, 0, -1)
-
-    updateScene()
-
 
     // CONTROLS
     //orbit = new MapControls(camera, canvasEl)
     //orbit.enableDamping = true
     controls = new OrbitControls(camera, renderer.domElement)
+
 
     // STATS
     /*
@@ -97,23 +113,22 @@ function initScene() {
     stats.domElement.style.position = "absolute"
     stats.domElement.style.bottom = "0px"
     stats.domElement.style.zIndex = 100
-    container.appendChild(stats.domElement)
+    containerEl.appendChild(stats.domElement)
     */
+
 
     // WORLD
     setLighting()
-    createFloor()
+    createRoom()
     //createSkybox()
+
 
     // OBJECTS
     diceMesh = createDiceMesh()
-
-    for (let i = 0; i < params.numberOfDice; i++) {
+    for (let i = 0; i < diceParams.numberOfDice; i++) {
         diceArray.push(createDice())
         addDiceEvents(diceArray[i])
     }
-
-    throwDice()
 
 
 }
@@ -121,7 +136,7 @@ function initScene() {
 function initPhysics() {
     physicsWorld = new CANNON.World({
         allowSleep: true,
-        gravity: new CANNON.Vec3(0, -50, 0)
+        gravity: new CANNON.Vec3(0, -500, 0)
     })
     physicsWorld.defaultContactMaterial.restitution = 0.3
     // physicsWorld.broadphase = new CANNON.NaiveBroadphase()
@@ -141,9 +156,33 @@ function renderScene() {
 }
 
 function updateScene() {
-    camera.aspect = container.clientWidth / container.clientHeight
+
+    updateContainer()
+
+    if ( container.width < container.height ) {
+        console.log("NARROW")
+        //this.camera.position.z = frameSize.x / this.camera.aspect / (2 * Math.tan(this.camera.fov / 2 * (Math.PI / 180)))
+        camera.position.y = ((100 * container.aspect) / camera.aspect) / (2 * Math.tan(fov / 2 * (Math.PI / 180)))
+        //camera.position.y = (100 / camera.aspect) / (2 * Math.tan(fov / 2 * (Math.PI / 180)))
+
+    } else {
+        console.log("WIDE")
+        //this.camera.position.z = frameSize.y / (2 * Math.tan(this.camera.fov / 2 * (Math.PI / 180)))
+
+        //WORKS
+        //camera.position.y = ((100 * container.aspect) / camera.aspect) / (2 * Math.tan(fov / 2 * (Math.PI / 180)))
+
+        //WORKS
+        //camera.position.y = ((100 * container.aspect) / camera.aspect) / (2 * Math.tan(fov / 2 * (Math.PI / 180)))
+
+        //camera.position.y = (100 / camera.aspect) / (2 * Math.tan(fov / 2 * (Math.PI / 180)))
+        camera.position.y = ((100 * container.aspect) / camera.aspect) / (2 * Math.tan(fov / 2 * (Math.PI / 180)))
+    }
+
+    camera.aspect = container.aspect
     camera.updateProjectionMatrix()
-    renderer.setSize(container.clientWidth, container.clientHeight)
+    renderer.setSize(container.width, container.height)
+
 }
 
 function setLighting() {
@@ -151,7 +190,7 @@ function setLighting() {
     scene.add(ambientLight)
 
     const topLight = new THREE.PointLight(0xffffff, 0.5)
-    topLight.position.set(10, 15, 0)
+    topLight.position.set(10, 55, 0)
     topLight.castShadow = true
     topLight.shadow.mapSize.width = 2048
     topLight.shadow.mapSize.height = 2048
@@ -160,18 +199,24 @@ function setLighting() {
     scene.add(topLight)
 }
 
-function createFloor() {
+function createRoom() {
 
+    // CREATE FLOOR AND WALLS
 
-console.log("createFloor container is: %O", container.clientWidth)
-console.log("createFloor container is: %O", container.clientHeight)
-//container.clientWidth / container.clientHeight
+    let floorWidth = floorSize * container.aspect
+    let floorHeight = floorSize
 
+    // ----------------
+    // FLOOR
+    // ----------------
+    //var geometry = new THREE.PlaneBufferGeometry( 110 * aspect, 110 );
     const floor = new THREE.Mesh(
-        new THREE.PlaneGeometry(container.clientWidth, container.clientHeight),
-        new THREE.ShadowMaterial({
-            opacity: 0.1
-        })
+        //new THREE.PlaneGeometry(containerEl.clientWidth, containerEl.clientHeight),
+        //new THREE.PlaneGeometry(containerWidth / 8, containerHeight / 8),
+        new THREE.PlaneGeometry(floorWidth, floorHeight),
+        //new THREE.PlaneGeometry(containerWidth, containerHeight),
+        new THREE.MeshBasicMaterial( { color: 0xff0000, opacity: 0.7 } )
+        //new THREE.ShadowMaterial({ opacity: 0.1 })
     )
     floor.receiveShadow = true
     floor.position.y = 0
@@ -187,68 +232,41 @@ console.log("createFloor container is: %O", container.clientHeight)
     physicsWorld.addBody(floorBody)
 
 
-    /*
-    wall_Back = new THREE.PlaneGeometry( 300, 300 );
-    wall_Back.applyMatrix( new THREE.Matrix4().makeRotationX( Math.PI));
-    wallMesh = new THREE.Mesh( wall_Back, material );
-    wallMesh.castShadow = false;
-    wallMesh.receiveShadow = true;
-    scene.add(wallMesh);
-    */
+    // ----------------
+    // WALLS
+    // ----------------
 
-    /*
-    var skyBoxMaterial = new THREE.MeshPhongMaterial({
-        color: 0x9999ff,
-        //side: THREE.BackSide
-    })
-    */
-
-    /*
-    geometry = new THREE.CubeGeometry( 50, 50, 50 );
-    material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } );
-    cube = new THREE.Mesh( geometry, material );
-    */
-
-
-    /*
-    const wall2 = new THREE.Mesh(
-        new THREE.PlaneGeometry(1000, 1000),
-        new THREE.MeshBasicMaterial( { color: 0x0000ff, wireframe: true} )
-    )
-    */
+    let wallThickness = 6
+    let wallHeight = 30
 
     let walls = {
-
-        
         back: {
-            // depth, width, vertical thickness
-            geometry: [6, 50, 30],
-
-            // in-out, vertical, left-right
-            position: [-10,15,0]
+            geometry: [floorWidth, wallThickness, wallHeight], // depth, width, vertical thickness
+            position: [0, wallHeight/2, -(floorHeight/2) - (wallThickness/2)] // in-out, up-down, left-right
         },
         left: {
-            geometry: [50, 6, 30],
-            position: [12,15,28]
+            geometry: [wallThickness, floorHeight, wallHeight],
+            position: [-(floorWidth/2) - (wallThickness/2), wallHeight/2, 0]
         },
         right: {
-            geometry: [50, 6, 30],
-            position: [12,15,-28]
-        }
+            geometry: [wallThickness, floorHeight, wallHeight],
+            position: [(floorWidth/2) + (wallThickness/2), wallHeight/2, 0]
+        },
+        front: {
+            geometry: [floorWidth, wallThickness, wallHeight],
+            position: [0, wallHeight/2, (floorHeight/2) + (wallThickness/2)]
+        },
     }
 
-    let wall_material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } )
+    let wall_material = new THREE.MeshBasicMaterial( { color: 0x0000ff, wireframe: true } )
 
     Object.values(walls).forEach(wall => {
-        console.log("Wall loop: %O", wall)
+
+        // WALL VISUAL
         let wall_geometry = new THREE.BoxGeometry(...wall.geometry)
-        //wall_Back.rotateY(85)
         let wall_scene = new THREE.Mesh( wall_geometry, wall_material )
-
         wall_scene.receiveShadow = true
-
-
-        
+        //wall_scene.castShadow = false
         wall_scene.position.x = wall.position[0]
         wall_scene.position.y = wall.position[1]
         wall_scene.position.z = wall.position[2]
@@ -272,6 +290,7 @@ console.log("createFloor container is: %O", container.clientHeight)
         wall_scene.quaternion.setFromAxisAngle(new THREE.Vector3(-1, 0, 0), Math.PI * 0.5)
         scene.add(wall_scene)
 
+        // WALL PHYSICS
         //let wallShape = new CANNON.Box(new CANNON.Vec3(15 / 2, 3 / 2, 0.5 / 2))
         let wall_body = new CANNON.Body({
             type: CANNON.Body.STATIC,
@@ -282,20 +301,7 @@ console.log("createFloor container is: %O", container.clientHeight)
         wall_body.quaternion.copy(wall_scene.quaternion)
         physicsWorld.addBody(wall_body)
 
-        /*
-        let wallShape = new CANNON.Box(new CANNON.Vec3(15 / 2, 3 / 2, 0.5 / 2))
-        let wallBody = new CANNON.Body({
-            type: CANNON.Body.STATIC,
-            mass: 0,
-            shape: wallShape,
-            //material: skyBoxMaterial
-        })
-        wallBody.position.y = 3 / 2
-        wallBody.position.z = -2
-        physicsWorld.addBody(wallBody)
-        */
     })
-
 
 
 }
@@ -321,14 +327,20 @@ function createSkybox() {
 
 function createDice() {
     const mesh = diceMesh.clone()
+    mesh.scale.set(20,20,20)
     scene.add(mesh)
 
     const body = new CANNON.Body({
         mass: 1,
-        shape: new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 0.5)),
+        //shape: new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 0.5)),
+        shape: new CANNON.Box(new CANNON.Vec3(10, 10, 10)), // Values should be HALF of what the mesh geometry values are
         sleepTimeLimit: 0.1
     })
     physicsWorld.addBody(body)
+
+    //mesh.scale.set(10,10,10);
+    //body.scale.set(10,10,10);
+
 
     return { mesh, body }
 }
@@ -359,13 +371,13 @@ function createBoxGeometry() {
         1,
         1,
         1,
-        params.segments,
-        params.segments,
-        params.segments
+        diceParams.segments,
+        diceParams.segments,
+        diceParams.segments
     )
 
     const positionAttr = boxGeometry.attributes.position
-    const subCubeHalfSize = 0.5 - params.edgeRadius
+    const subCubeHalfSize = 0.5 - diceParams.edgeRadius
 
     for (let i = 0; i < positionAttr.count; i++) {
 
@@ -384,14 +396,14 @@ function createBoxGeometry() {
         Math.abs(position.y) > subCubeHalfSize &&
         Math.abs(position.z) > subCubeHalfSize
         ) {
-            addition.normalize().multiplyScalar(params.edgeRadius)
+            addition.normalize().multiplyScalar(diceParams.edgeRadius)
             position = subCube.add(addition)
         } else if (
         Math.abs(position.x) > subCubeHalfSize &&
         Math.abs(position.y) > subCubeHalfSize
         ) {
             addition.z = 0
-            addition.normalize().multiplyScalar(params.edgeRadius)
+            addition.normalize().multiplyScalar(diceParams.edgeRadius)
             position.x = subCube.x + addition.x
             position.y = subCube.y + addition.y
         } else if (
@@ -399,7 +411,7 @@ function createBoxGeometry() {
         Math.abs(position.z) > subCubeHalfSize
         ) {
             addition.y = 0
-            addition.normalize().multiplyScalar(params.edgeRadius)
+            addition.normalize().multiplyScalar(diceParams.edgeRadius)
             position.x = subCube.x + addition.x
             position.z = subCube.z + addition.z
         } else if (
@@ -407,15 +419,15 @@ function createBoxGeometry() {
         Math.abs(position.z) > subCubeHalfSize
         ) {
             addition.x = 0
-            addition.normalize().multiplyScalar(params.edgeRadius)
+            addition.normalize().multiplyScalar(diceParams.edgeRadius)
             position.y = subCube.y + addition.y
             position.z = subCube.z + addition.z
         }
 
         const notchWave = (v) => {
-            v = (1 / params.notchRadius) * v
+            v = (1 / diceParams.notchRadius) * v
             v = Math.PI * Math.max(-1, Math.min(1, v))
-            return params.notchDepth * (Math.cos(v) + 1)
+            return diceParams.notchDepth * (Math.cos(v) + 1)
         }
 
         const notch = (pos) => notchWave(pos[0]) * notchWave(pos[1])
@@ -466,8 +478,8 @@ function createBoxGeometry() {
 function createInnerGeometry() {
 
     const baseGeometry = new THREE.PlaneGeometry(
-        1 - 2 * params.edgeRadius,
-        1 - 2 * params.edgeRadius
+        1 - 2 * diceParams.edgeRadius,
+        1 - 2 * diceParams.edgeRadius
     )
 
     const offset = 0.48
@@ -542,30 +554,35 @@ function throwDice() {
 
     scoreResult.innerHTML = ""
 
-    diceArray.forEach((d, dIdx) => {
+    diceArray.forEach((die, index) => {
 
-        console.log("Throwing dice")
-        d.body.velocity.setZero()
-        d.body.angularVelocity.setZero()
+        //console.log("Throwing dice die: %O", die)
+        //console.log("Throwing dice index: %O", index)
 
-        d.body.position = new CANNON.Vec3(2, dIdx * 1.5, 0);
-        d.mesh.position.copy(d.body.position)
+        // MOTION
+        die.body.velocity.setZero()
+        die.body.angularVelocity.setZero()
 
-        d.mesh.rotation.set(
-            2 * Math.PI * Math.random(),
-            0,
-            2 * Math.PI * Math.random()
-        )
-        d.body.quaternion.copy(d.mesh.quaternion)
+        // POSITION
+        //d.body.position = new CANNON.Vec3(2, index * 1.5, 0)
+        die.body.position = new CANNON.Vec3(0, (index+1) * 50, 0)
+        die.mesh.position.copy(die.body.position)
 
-        const force = 3 + (5 * Math.random())
+        // ROTATION
+        //die.mesh.rotation.set( 2 * Math.PI * Math.random(),   0,  2 * Math.PI * Math.random()  )
+        die.mesh.rotation.set( 2 * Math.PI * Math.random(),   0,  2 * Math.PI * Math.random()  )
+        die.body.quaternion.copy(die.mesh.quaternion)
 
-        d.body.applyImpulse(
+        // RANDOM FORCE
+        const force = 33 + (55 * Math.random())
+
+        // APPLY
+        die.body.applyImpulse(
             new CANNON.Vec3(-force, force, 0),
             new CANNON.Vec3(0, 0, 0.2)
         )
 
-        d.body.allowSleep = true
+        die.body.allowSleep = true
     })
 }
 
