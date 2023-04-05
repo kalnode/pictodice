@@ -42,6 +42,16 @@ const diceParams = {
     notchDepth: 0.1
 }
 
+const floor = {
+    mesh: null,
+    physicsBody: null
+}
+
+const walls = {
+    meshes: [],
+    physicsBodies: []
+}
+
 
 onMounted ( () => {
 
@@ -49,18 +59,25 @@ onMounted ( () => {
     canvasEl = document.getElementById("canvas")
     scoreResult = document.getElementById("score-result")
 
+    /*
     container = {
         width: containerEl.clientWidth,
         height: containerEl.clientHeight,
         aspect: containerEl.clientWidth / containerEl.clientHeight
     }
+    */
 
     updateContainer()
     initPhysics()
     initScene()
     updateScene()
 
-    window.addEventListener("resize", updateScene)
+    //window.addEventListener("resize", updateScene)
+
+    window.addEventListener("resize", debounceKal( (e) => {
+        console.log("resize event")
+        updateScene()
+    }, 300))
 
     renderScene()
 
@@ -71,6 +88,16 @@ onMounted ( () => {
 // =================================
 // FUNCTIONS
 // =================================
+
+function debounceKal (func, time) {
+    var time = time || 100
+    var timer
+    return function (event) {
+        if (timer) clearTimeout(timer)
+        timer = setTimeout(func, time, event)
+    }
+}
+
 
 function updateContainer() {
     container = {
@@ -119,7 +146,7 @@ function initScene() {
 
     // WORLD
     setLighting()
-    createRoom()
+    //createRoom()
     //createSkybox()
 
 
@@ -155,10 +182,19 @@ function renderScene() {
     renderer.render(scene, camera)
 }
 
-function updateScene() {
+async function updateScene() {
+
+    console.log("updating scene")
 
     updateContainer()
+    camera.aspect = container.aspect
 
+    await clearScene()
+    await createRoom()
+    //floor.mesh.position.x = -50
+
+//setTimeout(() => {
+    
     if ( container.width < container.height ) {
         console.log("NARROW")
         //this.camera.position.z = frameSize.x / this.camera.aspect / (2 * Math.tan(this.camera.fov / 2 * (Math.PI / 180)))
@@ -178,10 +214,12 @@ function updateScene() {
         //camera.position.y = (100 / camera.aspect) / (2 * Math.tan(fov / 2 * (Math.PI / 180)))
         camera.position.y = ((100 * container.aspect) / camera.aspect) / (2 * Math.tan(fov / 2 * (Math.PI / 180)))
     }
+    //camera.position.z = 0
 
-    camera.aspect = container.aspect
+
     camera.updateProjectionMatrix()
     renderer.setSize(container.width, container.height)
+//}, 2000);
 
 }
 
@@ -190,16 +228,115 @@ function setLighting() {
     scene.add(ambientLight)
 
     const topLight = new THREE.PointLight(0xffffff, 0.5)
-    topLight.position.set(10, 55, 0)
+    topLight.position.set(0, 150, 20)
     topLight.castShadow = true
     topLight.shadow.mapSize.width = 2048
     topLight.shadow.mapSize.height = 2048
-    topLight.shadow.camera.near = 5
+    topLight.shadow.camera.near = 80
     topLight.shadow.camera.far = 400
     scene.add(topLight)
 }
 
-function createRoom() {
+function rebuildRoom() {
+    //let floorWidth = floorSize * container.aspect
+    //let floorHeight = floorSize
+
+    //floor.mesh.scale.set(floorWidth,0,floorHeight)
+    
+    /*
+    floor.mesh.geometry = {
+        width: floorWidth,
+        height: floorHeight
+    }
+    */
+    //floor.mesh.scale.set(floorWidth, floorHeight, 1)
+
+    //floor.mesh.updateMatrix()
+}
+
+
+function clearScene() {
+
+    console.log("clearScene !!!!!!!!!!!!!!!!")
+
+    return new Promise ( async (resolve, reject) => {
+        scene.children.forEach( async sceneObject => {
+
+            //if (!(sceneObject instanceof THREE.Object3D)) return;
+
+            if (sceneObject.appClass == 'room') {
+
+                console.log("scene object is: %O", sceneObject)
+
+                // Remove geometries to free GPU resources
+                if (sceneObject.geometry) sceneObject.geometry.dispose();
+
+                // Remove materials to free GPU resources
+                if (sceneObject.material) {
+                    if (sceneObject.material instanceof Array) {
+                        await sceneObject.material.forEach(material => material.dispose())
+                    } else {
+                        await sceneObject.material.dispose()
+                    }
+                }
+
+                // Remove object from scene
+                scene.remove(sceneObject) // OR sceneObject.removeFromParent()
+
+                //physicsWorld.remove(sceneObject)
+            }
+        })
+
+        console.log("physicsWorld is: %O", physicsWorld)
+
+        
+        
+        physicsWorld.bodies.forEach( async object => {
+
+            if (object.appClass == 'room') {
+
+                console.log("physicsWorld object is: %O", object)
+                await physicsWorld.removeBody(object)
+                //physicsWorld.removeBody
+                //object.world.remove()
+            }
+
+        })
+        
+
+
+        resolve()
+
+        //scene.clear(); // Remove all other object children that aren't Object3D instance e.g DirectionalLight
+
+        // Remove any registered listeners
+        //domTarget.removeEventListener("pointermove", onPointerMove);
+        //window.removeEventListener("resize", onWindowResize);
+        //domTarget.removeChild(renderer.domElement);
+
+        // Manually clear webgl instance/context and free up CPU memory
+        /*
+        renderer.renderLists.dispose();
+        renderer.forceContextLoss();
+        renderer.context = null;
+        renderer.domElement = null;
+        renderer.dispose();
+        renderer = null;
+        scene = null;
+        camera = null;
+        */
+    })
+}
+
+async function createRoom() {
+
+    console.log("CREATING ROOM ++++++++++++++++++++++++++++++")
+
+    floor.mesh = null
+    floor.physicsBody = null
+
+    walls.meshes = []
+    walls.physicsBodies = []
 
     // CREATE FLOOR AND WALLS
 
@@ -209,37 +346,38 @@ function createRoom() {
     // ----------------
     // FLOOR
     // ----------------
-    //var geometry = new THREE.PlaneBufferGeometry( 110 * aspect, 110 );
-    const floor = new THREE.Mesh(
-        //new THREE.PlaneGeometry(containerEl.clientWidth, containerEl.clientHeight),
-        //new THREE.PlaneGeometry(containerWidth / 8, containerHeight / 8),
+    floor.mesh = new THREE.Mesh(
+        //new THREE.PlaneBufferGeometry(floorWidth, floorHeight)
         new THREE.PlaneGeometry(floorWidth, floorHeight),
-        //new THREE.PlaneGeometry(containerWidth, containerHeight),
-        new THREE.MeshBasicMaterial( { color: 0xff0000, opacity: 0.7 } )
-        //new THREE.ShadowMaterial({ opacity: 0.1 })
+        //new THREE.MeshBasicMaterial( { color: 0xff0000, opacity: 0.7 } )
+        new THREE.ShadowMaterial({ opacity: 0.1 })
     )
-    floor.receiveShadow = true
-    floor.position.y = 0
-    floor.quaternion.setFromAxisAngle(new THREE.Vector3(-1, 0, 0), Math.PI * 0.5)
-    scene.add(floor)
+    floor.mesh.receiveShadow = true
+    floor.mesh.position.y = 0
+    floor.mesh.quaternion.setFromAxisAngle(new THREE.Vector3(-1, 0, 0), Math.PI * 0.5)
+    floor.mesh.name="floor"
+    floor.mesh.appClass="room"
+    await scene.add(floor.mesh)
 
-    const floorBody = new CANNON.Body({
+    floor.physicsBody = new CANNON.Body({
         type: CANNON.Body.STATIC,
         shape: new CANNON.Plane()
     })
-    floorBody.position.copy(floor.position)
-    floorBody.quaternion.copy(floor.quaternion)
-    physicsWorld.addBody(floorBody)
+    floor.physicsBody.position.copy(floor.mesh.position)
+    floor.physicsBody.quaternion.copy(floor.mesh.quaternion)
+    floor.physicsBody.appClass = "room"
+    await physicsWorld.addBody(floor.physicsBody)
 
+    //updateFloor()
 
     // ----------------
     // WALLS
     // ----------------
 
     let wallThickness = 6
-    let wallHeight = 30
+    let wallHeight = 100
 
-    let walls = {
+    let wallPresets = {
         back: {
             geometry: [floorWidth, wallThickness, wallHeight], // depth, width, vertical thickness
             position: [0, wallHeight/2, -(floorHeight/2) - (wallThickness/2)] // in-out, up-down, left-right
@@ -260,7 +398,12 @@ function createRoom() {
 
     let wall_material = new THREE.MeshBasicMaterial( { color: 0x0000ff, wireframe: true } )
 
-    Object.values(walls).forEach(wall => {
+    Object.entries(wallPresets).forEach(async entry => {
+        //console.log("entry %O", entry)
+        let [wallName, wall] = entry
+
+        console.log("wallName %O", wallName)
+        //console.log("wall %O", wall)
 
         // WALL VISUAL
         let wall_geometry = new THREE.BoxGeometry(...wall.geometry)
@@ -288,7 +431,16 @@ function createRoom() {
         */
 
         wall_scene.quaternion.setFromAxisAngle(new THREE.Vector3(-1, 0, 0), Math.PI * 0.5)
-        scene.add(wall_scene)
+
+        wall_scene.name=wallName
+        wall_scene.appClass="room"
+
+
+        await scene.add(wall_scene)
+
+        // STORE THE WALL
+        walls.meshes.push(wall_scene)
+
 
         // WALL PHYSICS
         //let wallShape = new CANNON.Box(new CANNON.Vec3(15 / 2, 3 / 2, 0.5 / 2))
@@ -299,8 +451,11 @@ function createRoom() {
         })
         wall_body.position.copy(wall_scene.position)
         wall_body.quaternion.copy(wall_scene.quaternion)
-        physicsWorld.addBody(wall_body)
+        wall_body.appClass = "room"
+        await physicsWorld.addBody(wall_body)
 
+        // STORE THE BODY
+        walls.physicsBodies.push(wall_scene)
     })
 
 
@@ -565,12 +720,12 @@ function throwDice() {
 
         // POSITION
         //d.body.position = new CANNON.Vec3(2, index * 1.5, 0)
-        die.body.position = new CANNON.Vec3(0, (index+1) * 50, 0)
+        die.body.position = new CANNON.Vec3(generateRandomInteger(1,10), (index+1) * 50, generateRandomInteger(1,10))
         die.mesh.position.copy(die.body.position)
 
         // ROTATION
         //die.mesh.rotation.set( 2 * Math.PI * Math.random(),   0,  2 * Math.PI * Math.random()  )
-        die.mesh.rotation.set( 2 * Math.PI * Math.random(),   0,  2 * Math.PI * Math.random()  )
+        die.mesh.rotation.set( 2 * Math.PI * Math.random(), 0, 2 * Math.PI * Math.random()  )
         die.body.quaternion.copy(die.mesh.quaternion)
 
         // RANDOM FORCE
@@ -578,14 +733,17 @@ function throwDice() {
 
         // APPLY
         die.body.applyImpulse(
-            new CANNON.Vec3(-force, force, 0),
-            new CANNON.Vec3(0, 0, 0.2)
+            new CANNON.Vec3(generateRandomInteger(8,12), force, -generateRandomInteger(8,12)), // left-right, gravity, top-bottom
+            new CANNON.Vec3(generateRandomInteger(8,18), generateRandomInteger(4,12), -generateRandomInteger(8,18))
         )
 
         die.body.allowSleep = true
     })
 }
 
+function generateRandomInteger(min, max) {
+    return Math.floor(min + Math.random()*(max - min + 1))
+}
 
 function showRollResults(score) {
     if (scoreResult.innerHTML === "") {
