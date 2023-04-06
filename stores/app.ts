@@ -91,6 +91,7 @@ export const usePhotodiceAppStore = defineStore('PhotoDiceApp', {
         // DICE
         currentDie: 0,
         customDie: 5,
+        rolling: false,
 
 
         diceSets: <DiceSet[]>[

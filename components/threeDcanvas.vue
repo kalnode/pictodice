@@ -9,11 +9,13 @@
         -->
 
         <!-- BUTTON: ROLL -->
-        <div class="absolute mb-6 pointer-events-auto z-50 flex justify-center"
-        :style="'bottom:'+ (store.safeAreaInset.bottom+store.safeAreaPadding) +'px'">
-            <div @click="throwDice()" class="p-4 px-8 rounded-full bg-white hover:bg-gray-100 text-teal-800 hover:scale-105 transition cursor-pointer">ROLL</div>
-            <div class="absolute text-black text-center" style="top:-50%">Score: <span id="score-result"></span></div>
-        </div>
+        <transition name="fade">
+            <div v-if="!store.rolling" class="absolute mb-6 pointer-events-auto z-50 flex justify-center"
+            :style="'bottom:'+ (store.safeAreaInset.bottom+store.safeAreaPadding) +'px'">
+                <div @click="throwDice()" class="p-4 px-8 rounded-full bg-white hover:bg-gray-100 text-teal-800 hover:scale-105 transition cursor-pointer">ROLL</div>
+                <div class="absolute text-black text-center" style="top:-50%">Score: {{scoreResult}}</div>
+            </div>
+        </transition>
     </div>
 </template>
 
@@ -28,18 +30,30 @@ import * as BufferGeometryUtils from "three/examples/jsm/utils/BufferGeometryUti
 
 const store = usePhotodiceAppStore()
 
-let containerEl, canvasEl, container, scoreResult, renderer, scene, camera, diceMesh, physicsWorld, controls
+let containerEl, canvasEl, container, renderer, scene, camera, diceMesh, physicsWorld, controls, rollTimer
 
 const fov = 30 // Lower = shallow perspective (easier on eyes, less "3d"); Higher = deep perspective (harsh, more "3d")
 const floorSize = 100 // Arbitrary inner world dimensions; "100" is a nice round number that's better for troubleshooting and head-math. Could be anything, like "1920" (e.g. browser viewport).
 const diceArray = []
 
+const scoreResult = ref()
+
 const diceParams = {
-    numberOfDice: 2,
+    // GENERAL
+    //currentNumDice: 8, // TODO: We should set limit between 1 and 8
+    numDice: { current: 2, min: 1, max: 8 },
+    scale: 10, // Scale baseline; we adjust this later according to viewport real estate
+
+    // TODO: Setup system such that, in the same viewport, user has option to make fewer-dice scale larger. For instance, 2 dice can be much larger than a 8.
+
+    // GEOMETRY
     segments: 40,
     edgeRadius: 0.07,
+
+    // TODO: Make notches optional and only available for classic dice. All other dice facings should be flat.
     notchRadius: 0.12,
-    notchDepth: 0.1
+    notchDepth: 0.1,
+
 }
 
 const floor = {
@@ -57,7 +71,6 @@ onMounted ( () => {
 
     containerEl = document.getElementById("threeDcanvas")
     canvasEl = document.getElementById("canvas")
-    scoreResult = document.getElementById("score-result")
 
     /*
     container = {
@@ -75,7 +88,6 @@ onMounted ( () => {
     //window.addEventListener("resize", updateScene)
 
     window.addEventListener("resize", debounceKal( (e) => {
-        console.log("resize event")
         updateScene()
     }, 300))
 
@@ -105,7 +117,19 @@ function updateContainer() {
         height: containerEl.clientHeight,
         aspect: containerEl.clientWidth / containerEl.clientHeight
     }
-}
+
+    // SET DICE SCALE
+    // Based on measurement of fitting maximum number of dice in the smallest dimension
+    // plus some padding of say 10%
+    let distance = Math.min(floorSize * container.aspect, floorSize) //Math.min(container.width, container.height)
+    let maximumSize = (distance - ((80 / 100) * distance))
+    let calculatedScale = (distance - ((10 / 100) * distance)) / (diceParams.numDice.current)
+    console.log("shorter distance is: %O", distance)
+    console.log("calculatedScale: %O", calculatedScale)
+    console.log("maximumSize is: %O", maximumSize)
+    diceParams.scale = Math.min(calculatedScale, maximumSize) // (distance - ((10 / 100) * distance))
+    //console.log("dice scale is: %O", diceParams.scale)
+} 
 
 function initScene() {
 
@@ -118,6 +142,9 @@ function initScene() {
     renderer.shadowMap.enabled = true
     renderer.shadowMap.type = THREE.PCFSoftShadowMap
     renderer.setSize(container.width, container.height)
+
+    // TODO: Look into setPixelRatio esp when it comes to mobile screens
+    //renderer.setPixelRatio(window.devicePixelRatio)
     scene = new THREE.Scene()
 
 
@@ -150,14 +177,16 @@ function initScene() {
     //createSkybox()
 
 
+}
+
+async function createDice() {
+
     // OBJECTS
-    diceMesh = createDiceMesh()
-    for (let i = 0; i < diceParams.numberOfDice; i++) {
-        diceArray.push(createDice())
+    diceMesh = await createDiceMesh()
+    for (let i = 0; i < diceParams.numDice.current; i++) {
+        diceArray.push(createDiceGroup())
         addDiceEvents(diceArray[i])
     }
-
-
 }
 
 function initPhysics() {
@@ -165,7 +194,18 @@ function initPhysics() {
         allowSleep: true,
         gravity: new CANNON.Vec3(0, -500, 0)
     })
-    physicsWorld.defaultContactMaterial.restitution = 0.3
+
+    /*
+    var slipperyMat = new CANNON.Material()
+    var friction = 0.0
+    var restitution = 1
+    var slipperyContact = new CANNON.ContactMaterial(slipperyMat,slipperyMat,friction,restitution)
+    */
+    //world.addContactMaterial(slipperyContact)
+    
+
+    //physicsWorld.defaultContactMaterial.friction = 1
+    physicsWorld.defaultContactMaterial.restitution = 0.2
     // physicsWorld.broadphase = new CANNON.NaiveBroadphase()
     // physicsWorld.solver.iterations = 16
 }
@@ -184,25 +224,19 @@ function renderScene() {
 
 async function updateScene() {
 
-    console.log("updating scene")
-
     updateContainer()
     camera.aspect = container.aspect
-
     await clearScene()
     await createRoom()
-    //floor.mesh.position.x = -50
+    await createDice()
 
-//setTimeout(() => {
-    
+    // TODO: We're using an identical calculation here, but it seems to work. Why? Is this lucky coincidence, or is it actually proper?
     if ( container.width < container.height ) {
-        console.log("NARROW")
         //this.camera.position.z = frameSize.x / this.camera.aspect / (2 * Math.tan(this.camera.fov / 2 * (Math.PI / 180)))
         camera.position.y = ((100 * container.aspect) / camera.aspect) / (2 * Math.tan(fov / 2 * (Math.PI / 180)))
         //camera.position.y = (100 / camera.aspect) / (2 * Math.tan(fov / 2 * (Math.PI / 180)))
 
     } else {
-        console.log("WIDE")
         //this.camera.position.z = frameSize.y / (2 * Math.tan(this.camera.fov / 2 * (Math.PI / 180)))
 
         //WORKS
@@ -219,7 +253,9 @@ async function updateScene() {
 
     camera.updateProjectionMatrix()
     renderer.setSize(container.width, container.height)
-//}, 2000);
+    //renderer.setPixelRatio(window.devicePixelRatio);
+
+    throwDice()
 
 }
 
@@ -260,49 +296,42 @@ function clearScene() {
     console.log("clearScene !!!!!!!!!!!!!!!!")
 
     return new Promise ( async (resolve, reject) => {
-        scene.children.forEach( async sceneObject => {
+        
+        let objects = scene.children.filter(x => x.appClass == 'room' || x.appClass == 'dice')
 
-            //if (!(sceneObject instanceof THREE.Object3D)) return;
+        objects.forEach( async object => {
 
-            if (sceneObject.appClass == 'room') {
+            //if (!(object instanceof THREE.Object3D)) return;
 
-                console.log("scene object is: %O", sceneObject)
+            if (object.appClass == 'room' || object.appClass == 'dice') {
 
                 // Remove geometries to free GPU resources
-                if (sceneObject.geometry) sceneObject.geometry.dispose();
+                if (object.geometry) await object.geometry.dispose()
 
                 // Remove materials to free GPU resources
-                if (sceneObject.material) {
-                    if (sceneObject.material instanceof Array) {
-                        await sceneObject.material.forEach(material => material.dispose())
+                if (object.material) {
+                    if (object.material instanceof Array) {
+                        await object.material.forEach(material => material.dispose())
                     } else {
-                        await sceneObject.material.dispose()
+                        await object.material.dispose()
                     }
                 }
 
                 // Remove object from scene
-                scene.remove(sceneObject) // OR sceneObject.removeFromParent()
-
-                //physicsWorld.remove(sceneObject)
+                await scene.remove(object) // OR object.removeFromParent()
             }
         })
 
-        console.log("physicsWorld is: %O", physicsWorld)
-
-        
-        
         physicsWorld.bodies.forEach( async object => {
 
-            if (object.appClass == 'room') {
+            if (object.appClass == 'room' || object.appClass == 'dice') {
 
-                console.log("physicsWorld object is: %O", object)
                 await physicsWorld.removeBody(object)
                 //physicsWorld.removeBody
                 //object.world.remove()
             }
 
         })
-        
 
 
         resolve()
@@ -329,8 +358,6 @@ function clearScene() {
 }
 
 async function createRoom() {
-
-    console.log("CREATING ROOM ++++++++++++++++++++++++++++++")
 
     floor.mesh = null
     floor.physicsBody = null
@@ -375,7 +402,7 @@ async function createRoom() {
     // ----------------
 
     let wallThickness = 6
-    let wallHeight = 100
+    let wallHeight = 200
 
     let wallPresets = {
         back: {
@@ -402,8 +429,6 @@ async function createRoom() {
         //console.log("entry %O", entry)
         let [wallName, wall] = entry
 
-        console.log("wallName %O", wallName)
-        //console.log("wall %O", wall)
 
         // WALL VISUAL
         let wall_geometry = new THREE.BoxGeometry(...wall.geometry)
@@ -413,7 +438,7 @@ async function createRoom() {
         wall_scene.position.x = wall.position[0]
         wall_scene.position.y = wall.position[1]
         wall_scene.position.z = wall.position[2]
-        
+
         // WORKS:
         //wall.position.y = 0
         //wall.position.x = -10
@@ -480,22 +505,26 @@ function createSkybox() {
 // DICE FUNCTIONS
 // ----------------------------------
 
-function createDice() {
+function createDiceGroup() {
     const mesh = diceMesh.clone()
-    mesh.scale.set(20,20,20)
+    mesh.scale.set(diceParams.scale,diceParams.scale,diceParams.scale)
+    mesh.appClass = "dice"
     scene.add(mesh)
+    
+    let physicsBoxGeometry = [ diceParams.scale/2, diceParams.scale/2, diceParams.scale/2 ]
 
     const body = new CANNON.Body({
         mass: 1,
         //shape: new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 0.5)),
-        shape: new CANNON.Box(new CANNON.Vec3(10, 10, 10)), // Values should be HALF of what the mesh geometry values are
-        sleepTimeLimit: 0.1
+        shape: new CANNON.Box(new CANNON.Vec3(...physicsBoxGeometry)), // Values should be HALF of what the mesh geometry values are
+        sleepTimeLimit: 0.1,
+        //sleepSpeedLimit: 0.1
     })
+    body.appClass = "dice"
     physicsWorld.addBody(body)
 
     //mesh.scale.set(10,10,10);
     //body.scale.set(10,10,10);
-
 
     return { mesh, body }
 }
@@ -701,18 +730,38 @@ function addDiceEvents(dice) {
             // landed on edge => wait to fall on side and fire the event again
             dice.body.allowSleep = true
         }
+
+        checkDiceStoppedMoving()
     })
 }
 
+function checkDiceStoppedMoving() {
+
+    let diceStillMoving = diceArray.filter( x => x.body.allowSleep == true)
+
+    let timeDiff = Math.round(new Date() - rollTimer  / 1000)
+
+    if (diceStillMoving.length == 0 || timeDiff > 2.5) {
+        console.log("All dice stopped")
+        store.rolling = false
+
+        /*
+        if (timeDiff > 2.5) {
+            scoreResult.value = "Roll unfinished"
+        }
+        */
+    }
+
+}
 
 function throwDice() {
 
-    scoreResult.innerHTML = ""
+    store.rolling = true
+    rollTimer = new Date()
+
+    scoreResult.value = null
 
     diceArray.forEach((die, index) => {
-
-        //console.log("Throwing dice die: %O", die)
-        //console.log("Throwing dice index: %O", index)
 
         // MOTION
         die.body.velocity.setZero()
@@ -720,21 +769,28 @@ function throwDice() {
 
         // POSITION
         //d.body.position = new CANNON.Vec3(2, index * 1.5, 0)
-        die.body.position = new CANNON.Vec3(generateRandomInteger(1,10), (index+1) * 50, generateRandomInteger(1,10))
+        const throwHeight = () => {
+            return generateRandomInteger(40, 150) //(index+2) * (diceParams.scale - ((40 / 100) * diceParams.scale))
+        }
+        die.body.position = new CANNON.Vec3(generateRandomInteger(-10,10), generateRandomInteger(70, 150), generateRandomInteger(-10,10))
         die.mesh.position.copy(die.body.position)
 
         // ROTATION
         //die.mesh.rotation.set( 2 * Math.PI * Math.random(),   0,  2 * Math.PI * Math.random()  )
-        die.mesh.rotation.set( 2 * Math.PI * Math.random(), 0, 2 * Math.PI * Math.random()  )
+        die.mesh.rotation.set( 2 * Math.PI * Math.random(), 2 * Math.PI * Math.random(), 2 * Math.PI * Math.random())
         die.body.quaternion.copy(die.mesh.quaternion)
 
         // RANDOM FORCE
-        const force = 33 + (55 * Math.random())
+        const force = 33 + (35 * Math.random())
 
         // APPLY
         die.body.applyImpulse(
-            new CANNON.Vec3(generateRandomInteger(8,12), force, -generateRandomInteger(8,12)), // left-right, gravity, top-bottom
-            new CANNON.Vec3(generateRandomInteger(8,18), generateRandomInteger(4,12), -generateRandomInteger(8,18))
+
+            // POSITION
+            new CANNON.Vec3(generateRandomInteger(-4,32), force, -generateRandomInteger(-8,32)), // left-right, gravity, top-bottom
+
+            // ROTATION
+            new CANNON.Vec3(generateRandomInteger(3,4)*(100/diceParams.scale), generateRandomInteger(3,4)*(100/diceParams.scale), -generateRandomInteger(3,4)*(100/diceParams.scale))
         )
 
         die.body.allowSleep = true
@@ -742,14 +798,15 @@ function throwDice() {
 }
 
 function generateRandomInteger(min, max) {
+    // TODO: We want min to be able to be a negative number. e.g. want want to be able to get random inside -10 to 10, for instance.
     return Math.floor(min + Math.random()*(max - min + 1))
 }
 
 function showRollResults(score) {
-    if (scoreResult.innerHTML === "") {
-        scoreResult.innerHTML += score
+    if (!scoreResult.value) {
+        scoreResult.value += score
     } else {
-        scoreResult.innerHTML += "+" + score
+        scoreResult.value += "+" + score
     }
 }
 

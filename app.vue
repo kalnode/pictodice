@@ -4,17 +4,19 @@
         store.safeAreaInset.bottom ? 'padding-bottom:'+(store.safeAreaInset.bottom+store.safeAreaPadding)+'px' : ''
     ]">
 
-        <header id="Header"
-        :class="currentRoute.name == 'index' || currentRoute.name == 'threedtest' ? 'absolute z-50' : ''"
-        :style="currentRoute.name == 'index' ? 'top:'+ (store.safeAreaInset.top+store.safeAreaPadding) +'px' : ''"
-        class="w-full flex justify-center p-2">
-            <transition name="fade" mode="out-in">
-                <NuxtLink :to="currentRoute.name == 'index' ? '/' : currentRoute.name" :key="'title-'+currentRoute.name">
-                    <h1 class="p-1.5 text-3xl font-bold uppercase text-teal-900 hover:text-teal-200 hover:scale-110 transition-transform">{{ currentRoute.meta.title }}</h1>
-                </NuxtLink>
-            </transition>
-            <!-- <Logo /> -->
-        </header>
+        <transition name="fade">
+            <header v-if="!store.rolling" id="Header"
+            :class="currentRoute.name == 'index' || currentRoute.name == 'threedtest' ? 'absolute z-50' : ''"
+            :style="currentRoute.name == 'index' ? 'top:'+ (store.safeAreaInset.top+store.safeAreaPadding) +'px' : ''"
+            class="w-full flex justify-center p-2">
+                <transition name="fade" mode="out-in">
+                    <NuxtLink :to="currentRoute.name == 'index' ? '/' : currentRoute.name" :key="'title-'+currentRoute.name">
+                        <h1 class="p-1.5 text-3xl font-bold uppercase text-teal-900 hover:text-teal-200 hover:scale-110 transition-transform">{{ currentRoute.meta.title }}</h1>
+                    </NuxtLink>
+                </transition>
+                <!-- <Logo /> -->
+            </header>
+        </transition>
 
         <div v-if="store.showPromptMotionPermission"
         class="flex justify-center space-x-2 items-center absolute top-4 mt-12 mx-4 z-50 pointer-events-auto bg-yellow-200 text-xs p-2 text-orange-800"
@@ -42,7 +44,10 @@
         <!-- NAVIGATION -->
         <nav class="z-40 absolute bottom-0 w-full pointer-events-none"
         :style="'bottom:'+ (store.safeAreaInset.bottom) +'px'">
-            <Navigation id="Navigation" class="w-full" />
+
+            <transition name="fade">
+                <Navigation v-if="!store.rolling" id="Navigation" class="w-full" />
+            </transition>
         </nav>
 
         <!-- OFFLINE EXPERIENCE -->

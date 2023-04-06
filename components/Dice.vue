@@ -8,14 +8,15 @@
         </div>
 
         <!-- BUTTON: ROLL -->
-        <div id="buttonRoll" class="absolute mb-6"
-        :style="'bottom:'+ (store.safeAreaInset.bottom+store.safeAreaPadding) +'px'">
-            <div @click="getRandomDieFace()" class="p-4 px-8 rounded-full bg-white hover:bg-gray-100 text-teal-800 hover:scale-105 transition cursor-pointer">ROLL</div>
-        </div>
+        <transition name="fade">
+            <div v-if="!store.rolling" id="buttonRoll" class="absolute mb-6"
+            :style="'bottom:'+ (store.safeAreaInset.bottom+store.safeAreaPadding) +'px'">
+                <div @click="getRandomDieFace()" class="p-4 px-8 rounded-full bg-white hover:bg-gray-100 text-teal-800 hover:scale-105 transition cursor-pointer">ROLL</div>
+            </div>
+        </transition>
 
         <!-- DIE -->
         <Die :Die="store.dice[store.currentDie]" :DieState="DieState" @click="getRandomDieFace()" />
-
         <!-- {{ DieState }} -->
 
     </div>
