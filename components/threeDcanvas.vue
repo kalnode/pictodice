@@ -26,11 +26,20 @@ import * as THREE from 'three'
 import * as CANNON from 'cannon-es'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 //import { MapControls } from "three/examples/jsm/controls/OrbitControls";
-import * as BufferGeometryUtils from "three/examples/jsm/utils/BufferGeometryUtils";
+import * as BufferGeometryUtils from "three/examples/jsm/utils/BufferGeometryUtils"
+
+// TODO: Convert this component to typescript, and make use of these interfaces
+//import { Die, DieState, DiceSet } from '~/stores/app'
 
 const store = usePhotodiceAppStore()
 
-let containerEl, canvasEl, container, renderer, scene, camera, diceMesh, physicsWorld, controls, rollTimer
+let containerEl, canvasEl, container, renderer, scene, camera, mesh_classicDice, physicsWorld, controls, rollTimer
+
+
+// TODO: Make this typescript
+const props = defineProps({
+    Dice: Object
+})
 
 const fov = 30 // Lower = shallow perspective (easier on eyes, less "3d"); Higher = deep perspective (harsh, more "3d")
 const floorSize = 100 // Arbitrary inner world dimensions; "100" is a nice round number that's better for troubleshooting and head-math. Could be anything, like "1920" (e.g. browser viewport).
@@ -47,7 +56,8 @@ const diceParams = {
     // TODO: Setup system such that, in the same viewport, user has option to make fewer-dice scale larger. For instance, 2 dice can be much larger than a 8.
 
     // GEOMETRY
-    segments: 40,
+    segments: 20, // Detail in cube mesh. Also affects holes for classic dice. e.g. 20 = holes start looking angular.
+    segments_ClassicDice: 40,
     edgeRadius: 0.07,
 
     // TODO: Make notches optional and only available for classic dice. All other dice facings should be flat.
@@ -121,17 +131,17 @@ function updateContainer() {
     // SET DICE SCALE
     // Based on measurement of fitting maximum number of dice in the smallest dimension
     // plus some padding of say 10%
-    let distance = Math.min(floorSize * container.aspect, floorSize) //Math.min(container.width, container.height)
-    let maximumSize = (distance - ((80 / 100) * distance))
-    let calculatedScale = (distance - ((10 / 100) * distance)) / (diceParams.numDice.current)
-    console.log("shorter distance is: %O", distance)
-    console.log("calculatedScale: %O", calculatedScale)
+    let smallestDistance = Math.min(floorSize * container.aspect, floorSize) //Math.min(container.width, container.height)
+    let maximumSize = (smallestDistance - ((80 / 100) * smallestDistance))
+    let calculatedScale = (smallestDistance - ((10 / 100) * smallestDistance)) / (diceParams.numDice.current)
+    console.log("container smallestDistance is: %O", smallestDistance)
     console.log("maximumSize is: %O", maximumSize)
-    diceParams.scale = Math.min(calculatedScale, maximumSize) // (distance - ((10 / 100) * distance))
+    console.log("calculatedScale: %O", calculatedScale)
+    diceParams.scale = Math.min(calculatedScale, maximumSize) // (smallestDistance - ((10 / 100) * smallestDistance))
     //console.log("dice scale is: %O", diceParams.scale)
 } 
 
-function initScene() {
+async function initScene() {
 
     // SCENE
     renderer = new THREE.WebGLRenderer({
@@ -176,23 +186,44 @@ function initScene() {
     //createRoom()
     //createSkybox()
 
+    // CREATE CLASSIC MESH
+    // One-time mesh creation for:
+    // 1. No props passed to this component, so we assume classic dice desired
+    // 2. Any die in the passed dice set is marked as classic
+    // TODO: Create a static mesh and import it, rather than run this function
+    if (!props.Dice || props.Dice.filter(x => x.type == 'classic')) {
+        mesh_classicDice = await createDiceMesh(true)
+    }
 
 }
 
 async function createDice() {
 
-    // OBJECTS
-    diceMesh = await createDiceMesh()
-    for (let i = 0; i < diceParams.numDice.current; i++) {
-        diceArray.push(createDiceGroup())
-        addDiceEvents(diceArray[i])
+    console.log("creating dice")
+
+    //console.log("createDice props.Dice %O", props.Dice)
+
+    if (props && props.Dice && props.Dice.length > 0) {
+        for (let i = 0; i < props.Dice.length; i++) {
+            //let newDie = createDiceGroup(props.Dice[i])
+            diceArray.push(createDiceGroup(props.Dice[i]))
+            addDiceEvents(diceArray[i])
+        }
+
+    } else {
+        for (let i = 0; i < diceParams.numDice.current; i++) {
+
+            console.log("olddice push %O", i)
+            diceArray.push(createDiceGroup())
+            addDiceEvents(diceArray[i])
+        }
     }
 }
 
 function initPhysics() {
     physicsWorld = new CANNON.World({
         allowSleep: true,
-        gravity: new CANNON.Vec3(0, -500, 0)
+        gravity: new CANNON.Vec3(0, -800, 0)
     })
 
     /*
@@ -210,17 +241,46 @@ function initPhysics() {
     // physicsWorld.solver.iterations = 16
 }
 
-function renderScene() {
-    physicsWorld.fixedStep()
 
-    for (const dice of diceArray) {
-        dice.mesh.position.copy(dice.body.position)
-        dice.mesh.quaternion.copy(dice.body.quaternion)
+// RENDERER WITH FPS LIMITER
+
+var frameLengthMS = 1000/60;//60 fps
+var previousTime = 0;
+
+function renderScene(timestamp) {
+
+     if (timestamp - previousTime > frameLengthMS){
+
+        physicsWorld.fixedStep()
+
+        // Sync dice mesh and dice physics-body for each dice
+        for (const dice of diceArray) {
+            dice.mesh.position.copy(dice.body.position)
+            dice.mesh.quaternion.copy(dice.body.quaternion)
+        }
+
+        // Update scene (?)
+        renderer.render(scene, camera)
+
+        previousTime = timestamp
     }
 
     requestAnimationFrame(renderScene)
-    renderer.render(scene, camera)
+
 }
+
+/*
+var frameLengthMS = 1000/60;//60 fps
+var previousTime = 0;
+
+function render(timestamp){
+  if(timestamp - previousTime > frameLengthMS){
+       drawSomething();
+    previousTime = timestamp;
+  }
+  requestAnimationFrame(render);
+}
+*/
 
 async function updateScene() {
 
@@ -505,14 +565,82 @@ function createSkybox() {
 // DICE FUNCTIONS
 // ----------------------------------
 
-function createDiceGroup() {
-    const mesh = diceMesh.clone()
+function createDiceGroup(die) {
+
+    let mesh
+
+    console.log("createDiceGroup die %O", die)
+
+    let allowMat = true
+
+    if (allowMat && die != null && die.type != 'classic') {
+
+        let loader = new THREE.TextureLoader()
+        let cubeMaterials = []
+
+        for (let i = 0; i < die.images.length; i++) {
+            //let loadItem = new THREE.MeshBasicMaterial({ map: loader.load('images/'+die.images[i].src), transparent: true })//, opacity: 0.5, color: 0xFF0000 })
+            
+            let loadItem = new THREE.MeshStandardMaterial({
+                map: loader.load('images/'+die.images[i].src),
+                alphaTest: 1,
+                color: 0xffffff,
+                //specular: 0x000005,
+                //reflectivity: 1,
+                side: THREE.DoubleSide,
+                /*
+                onBeforeCompile: shader => {
+                    shader.fragmentShader = shader.fragmentShader.replace('#include <alphatest_fragment>', `
+                        if ( diffuseColor.a < ALPHATEST ) diffuseColor = vec4(vec3(0.733,0.733,0.733), 1.0);
+                    `)
+                }
+                */
+
+                onBeforeCompile: shader => {
+
+                    //shader.fragmentShader = shader.fragmentShader.replace('#include <alphatest_fragment>', `
+                    //    if ( diffuseColor.a < ALPHATEST ) diffuseColor = vec4(vec3(0.733,0.733,0.733), 1.0);
+                    //`)
+
+                    const custom_map_fragment = THREE.ShaderChunk.map_fragment.replace(
+                        `diffuseColor *= sampledDiffuseColor;`,
+                        `diffuseColor = vec4( mix( diffuse, sampledDiffuseColor.rgb, sampledDiffuseColor.a ), opacity );`
+                    )
+
+                    shader.fragmentShader = shader.fragmentShader.replace('#include <map_fragment>', custom_map_fragment)
+
+                }
+            })
+
+           
+            //const tex = sprite.material.map;
+            //const scaleY = tex.image.height / tex.image.width;
+            //sprite.scale.setX(width).setY(width * scaleY);
+            //loadItem.color.set(0xff0000);
+            loadItem.width = 512
+            loadItem.height = 512
+            cubeMaterials.push(loadItem)
+        }
+
+        console.log("we got a die %O", die)
+
+        // USING SQUARE MESH
+        let dice_geometry = new THREE.BoxGeometry(1, 1, 1)
+        mesh = new THREE.Mesh(dice_geometry, cubeMaterials)
+
+        //Create material, color, or image texture
+        //mesh = createDiceMesh(useHoles, cubeMaterials)
+
+    } else if (!die || die.type == 'classic') {
+        mesh = mesh_classicDice.clone()
+    }
+
     mesh.scale.set(diceParams.scale,diceParams.scale,diceParams.scale)
     mesh.appClass = "dice"
     scene.add(mesh)
-    
-    let physicsBoxGeometry = [ diceParams.scale/2, diceParams.scale/2, diceParams.scale/2 ]
 
+    // PHYSICS
+    let physicsBoxGeometry = [ diceParams.scale/2, diceParams.scale/2, diceParams.scale/2 ]
     const body = new CANNON.Body({
         mass: 1,
         //shape: new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 0.5)),
@@ -529,125 +657,150 @@ function createDiceGroup() {
     return { mesh, body }
 }
 
-function createDiceMesh() {
-    const boxMaterialOuter = new THREE.MeshStandardMaterial({
-        color: 0xeeeeee
-    })
-    const boxMaterialInner = new THREE.MeshStandardMaterial({
-        color: 0x000000,
-        roughness: 0,
-        metalness: 1,
-        side: THREE.DoubleSide
-    })
 
-    const diceMesh = new THREE.Group()
-    const innerMesh = new THREE.Mesh(createInnerGeometry(), boxMaterialInner)
-    const outerMesh = new THREE.Mesh(createBoxGeometry(), boxMaterialOuter)
+// ===============================================
+// DICE MESH CREATION
+// ===============================================
+// These are used one-time to create a rounded-edge/corner dice mesh
+
+function createDiceMesh(useHoles, cubeMaterials) {
+
+    const diceMeshgroup = new THREE.Group()
+
+    let boxMaterialOuter
+
+    if (cubeMaterials) {
+        boxMaterialOuter = cubeMaterials
+    } else {
+        boxMaterialOuter = new THREE.MeshStandardMaterial({
+            color: 0xeeeeee
+        })
+    }
+
+    let boxMaterialInner, innerMesh
+
+    if (useHoles) {
+        boxMaterialInner = new THREE.MeshStandardMaterial({
+            color: 0x000000,
+            roughness: 0,
+            metalness: 1,
+            side: THREE.DoubleSide
+        })
+        innerMesh = new THREE.Mesh(createDiceMesh_InnerGeometry(), boxMaterialInner)
+    }
+
+    // rest of the die (gray, rounded)
+    const outerMesh = new THREE.Mesh(createDiceMesh_BoxGeometry(useHoles), boxMaterialOuter)
+    
     outerMesh.castShadow = true
-    diceMesh.add(innerMesh, outerMesh)
 
-    return diceMesh
+    if (useHoles) {
+        diceMeshgroup.add(innerMesh, outerMesh)
+    } else {
+        diceMeshgroup.add(outerMesh)
+    }
+
+    return diceMeshgroup
 }
 
-function createBoxGeometry() {
+function createDiceMesh_BoxGeometry(useHoles) {
 
-    let boxGeometry = new THREE.BoxGeometry(
-        1,
-        1,
-        1,
-        diceParams.segments,
-        diceParams.segments,
-        diceParams.segments
-    )
+    let segments = useHoles ? diceParams.segments_ClassicDice : diceParams.segments
 
-    const positionAttr = boxGeometry.attributes.position
-    const subCubeHalfSize = 0.5 - diceParams.edgeRadius
+    let boxGeometry = new THREE.BoxGeometry(1,1,1,segments,segments,segments)
 
-    for (let i = 0; i < positionAttr.count; i++) {
+    if (useHoles) {
 
-        let position = new THREE.Vector3().fromBufferAttribute(positionAttr, i)
+        // DOTS (notches)
+        const positionAttr = boxGeometry.attributes.position
+        const subCubeHalfSize = 0.5 - diceParams.edgeRadius
+        for (let i = 0; i < positionAttr.count; i++) {
 
-        const subCube = new THREE.Vector3(
-            Math.sign(position.x),
-            Math.sign(position.y),
-            Math.sign(position.z)
-        ).multiplyScalar(subCubeHalfSize)
+            let position = new THREE.Vector3().fromBufferAttribute(positionAttr, i)
 
-        const addition = new THREE.Vector3().subVectors(position, subCube)
+            const subCube = new THREE.Vector3(
+                Math.sign(position.x),
+                Math.sign(position.y),
+                Math.sign(position.z)
+            ).multiplyScalar(subCubeHalfSize)
 
-        if (
-        Math.abs(position.x) > subCubeHalfSize &&
-        Math.abs(position.y) > subCubeHalfSize &&
-        Math.abs(position.z) > subCubeHalfSize
-        ) {
-            addition.normalize().multiplyScalar(diceParams.edgeRadius)
-            position = subCube.add(addition)
-        } else if (
-        Math.abs(position.x) > subCubeHalfSize &&
-        Math.abs(position.y) > subCubeHalfSize
-        ) {
-            addition.z = 0
-            addition.normalize().multiplyScalar(diceParams.edgeRadius)
-            position.x = subCube.x + addition.x
-            position.y = subCube.y + addition.y
-        } else if (
-        Math.abs(position.x) > subCubeHalfSize &&
-        Math.abs(position.z) > subCubeHalfSize
-        ) {
-            addition.y = 0
-            addition.normalize().multiplyScalar(diceParams.edgeRadius)
-            position.x = subCube.x + addition.x
-            position.z = subCube.z + addition.z
-        } else if (
-        Math.abs(position.y) > subCubeHalfSize &&
-        Math.abs(position.z) > subCubeHalfSize
-        ) {
-            addition.x = 0
-            addition.normalize().multiplyScalar(diceParams.edgeRadius)
-            position.y = subCube.y + addition.y
-            position.z = subCube.z + addition.z
+            const addition = new THREE.Vector3().subVectors(position, subCube)
+
+            if (
+            Math.abs(position.x) > subCubeHalfSize &&
+            Math.abs(position.y) > subCubeHalfSize &&
+            Math.abs(position.z) > subCubeHalfSize
+            ) {
+                addition.normalize().multiplyScalar(diceParams.edgeRadius)
+                position = subCube.add(addition)
+            } else if (
+            Math.abs(position.x) > subCubeHalfSize &&
+            Math.abs(position.y) > subCubeHalfSize
+            ) {
+                addition.z = 0
+                addition.normalize().multiplyScalar(diceParams.edgeRadius)
+                position.x = subCube.x + addition.x
+                position.y = subCube.y + addition.y
+            } else if (
+            Math.abs(position.x) > subCubeHalfSize &&
+            Math.abs(position.z) > subCubeHalfSize
+            ) {
+                addition.y = 0
+                addition.normalize().multiplyScalar(diceParams.edgeRadius)
+                position.x = subCube.x + addition.x
+                position.z = subCube.z + addition.z
+            } else if (
+            Math.abs(position.y) > subCubeHalfSize &&
+            Math.abs(position.z) > subCubeHalfSize
+            ) {
+                addition.x = 0
+                addition.normalize().multiplyScalar(diceParams.edgeRadius)
+                position.y = subCube.y + addition.y
+                position.z = subCube.z + addition.z
+            }
+
+            const notchWave = (v) => {
+                v = (1 / diceParams.notchRadius) * v
+                v = Math.PI * Math.max(-1, Math.min(1, v))
+                return diceParams.notchDepth * (Math.cos(v) + 1)
+            }
+
+            const notch = (pos) => notchWave(pos[0]) * notchWave(pos[1])
+
+            const offset = 0.23 // Padding between face edge and notch
+
+            if (position.y === 0.5) {
+                position.y -= notch([position.x, position.z])
+            } else if (position.x === 0.5) {
+                position.x -= notch([position.y + offset, position.z + offset])
+                position.x -= notch([position.y - offset, position.z - offset])
+            } else if (position.z === 0.5) {
+                position.z -= notch([position.x - offset, position.y + offset])
+                position.z -= notch([position.x, position.y])
+                position.z -= notch([position.x + offset, position.y - offset])
+            } else if (position.z === -0.5) {
+                position.z += notch([position.x + offset, position.y + offset])
+                position.z += notch([position.x + offset, position.y - offset])
+                position.z += notch([position.x - offset, position.y + offset])
+                position.z += notch([position.x - offset, position.y - offset])
+            } else if (position.x === -0.5) {
+                position.x += notch([position.y + offset, position.z + offset])
+                position.x += notch([position.y + offset, position.z - offset])
+                position.x += notch([position.y, position.z])
+                position.x += notch([position.y - offset, position.z + offset])
+                position.x += notch([position.y - offset, position.z - offset])
+            } else if (position.y === -0.5) {
+                position.y += notch([position.x + offset, position.z + offset])
+                position.y += notch([position.x + offset, position.z])
+                position.y += notch([position.x + offset, position.z - offset])
+                position.y += notch([position.x - offset, position.z + offset])
+                position.y += notch([position.x - offset, position.z])
+                position.y += notch([position.x - offset, position.z - offset])
+            }
+
+            positionAttr.setXYZ(i, position.x, position.y, position.z)
+
         }
-
-        const notchWave = (v) => {
-            v = (1 / diceParams.notchRadius) * v
-            v = Math.PI * Math.max(-1, Math.min(1, v))
-            return diceParams.notchDepth * (Math.cos(v) + 1)
-        }
-
-        const notch = (pos) => notchWave(pos[0]) * notchWave(pos[1])
-
-        const offset = 0.23
-
-        if (position.y === 0.5) {
-            position.y -= notch([position.x, position.z])
-        } else if (position.x === 0.5) {
-            position.x -= notch([position.y + offset, position.z + offset])
-            position.x -= notch([position.y - offset, position.z - offset])
-        } else if (position.z === 0.5) {
-            position.z -= notch([position.x - offset, position.y + offset])
-            position.z -= notch([position.x, position.y])
-            position.z -= notch([position.x + offset, position.y - offset])
-        } else if (position.z === -0.5) {
-            position.z += notch([position.x + offset, position.y + offset])
-            position.z += notch([position.x + offset, position.y - offset])
-            position.z += notch([position.x - offset, position.y + offset])
-            position.z += notch([position.x - offset, position.y - offset])
-        } else if (position.x === -0.5) {
-            position.x += notch([position.y + offset, position.z + offset])
-            position.x += notch([position.y + offset, position.z - offset])
-            position.x += notch([position.y, position.z])
-            position.x += notch([position.y - offset, position.z + offset])
-            position.x += notch([position.y - offset, position.z - offset])
-        } else if (position.y === -0.5) {
-            position.y += notch([position.x + offset, position.z + offset])
-            position.y += notch([position.x + offset, position.z])
-            position.y += notch([position.x + offset, position.z - offset])
-            position.y += notch([position.x - offset, position.z + offset])
-            position.y += notch([position.x - offset, position.z])
-            position.y += notch([position.x - offset, position.z - offset])
-        }
-
-        positionAttr.setXYZ(i, position.x, position.y, position.z)
     }
 
     boxGeometry.deleteAttribute("normal")
@@ -657,9 +810,14 @@ function createBoxGeometry() {
     boxGeometry.computeVertexNormals()
 
     return boxGeometry
+
 }
 
-function createInnerGeometry() {
+
+// DOTS
+function createDiceMesh_InnerGeometry() {
+
+    // Creates an inner box, slightly smaller, that just serves to fill divots with black color
 
     const baseGeometry = new THREE.PlaneGeometry(
         1 - 2 * diceParams.edgeRadius,
@@ -668,26 +826,26 @@ function createInnerGeometry() {
 
     const offset = 0.48
 
-    return BufferGeometryUtils.mergeBufferGeometries(
+    return BufferGeometryUtils.mergeGeometries(
         [
-        baseGeometry.clone().translate(0, 0, offset),
-        baseGeometry.clone().translate(0, 0, -offset),
-        baseGeometry
-            .clone()
-            .rotateX(0.5 * Math.PI)
-            .translate(0, -offset, 0),
-        baseGeometry
-            .clone()
-            .rotateX(0.5 * Math.PI)
-            .translate(0, offset, 0),
-        baseGeometry
-            .clone()
-            .rotateY(0.5 * Math.PI)
-            .translate(-offset, 0, 0),
-        baseGeometry
-            .clone()
-            .rotateY(0.5 * Math.PI)
-            .translate(offset, 0, 0)
+            baseGeometry.clone().translate(0, 0, offset),
+            baseGeometry.clone().translate(0, 0, -offset),
+            baseGeometry
+                .clone()
+                .rotateX(0.5 * Math.PI)
+                .translate(0, -offset, 0),
+            baseGeometry
+                .clone()
+                .rotateX(0.5 * Math.PI)
+                .translate(0, offset, 0),
+            baseGeometry
+                .clone()
+                .rotateY(0.5 * Math.PI)
+                .translate(-offset, 0, 0),
+            baseGeometry
+                .clone()
+                .rotateY(0.5 * Math.PI)
+                .translate(offset, 0, 0)
         ],
         false
     )

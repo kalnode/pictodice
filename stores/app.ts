@@ -90,6 +90,7 @@ export const usePhotodiceAppStore = defineStore('PhotoDiceApp', {
 
         // DICE
         currentDie: 0,
+        currentDiceSet: 1,
         customDie: 5,
         rolling: false,
 
@@ -101,7 +102,7 @@ export const usePhotodiceAppStore = defineStore('PhotoDiceApp', {
             },
             {
                 name: 'Set2',
-                dies: [ 0, 2, 1 ]
+                dies: [ 0, 3, 4 ]
             },
             {
                 name: 'Set3',
@@ -113,6 +114,11 @@ export const usePhotodiceAppStore = defineStore('PhotoDiceApp', {
         dice: [
             {
                 name: 'Classic Dice',
+                type: 'classic', // 'preset' die, or 'custom' for user-made die
+                active: true,
+            },
+            {
+                name: 'Classic Dice PNG',
                 type: 'preset', // 'preset' die, or 'custom' for user-made die
                 active: true,
                 images: [
@@ -205,6 +211,10 @@ export const usePhotodiceAppStore = defineStore('PhotoDiceApp', {
         // TODO: From Die.vue component, move ax/ay calculations here
         //ax: () => { },
         //ay: () => { },
+
+        currentDice: (state) => {
+            return state.diceSets[state.currentDiceSet].dies.map(e => state.dice[e])
+        },
 
         accelerationComputed: (state) => {
 
