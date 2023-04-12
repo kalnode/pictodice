@@ -36,20 +36,18 @@
     </transition>
 
 </template>
-
 <script lang="ts" setup>
+// Initially, based on tut here: https://dev.to/cloudx/reusable-dynamic-modal-on-vue-3-1k56
 
-    // Initially, based on tut here: https://dev.to/cloudx/reusable-dynamic-modal-on-vue-3-1k56
+import { reactive } from "vue"
+import { storeToRefs } from "pinia"
+import { useModal } from "~/stores/modal"
 
-    import { reactive } from "vue"
-    import { storeToRefs } from "pinia"
-    import { useModal } from "~/stores/modal"
+const modal = useModal()
 
-    const modal = useModal()
+// Reactive holder to save the payload returned by the mounted modalContent
+var model = reactive({})
 
-    // Reactive holder to save the payload returned by the mounted modalContent
-    var model = reactive({})
-
-    // Convert all state properties to reactive references to be used on modalContent
-    const { isOpen, modalContent, modalContentProps, modalActions } = storeToRefs(modal)
+// Convert all state properties to reactive references to be used on modalContent
+const { isOpen, modalContent, modalContentProps, modalActions } = storeToRefs(modal)
 </script>

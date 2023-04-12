@@ -1,4 +1,7 @@
 /** @type {import('tailwindcss').Config} */
+
+const { screens } = require('tailwindcss/defaultTheme')
+
 module.exports = {
     content: [
         "./components/**/*.{js,vue,ts}",
@@ -9,7 +12,11 @@ module.exports = {
         "./app.vue"
     ],
     theme: {
-        extend: {}
+        extend: {},
+        screens: {
+            'xs': '320px', // We specify a custom width
+            ...screens, // Append core TW widths
+        }
     },
     plugins: [require('daisyui')],
     future: {

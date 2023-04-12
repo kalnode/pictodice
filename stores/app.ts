@@ -21,16 +21,19 @@ import { Preferences } from '@capacitor/preferences'
 
 export interface Die {
     name: string
-    type: 'preset' | 'custom'
+    type: 'preset' | 'custom' | 'classic'
     active: boolean
+    /*
     images: Array<{
         type: 'static' | 'remote' | 'localStorage'
         src: string
     }>
+    */
 
     // TODO: Finish more-proper "faces" type, and use it app-wide, instead of the above "images".
     faces: Array<{
         type: 'image' | 'text'
+        text_src: string
         image_type: 'static' | 'remote' | 'localStorage' // TODO: This is possibly not needed, and should be inferred by src and/or filename
         image_src: string
         image_filename: string
@@ -45,6 +48,7 @@ export interface DieState {
 
 export interface DiceSet {
     name: string,
+    // TODO: Need to add Die type here
     dies: Array<number>
 }
 
@@ -90,23 +94,35 @@ export const usePhotodiceAppStore = defineStore('PhotoDiceApp', {
 
         // DICE
         currentDie: 0,
-        currentDiceSet: 1,
+        currentDiceSet: 0,
         customDie: 5,
         rolling: false,
 
 
         diceSets: <DiceSet[]>[
             {
-                name: 'Set1',
+                name: 'Classic Dice',
                 dies: [ 0, 0 ]
             },
             {
-                name: 'Set2',
-                dies: [ 0, 3, 4 ]
+                name: 'Preset 2',
+                dies: [ 0, 3 ]
             },
             {
-                name: 'Set3',
-                dies: [ 3, 4 ]
+                name: 'Preset 3',
+                dies: [ 3, 4, 0 ]
+            },
+            {
+                name: 'Preset 4',
+                dies: [ 3, 4, 0, 3 ]
+            },
+            {
+                name: 'Preset 5',
+                dies: [ 0, 0, 0, 3, 4 ]
+            },
+            {
+                name: 'Preset 6',
+                dies: [ 0, 2, 2, 3, 4, 0 ]
             }
         ],
 
@@ -121,67 +137,67 @@ export const usePhotodiceAppStore = defineStore('PhotoDiceApp', {
                 name: 'Classic Dice PNG',
                 type: 'preset', // 'preset' die, or 'custom' for user-made die
                 active: true,
-                images: [
+                faces: [
                     // type: static, remote, localStorage
-                    { type: 'static', src: '1.png' },
-                    { type: 'static', src: '2.png' },
-                    { type: 'static', src: '3.png' },
-                    { type: 'static', src: '4.png' },
-                    { type: 'static', src: '5.png' },
-                    { type: 'static', src: '6.png' }
+                    { type: 'image', image_type: 'static', image_src: '1.png' },
+                    { type: 'image', image_type: 'static', image_src: '2.png' },
+                    { type: 'image', image_type: 'static', image_src: '3.png' },
+                    { type: 'image', image_type: 'static', image_src: '4.png' },
+                    { type: 'image', image_type: 'static', image_src: '5.png' },
+                    { type: 'image', image_type: 'static', image_src: '6.png' }
                 ]
             },
             {
                 name: 'Magic Answers',
                 type: 'preset', // 'preset' die, or 'custom' for user-made die
                 active: true,
-                images: [
+                faces: [
                     // type: static, remote, localStorage
-                    { type: 'text', src: 'Yes' },
-                    { type: 'text', src: 'No' },
-                    { type: 'text', src: 'Maybe' },
-                    { type: 'text', src: 'Ask again later' },
-                    { type: 'text', src: 'Possibly' },
-                    { type: 'text', src: 'Absolutely' }
+                    { type: 'text', text_src: 'Yes' },
+                    { type: 'text', text_src: 'No' },
+                    { type: 'text', text_src: 'Maybe' },
+                    { type: 'text', text_src: 'Ask again later' },
+                    { type: 'text', text_src: 'Possibly' },
+                    { type: 'text', text_src: 'Absolutely' }
                 ]
             },
             {
                 name: 'Yoga',
                 type: 'preset',
                 active: true,
-                images: [
-                    { type: 'static', src: 'yoga1.png' },
-                    { type: 'static', src: 'yoga2.png' },
-                    { type: 'static', src: 'yoga3.png' },
-                    { type: 'static', src: 'yoga4.png' },
-                    { type: 'static', src: 'yoga5.png' },
-                    { type: 'static', src: 'yoga6.png' }
+                faces: [
+                    { type: 'image', image_type: 'static', image_src: 'yoga1.png' },
+                    { type: 'image', image_type: 'static', image_src: 'yoga2.png' },
+                    { type: 'image', image_type: 'static', image_src: 'yoga3.png' },
+                    { type: 'image', image_type: 'static', image_src: 'yoga4.png' },
+                    { type: 'image', image_type: 'static', image_src: 'yoga5.png' },
+                    { type: 'image', image_type: 'static', image_src: 'yoga6.png' }
                 ]
             },
             {
                 name: 'Stock Photos',
                 type: 'preset',
                 active: true,
-                images: [
-                    { type: 'static', src: 'dummy-400x400-BodyLanguage.jpg' },
-                    { type: 'static', src: 'dummy-400x400-CharlesBaudelaire.jpg' },
-                    { type: 'static', src: 'dummy-400x400-Eye.jpg' },
-                    { type: 'static', src: 'dummy-400x400-HappyBoy.jpg' },
-                    { type: 'static', src: 'dummy-400x400-Headphone.jpg' },
-                    { type: 'static', src: 'dummy-400x400-UmbrellaGirl.jpg' }
+                faces: [
+                    { type: 'image', image_type: 'static', image_src: 'dummy-400x400-BodyLanguage.jpg' },
+                    { type: 'image', image_type: 'static', image_src: 'dummy-400x400-CharlesBaudelaire.jpg' },
+                    { type: 'image', image_type: 'static', image_src: 'dummy-400x400-Eye.jpg' },
+                    { type: 'image', image_type: 'static', image_src: 'dummy-400x400-HappyBoy.jpg' },
+                    { type: 'image', image_type: 'static', image_src: 'dummy-400x400-Headphone.jpg' },
+                    { type: 'image', image_type: 'static', image_src: 'dummy-400x400-UmbrellaGirl.jpg' }
                 ]
             },
             {
                 name: "Emoji's",
                 type: 'preset',
                 active: true,
-                images: [
-                    { type: 'static', src: 'emoticon1.png' },
-                    { type: 'static', src: 'emoticon2.png' },
-                    { type: 'static', src: 'emoticon3.png' },
-                    { type: 'static', src: 'emoticon4.png' },
-                    { type: 'static', src: 'emoticon5.png' },
-                    { type: 'static', src: 'emoticon6.png' }
+                faces: [
+                    { type: 'image', image_type: 'static', image_src: 'emoticon1.png' },
+                    { type: 'image', image_type: 'static', image_src: 'emoticon2.png' },
+                    { type: 'image', image_type: 'static', image_src: 'emoticon3.png' },
+                    { type: 'image', image_type: 'static', image_src: 'emoticon4.png' },
+                    { type: 'image', image_type: 'static', image_src: 'emoticon5.png' },
+                    { type: 'image', image_type: 'static', image_src: 'emoticon6.png' }
                 ]
             },
             {
@@ -191,13 +207,13 @@ export const usePhotodiceAppStore = defineStore('PhotoDiceApp', {
                     </svg>`,
                 type: 'custom',
                 active: true,
-                images: [
-                    { type: 'localStorage', src: '', filename: '' },
-                    { type: 'localStorage', src: '', filename: '' },
-                    { type: 'localStorage', src: '', filename: '' },
-                    { type: 'localStorage', src: '', filename: '' },
-                    { type: 'localStorage', src: '', filename: '' },
-                    { type: 'localStorage', src: '', filename: '' }
+                faces: [
+                    { type: 'image', image_type: 'localStorage', image_src: '', filename: '' },
+                    { type: 'image', image_type: 'localStorage', image_src: '', filename: '' },
+                    { type: 'image', image_type: 'localStorage', image_src: '', filename: '' },
+                    { type: 'image', image_type: 'localStorage', image_src: '', filename: '' },
+                    { type: 'image', image_type: 'localStorage', image_src: '', filename: '' },
+                    { type: 'image', image_type: 'localStorage', image_src: '', filename: '' }
                 ]
             }
 
@@ -278,7 +294,7 @@ export const usePhotodiceAppStore = defineStore('PhotoDiceApp', {
 
         // TODO: We can probably blow away this func.
         setImage(payload: {index: number; src: string}) {
-            if (this.dice[0] != null && this.dice[0].images != null) {
+            if (this.dice[0] != null && this.dice[0].faces != null) {
                 this.updateLocalStorage()
             }
         },
@@ -310,7 +326,7 @@ export const usePhotodiceAppStore = defineStore('PhotoDiceApp', {
 
         async updateLocalStorage() {
             return new Promise ( async (resolve, reject) => {
-                await Preferences.set({ key: 'customDie', value: JSON.stringify({ currentDie: this.currentDie, images: this.dice[this.customDie].images }) })
+                await Preferences.set({ key: 'customDie', value: JSON.stringify({ currentDie: this.currentDie, images: this.dice[this.customDie].faces }) })
                 .then( () => {
                     resolve
                 })

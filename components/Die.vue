@@ -7,21 +7,21 @@
         ]
         ">
             <div id="dieInner" class="cube">
-                <div v-for="(image, index) in Die.images" :key="'face-'+index"
+                <div v-for="(face, index) in Die.faces" :key="'face-'+index"
                 :class="[
                     faceOrientations[index].name,
                     (DieState.face === index+1 || DieState.spinning) ? 'lightFacing' : '',
-                    image.type == 'text' ? 'bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-800 to-violet-900 text-white' : 'bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-gray-100 to-gray-300 text-black'
+                    face.type == 'text' ? 'bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-800 to-violet-900 text-white' : 'bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-gray-100 to-gray-300 text-black'
                 ]"
                 class="border-2 border-white">
-                <!-- :style="!image.type == 'text' && !useBGmap ? 'background-image: url(' + (image.type == 'localStorage' ? image.src : 'images/' + image.src) + ')' : ''"> -->
+                <!-- :style="!face.type == 'text' && !useBGmap ? 'background-image: url(' + (face.image_type == 'localStorage' ? face.image_src : 'images/' + face.image_src) + ')' : ''"> -->
                 <!-- bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-gray-100 to-gray-300 -->
 
-                    <img v-if="image.type && image.src != '' && image.type != 'text'"
-                    :src="image.type == 'localStorage' ? image.src : config.app.baseURL+'images/'+image.src"
+                    <img v-if="face.image_type && face.image_src != '' && face.type != 'text'"
+                    :src="face.image_type == 'localStorage' ? face.image_src : config.app.baseURL+'images/'+face.image_src"
                     class="relative w-full h-full object-cover object-center" />
 
-                    <span v-if="image.type == 'text'" class="p-2 text-2xl text-center font-bold italic uppercase">{{ image.src }}</span>
+                    <span v-if="face.type == 'text'" class="p-2 text-2xl text-center font-bold italic uppercase">{{ face.text_src }}</span>
                 </div>
             </div>
         </div>

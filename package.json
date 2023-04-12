@@ -45,6 +45,7 @@
     "@capacitor/motion": "^4.0.2",
     "@capacitor/preferences": "^4.0.2",
     "@capawesome/capacitor-app-update": "^2.1.0",
+    "@headlessui/vue": "^1.7.12",
     "@ionic/pwa-elements": "^3.1.1",
     "@pinia/nuxt": "^0.4.7",
     "cannon-es": "^0.20.0",

@@ -4,19 +4,29 @@
         store.safeAreaInset.bottom ? 'padding-bottom:'+(store.safeAreaInset.bottom+store.safeAreaPadding)+'px' : ''
     ]">
 
-        <transition name="fade">
-            <header v-if="!store.rolling" id="Header"
-            :class="currentRoute.name == 'index' || currentRoute.name == 'threedtest' ? 'absolute z-50' : ''"
-            :style="currentRoute.name == 'index' ? 'top:'+ (store.safeAreaInset.top+store.safeAreaPadding) +'px' : ''"
-            class="w-full flex justify-center p-2">
-                <transition name="fade" mode="out-in">
-                    <NuxtLink :to="currentRoute.name == 'index' ? '/' : currentRoute.name" :key="'title-'+currentRoute.name">
-                        <h1 class="p-1.5 text-3xl font-bold uppercase text-teal-900 hover:text-teal-200 hover:scale-110 transition-transform">{{ currentRoute.meta.title }}</h1>
-                    </NuxtLink>
+        <div class="w-full flex justify-between items-center">
+            <div>
+                <div v-if="currentRoute.name != 'index' && currentRoute.name != 'threedtest' && currentRoute.name != 'roll'" @click="router.back()">Back</div>
+            </div>
+
+            <div>
+                <transition name="fade">
+                    <!-- TODO: Support page meta here for class, instead of doing stupid route lookups -->
+                    <header v-if="showTopTitle && !store.rolling" id="Header"
+                    :class="currentRoute.name == 'threedtest' || currentRoute.name == 'roll' ? 'absolute z-50' : ''"
+                    :style="currentRoute.name == 'index' ? 'top:'+ (store.safeAreaInset.top+store.safeAreaPadding) +'px' : ''"
+                    class="w-full flex justify-center p-2">
+                        <transition name="fade" mode="out-in">
+                            <NuxtLink :to="currentRoute.name == 'index' ? '/' : currentRoute.name" :key="'title-'+currentRoute.name">
+                                <h1 class="p-1.5 text-3xl font-bold uppercase text-teal-900 hover:text-teal-200 hover:scale-110 transition-transform">{{ currentRoute.meta.title }}</h1>
+                            </NuxtLink>
+                        </transition>
+                        <!-- <Logo /> -->
+                    </header>
                 </transition>
-                <!-- <Logo /> -->
-            </header>
-        </transition>
+            </div>
+            <div class="absolute right-2 top-1">...</div>
+        </div>
 
         <div v-if="store.showPromptMotionPermission"
         class="flex justify-center space-x-2 items-center absolute top-4 mt-12 mx-4 z-50 pointer-events-auto bg-yellow-200 text-xs p-2 text-orange-800"
@@ -85,7 +95,8 @@ import { usePhotodiceAppStore } from '~/stores/app'
 
 // ----- FOR DYNAMIC HEADER TITLE -----
 // TODO: Double check if this is correct. Because <Nav> occurs outside of <NuxtPage />, we need this import to make currentRoute reactive, otherwise it never changes after initial landing.
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+const router = useRouter()
 const currentRoute = useRoute()
 // ------------------------------------
 
@@ -97,6 +108,7 @@ const { $event } = useNuxtApp()
 // ==========================================
 const store = usePhotodiceAppStore()
 const appReady = ref(false)
+const showTopTitle = ref(false)
 
 
 // ==========================================
