@@ -40,3 +40,19 @@
 .fade-leave-to {
     opacity: 0;
 }
+
+.card {
+    @apply  bg-white bg-opacity-40 rounded-lg p-4 xs:p-6 md:p-10;
+}
+
+.btn_picto {
+    @apply rounded-full bg-teal-800 hover:bg-teal-700 text-white hover:scale-105 transition cursor-pointer;
+}
+
+.btn_picto.small {
+    @apply p-2 px-4 text-xs xs:text-sm md:text-lg;
+}
+
+.btn_picto.large {
+    @apply p-4 px-8 text-sm xs:text-base md:text-xl;
+}

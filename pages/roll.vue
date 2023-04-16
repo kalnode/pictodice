@@ -6,28 +6,33 @@ import { usePhotodiceAppStore } from '~/stores/app'
 const store = usePhotodiceAppStore()
 
 definePageMeta({
-    title: 'Rolling Dice',
-    absoluteTitle: 'rtyhh'
+    name: 'Roll',
+    title: 'Rolling Dice'
 })
 
-/*
-// TODO: Attempting to set arbitrary data for page; how? This is page meta, sure, but nothing to do with HTML meta tag.
-useMeta({
-    absoluteTitle: true
-})
-useHead({
-    absoluteTitle: true
-    //meta: [{ absoluteTitle: true }]
-})
-*/
+const { $event } = useNuxtApp()
+
+function throwDice() {
+    $event('rollDice')
+}
+
 
 </script>
 <template>
     <div class="w-full h-full flex justify-center items-center">
-
-        <threeDcanvas :Dice="'classic' in currentRoute.query ? store.diceSets[0].dies.map(e => store.dice[e]) : store.currentDice" />
+<!-- 'classic' in currentRoute.query -->
+        <threeDcanvas :Dice="currentRoute.query['set'] && currentRoute.query['set'] == 'classic' ? store.diceSets[0].dies.map(e => store.dice[e]) : store.currentDice" />
 
         <!-- TODO: Support old style 2d dice, displayed as a grid -->
         <!-- <Dice /> -->
+
+        <!-- BUTTON: ROLL -->
+        <transition name="fade">
+            <div v-if="!store.rolling" class="absolute mb-6 pointer-events-auto z-50 flex justify-center"
+            :style="'bottom:'+ (store.safeAreaInset.bottom+store.safeAreaPadding) +'px'">
+                <div @click="throwDice()" class="p-4 px-8 rounded-full bg-white hover:bg-gray-100 text-teal-800 hover:scale-105 transition cursor-pointer">ROLL</div>
+                <!-- <div class="absolute text-black text-center" style="top:-50%">Score: {{scoreResult}}</div> -->
+            </div>
+        </transition>
     </div>
 </template>

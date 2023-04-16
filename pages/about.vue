@@ -11,6 +11,7 @@
     <div class="w-full h-full flex flex-col items-center p-4 overflow-auto">
 
         <div class="max-w-lg space-y-4 pb-48 text-black text-opacity-80">
+
             <section>
                 <h2 class="font-bold">A technical demo by Kal</h2>
                 <p>A <span class="italic">'universal'</span>&nbsp;app with one single codebase powering 3 clients:</p>

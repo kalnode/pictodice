@@ -1,21 +1,24 @@
 <template>
-    <div v-if="appReady" class="relative w-full h-full flex flex-col noSelect noHighlight" :style="[
+    <div v-if="appReady" class="relative w-full h-full flex flex-col noHighlight" :style="[
         store.safeAreaInset.top ? 'padding-top:'+(store.safeAreaInset.top+store.safeAreaPadding)+'px' : '',
         store.safeAreaInset.bottom ? 'padding-bottom:'+(store.safeAreaInset.bottom+store.safeAreaPadding)+'px' : ''
     ]">
 
-        <div class="w-full flex justify-between items-center">
+        <div class="absolute z-50 w-full flex justify-between items-center pointer-events-none">
             <div>
-                <div v-if="currentRoute.name != 'index' && currentRoute.name != 'threedtest' && currentRoute.name != 'roll'" @click="router.back()">Back</div>
+                <div v-if="currentRoute.name != 'index' && currentRoute.name != 'roll'" @click="router.back()"
+                class="p-4 text-teal-900 hover:text-teal-200 hover:scale-105 transition cursor-pointer pointer-events-auto">
+                    <IconsBase name="arrowBack" class="w-10 h-auto" />
+                </div>
             </div>
 
             <div>
                 <transition name="fade">
                     <!-- TODO: Support page meta here for class, instead of doing stupid route lookups -->
                     <header v-if="showTopTitle && !store.rolling" id="Header"
-                    :class="currentRoute.name == 'threedtest' || currentRoute.name == 'roll' ? 'absolute z-50' : ''"
+                    :class="currentRoute.name == 'roll' ? 'absolute z-50' : ''"
                     :style="currentRoute.name == 'index' ? 'top:'+ (store.safeAreaInset.top+store.safeAreaPadding) +'px' : ''"
-                    class="w-full flex justify-center p-2">
+                    class="w-full flex justify-center p-2 pointer-events-auto">
                         <transition name="fade" mode="out-in">
                             <NuxtLink :to="currentRoute.name == 'index' ? '/' : currentRoute.name" :key="'title-'+currentRoute.name">
                                 <h1 class="p-1.5 text-3xl font-bold uppercase text-teal-900 hover:text-teal-200 hover:scale-110 transition-transform">{{ currentRoute.meta.title }}</h1>
@@ -25,7 +28,7 @@
                     </header>
                 </transition>
             </div>
-            <div class="absolute right-2 top-1">...</div>
+            <div class="absolute right-2 top-1 pointer-events-auto">...</div>
         </div>
 
         <div v-if="store.showPromptMotionPermission"
@@ -37,11 +40,10 @@
         </div>
 
         <!-- DEV TOOLS -->
-        <div v-if="store.showDevTools" class="fixed w-full my-8 overflow-hidden">
+        <div v-if="store.showDevTools" class="fixed w-full my-8 overflow-hidden pointer-events-auto">
             <div>mouseTouchCoords: {{ store.mouseTouchCoords }}</div>
             <div>currentInteraction: {{ store.currentInteraction }}</div>
         </div>
-
 
         <!-- CONTENT -->
         <main class="w-full h-full flex-1">
@@ -54,7 +56,6 @@
         <!-- NAVIGATION -->
         <nav class="z-40 absolute bottom-0 w-full pointer-events-none"
         :style="'bottom:'+ (store.safeAreaInset.bottom) +'px'">
-
             <transition name="fade">
                 <Navigation v-if="!store.rolling" id="Navigation" class="w-full" />
             </transition>
