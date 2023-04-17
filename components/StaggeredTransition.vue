@@ -4,7 +4,6 @@
         :css="false"
         appear
         v-bind="$attrs"
-        @before-enter="beforeEnter"
         @enter="enter"
         @leave="leave"
         ref="tgroup"
