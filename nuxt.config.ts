@@ -35,7 +35,10 @@ export default defineNuxtConfig({
         },
 
         // TODO: Since we're using an "app.config.ts" (based on official recommendations), should we not put page transitions there too?
-        pageTransition: { name: 'page', mode: 'out-in' },
+        pageTransition: {
+            name: 'page',
+            //mode: 'out-in' // Disabled this mode because it brings up errors especially when running animations on pages. However, looks like pages are cross-fading just fine without this???
+        },
 
         baseURL: process.env.NUXT_WTF === 'productionweb' ? '/photodice/' : '/'
 
@@ -55,7 +58,8 @@ export default defineNuxtConfig({
           '@pinia/nuxt',
           { autoImports: ['defineStore', 'acceptHMRUpdate'] }
         ],
-        '@vite-pwa/nuxt'
+        '@vite-pwa/nuxt',
+        '@vueuse/motion/nuxt'
 
     ],
     pwa: {
@@ -70,7 +74,7 @@ export default defineNuxtConfig({
 
 
     //modules: ['@pinia/nuxt'],
-/*
+    /*
     pinia: {
         autoImports: [
         // automatically imports `defineStore`
@@ -79,6 +83,5 @@ export default defineNuxtConfig({
         ],
     },
     */
-
 
 })

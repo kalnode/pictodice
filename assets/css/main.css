@@ -42,7 +42,11 @@
 }
 
 .card {
-    @apply  bg-white bg-opacity-40 rounded-lg p-4 xs:p-6 md:p-10;
+    @apply bg-white bg-opacity-40 rounded-lg;
+}
+
+.card_padding {
+    @apply p-4 xs:p-6 md:p-10;
 }
 
 .btn_picto {

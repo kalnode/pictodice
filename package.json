@@ -27,36 +27,38 @@
     "deploy to github-pages": "gh-pages -d dist -t true"
   },
   "devDependencies": {
-    "@capacitor/cli": "^4.7.0",
+    "@capacitor/cli": "^4.7.3",
     "@vite-pwa/nuxt": "^0.0.7",
     "autoprefixer": "^10.4.14",
     "nuxt": "^3.4.1",
-    "postcss": "^8.4.21",
-    "tailwindcss": "^3.2.7"
+    "postcss": "^8.4.22",
+    "tailwindcss": "^3.3.1"
   },
   "dependencies": {
-    "@capacitor/android": "^4.7.0",
+    "@capacitor/android": "^4.7.3",
     "@capacitor/assets": "^2.0.4",
     "@capacitor/camera": "^4.1.4",
-    "@capacitor/core": "^4.7.0",
+    "@capacitor/core": "^4.7.3",
     "@capacitor/dialog": "^4.1.0",
     "@capacitor/filesystem": "^4.1.4",
-    "@capacitor/ios": "^4.7.0",
+    "@capacitor/ios": "^4.7.3",
     "@capacitor/motion": "^4.0.2",
     "@capacitor/preferences": "^4.0.2",
-    "@capawesome/capacitor-app-update": "^2.1.0",
-    "@headlessui/vue": "^1.7.12",
+    "@capawesome/capacitor-app-update": "^2.1.1",
+    "@headlessui/vue": "^1.7.13",
     "@ionic/pwa-elements": "^3.1.1",
-    "@pinia/nuxt": "^0.4.7",
+    "@pinia/nuxt": "^0.4.8",
+    "@vueuse/motion": "^2.0.0-beta.25",
     "cannon-es": "^0.20.0",
     "capacitor-native-settings": "^4.0.3",
     "capacitor-sync-version": "^1.0.6",
     "cropperjs": "^1.5.13",
-    "daisyui": "^2.51.4",
+    "daisyui": "^2.51.5",
     "gh-pages": "^5.0.0",
     "jimp": "^0.22.7",
     "mitt": "^3.0.0",
-    "pinia": "^2.0.33",
-    "three": "^0.151.2"
+    "pinia": "^2.0.34",
+    "three": "^0.151.3",
+    "velocity-animate": "^1.5.2"
   }
 }

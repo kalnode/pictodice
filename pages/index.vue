@@ -12,7 +12,7 @@ definePageMeta({
 
         <nav class="w-full flex flex-col sm:flex-row sm:justify-center overflow-auto">
             <!-- LEFT --> 
-            <section class="card h-full flex flex-col justify-end items-center mb-4 sm:mb-0 sm:mr-4 p-8">
+            <section v-motion-slide-left :delay="500" class="card card_padding h-full flex flex-col justify-end items-center mb-4 sm:mb-0 sm:mr-4 p-8">
                 <NuxtLink :to="{ name: 'Roll'}" tabindex=-1 class="flex flex-col items-center">
                     <IconsBase name="die" class="mb-4 w-16 h-auto transition hover:scale-105" />
                     <div class="btn_picto large mb-3">Roll Dice</div>
@@ -25,7 +25,7 @@ definePageMeta({
             </section>
             <!-- RIGHT -->
             <div>
-                <section class="card mb-4 pt-8 flex justify-center">
+                <section v-motion-slide-right :delay="700" class="card card_padding mb-4 pt-8 flex justify-center">
                     <!-- TODO: Ideally we want to use a named route with params, but apparently that is ill-advised, and now throws an error (from VueRouter) -->
                     <!-- <NuxtLink :to="{ name: 'Roll', params: { 'set': 'classic' } }" tabindex=-1 class="flex flex-col items-center"> -->
                     <!-- SEE: https://github.com/vuejs/router/blob/main/packages/router/CHANGELOG.md#414-2022-08-22 -->
@@ -38,7 +38,7 @@ definePageMeta({
                         <div class="btn_picto small">Roll Classic Dice</div>
                     </NuxtLink>
                 </section>
-                <section class="card pt-8 flex justify-center">
+                <section v-motion-slide-right :delay="1900" class="card card_padding pt-8 flex justify-center">
                     <NuxtLink to="/roll?classic" tabindex=-1>
                         <div class="btn_picto small">Create Custom Dice</div>
                     </NuxtLink>

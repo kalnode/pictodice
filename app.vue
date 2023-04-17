@@ -48,7 +48,7 @@
         <!-- CONTENT -->
         <main class="w-full h-full flex-1">
             <!-- TODO: Look into page-key; why static? -->
-            <NuxtPage id="Content" page-key="static" />
+            <NuxtPage id="Content" />
             <!-- :page-key="'pagekey-'+currentRoute.name" -->
             <!--  page-key="static" -->
         </main>

@@ -2,7 +2,7 @@
 import { onBeforeRouteUpdate } from "vue-router"
 import { ref } from "vue"
 
-const breadcrumbs = ref()
+const breadcrumbs = ref([])
 
 onMounted(async () => {
     await setBreadcrumbs(useRoute())
@@ -13,8 +13,6 @@ onBeforeRouteUpdate(async (newRoute) => {
 })
 
 async function setBreadcrumbs(currentRoute) {
-    // Reset breadcrumbs
-    breadcrumbs.value = []
 
     // --------------------------
     // Assemble paths
@@ -69,26 +67,17 @@ async function setBreadcrumbs(currentRoute) {
         .then((result) => {
             let crumbTitle = result.meta.breadcrumb ?? result.meta.title ?? 'what'
 
-            console.log("result.meta.breadcrumb is: %O", result.meta.breadcrumb)
-            //console.log("result.meta is: %O", result.meta)
-
-
-
-            console.log("crumbTitle is: %O", crumbTitle)
-
             // Check if the text has any special string (e.g. %propid%)
-            //if (rawcrumb) {
-                const regexVar = /\%.+\%/g // Looking for instance of %text% in string
-                const foundVar = crumbTitle.match(regexVar)
+            const regexVar = /\%.+\%/g // Looking for instance of %text% in string
+            const foundVar = crumbTitle.match(regexVar)
 
-                // Look for a route param that matches; use the value
-                if (foundVar) {
-                    const cleanedVar = foundVar[0].substring(1, foundVar[0].length - 1)
-                    if (cleanedVar && crumbTitle && currentRoute.params[cleanedVar]) {
-                        crumbTitle = crumbTitle.replace(regexVar,currentRoute.params[cleanedVar])
-                    }
+            // Look for a route param that matches; use the value
+            if (foundVar) {
+                const cleanedVar = foundVar[0].substring(1, foundVar[0].length - 1)
+                if (cleanedVar && crumbTitle && currentRoute.params[cleanedVar]) {
+                    crumbTitle = crumbTitle.replace(regexVar,currentRoute.params[cleanedVar])
                 }
-            //}
+            }
 
             // Assemble final breadcrumb segment
             finalOutput.push({
@@ -131,15 +120,23 @@ async function findRouteObject(array, key1, key2, value) {
 </script>
 
 <template>
-    <div class="flex space-x-4">
-        <div v-for="(crumb, index) in breadcrumbs" :key="'crumb-' + index" class="flex space-x-4">
-            <div v-if="index > 0">/</div>
-            <NuxtLink :to="crumb.active ? crumb.path : null">
-                <div :class="crumb.active ? '' : 'disabled'" class="link">
-                    {{ crumb.title }}
+    <div class="flex items-center space-x-4">
+        <div class="text-xs text-teal-900">/</div>
+        <client-only>
+            <StaggeredTransition animType='slideRight' :duration="100" tag="div" class="text-xs sm:text-md md:text-xl flex space-x-4">
+                <div v-for="(crumb, index) in breadcrumbs" :key="'crumb-' + index" class="flex items-center space-x-4">
+
+                    <!-- TODO: We want to know when breadcrumb animates, then after 100ms we fade in this slash -->
+                    <div v-if="index > 0" class="text-xs text-teal-900">/</div>
+
+                    <NuxtLink :to="crumb.active ? crumb.path : null">
+                        <div :class="crumb.active ? '' : 'disabled'" class="link">
+                            {{ crumb.title }}
+                        </div>
+                    </NuxtLink>
                 </div>
-            </NuxtLink>
-        </div>
+            </StaggeredTransition>
+        </client-only>
     </div>
 </template>
 <style scoped>
