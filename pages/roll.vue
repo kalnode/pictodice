@@ -21,7 +21,7 @@ function throwDice() {
 <template>
     <div class="w-full h-full flex justify-center items-center">
 <!-- 'classic' in currentRoute.query -->
-        <threeDcanvas :Dice="currentRoute.query['set'] && currentRoute.query['set'] == 'classic' ? store.diceSets[0].dies.map(e => store.dice[e]) : store.currentDice" />
+        <threeDcanvas :Objects="currentRoute.query['set'] && currentRoute.query['set'] == 'classic' ? store.diceSets[0].dies.map(e => store.dice[e]) : store.currentDice" />
 
         <!-- TODO: Support old style 2d dice, displayed as a grid -->
         <!-- <Dice /> -->

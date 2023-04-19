@@ -3,20 +3,18 @@
         <canvas id="canvas" class="relative z-10"></canvas>
         <!--
         <div class="absolute top-1 left-1 z-50">
-            <div @click="throwDice()" class="inline-block cursor-pointer p-2 bg-white rounded-full hover:bg-gray-100">Roll</div>
+            <div @click="throwObjects()" class="inline-block cursor-pointer p-2 bg-white rounded-full hover:bg-gray-100">Roll</div>
             <div>Score: <span id="score-result"></span></div>
         </div>
         -->
 
-        <!--
         <transition name="fade">
-            <div v-if="!store.rolling" class="absolute left-8 mb-6 pointer-events-auto z-50 flex justify-center"
-            :style="'bottom:'+ (store.safeAreaInset.bottom+store.safeAreaPadding) +'px'">
+            <div v-if="!store.rolling" class="absolute left-8 bottom-20 mb-6 pointer-events-auto z-50 flex justify-center">
+                <!-- :style="'bottom:'+ (store.safeAreaInset.bottom+store.safeAreaPadding) +'px'" -->
                 <div @click="setupFormation()" class="p-4 px-8 rounded-full bg-white hover:bg-gray-100 text-teal-800 hover:scale-105 transition cursor-pointer">Formation</div>
                 <div @click="createScreenshot()" class="p-4 px-8 rounded-full bg-white hover:bg-gray-100 text-teal-800 hover:scale-105 transition cursor-pointer">Screenshot</div>
             </div>
         </transition>
-        -->
 
     </div>
 </template>
@@ -39,19 +37,19 @@ let containerEl, canvasEl, renderer, scene, container, camera, mesh_classicDice,
 
 // TODO: Make this typescript
 const props = defineProps({
-    Dice: Object,
+    Objects: Object,
     screenshotMode: Boolean
 })
 
 const fov = 30 // Lower = shallow perspective (easier on eyes, less "3d"); Higher = deep perspective (harsh, more "3d")
 const floorSize = 100 // Arbitrary inner world dimensions; "100" is a nice round number that's better for troubleshooting and head-math. Could be anything, like "1920" (e.g. browser viewport).
-const diceArray = []
+const objectArray = []
 const scoreResult = ref()
 
-const diceParams = {
+const objectParams = {
     // GENERAL
-    //currentNumDice: 8, // TODO: We should set limit between 1 and 8
-    numDice: { current: 2, min: 1, max: 8 },
+    //currentnumObjects: 8, // TODO: We should set limit between 1 and 8
+    numObjects: { current: 2, min: 1, max: 8 },
     scale: 10, // Scale baseline; we adjust this later according to viewport real estate
 
     // TODO: Setup system such that, in the same viewport, user has option to make fewer-dice scale larger. For instance, 2 dice can be much larger than a 8.
@@ -93,16 +91,16 @@ onMounted ( () => {
     }, 300))
 
     $listen('deviceShaken', (e) => {
-        throwDice()
+        throwObjects()
     })
 
     $listen('rollDice', (e) => {
-        throwDice()
+        throwObjects()
     })
 
     renderScene()
 
-    throwDice()
+    throwObjects()
 
 })
 
@@ -129,22 +127,22 @@ function updateContainer() {
     }
 
 
-    let numDice = props.Dice.length
-    // SET DICE SCALE
-    // Based on measurement of fitting maximum number of dice in the smallest dimension
+    let numObjects = props.Objects.length
+    // SET OBJECT SCALE
+    // Based on measurement of fitting maximum number of object in the smallest dimension
     // plus some padding of say 10%
     let smallerDimensionSize = Math.min(floorSize * container.aspect, floorSize) //Math.min(container.width, container.height)
 
-    // We initial dice size is calculate by taking off a safety padding percentage (like 10%) from the dimension, then we divide the result by number of device (e.g. 500 width minus 10% = 450. 450 divided by 2 dice = 225 width per dice)
+    // We initial object size is calculate by taking off a safety padding percentage (like 10%) from the dimension, then we divide the result by number of device (e.g. 500 width minus 10% = 450. 450 divided by 2 dice = 225 width per dice)
     let pOffset = 10
     let dPAdjust = (smallerDimensionSize - ((pOffset / 100) * smallerDimensionSize))
-    let baselineDiceScale = dPAdjust / (numDice)
+    let baselineObjectScale = dPAdjust / (numObjects)
     
-    // We calculate maximum dice size being 85
+    // We calculate maximum object size being 85
     let maximumSize = (smallerDimensionSize - ((75 / 100) * smallerDimensionSize))
-    console.log("numDice: " + numDice)
+    console.log("numObjects: " + numObjects)
 
-    diceParams.scale = Math.min(baselineDiceScale, maximumSize) // (smallerDimensionSize - ((10 / 100) * smallerDimensionSize))
+    objectParams.scale = Math.min(baselineObjectScale, maximumSize) // (smallerDimensionSize - ((10 / 100) * smallerDimensionSize))
 } 
 
 async function initScene() {
@@ -196,22 +194,22 @@ async function initScene() {
     // 1. No props passed to this component, so we assume classic dice desired
     // 2. Any die in the passed dice set is marked as classic
     // TODO: Create a static mesh and import it, rather than run this function
-    if (!props.Dice || props.Dice.filter(x => x.type == 'classic')) {
-        mesh_classicDice = await createDiceMesh(true)
+    if (!props.Objects || props.Objects.filter(x => x.type == 'classic')) {
+        mesh_classicDice = await createObjectMesh(true)
     }
 
 }
 
-async function createDice() {
-    if (props && props.Dice && props.Dice.length > 0) {
-        for (let i = 0; i < props.Dice.length; i++) {
-            diceArray.push(createDiceGroup(props.Dice[i]))
-            addDiceEvents(diceArray[i])
+async function createObject() {
+    if (props && props.Objects && props.Objects.length > 0) {
+        for (let i = 0; i < props.Objects.length; i++) {
+            objectArray.push(createObjectGroup(props.Objects[i]))
+            addObjectEvents(objectArray[i])
         }
     } else {
-        for (let i = 0; i < diceParams.numDice.current; i++) {
-            diceArray.push(createDiceGroup())
-            addDiceEvents(diceArray[i])
+        for (let i = 0; i < objectParams.numObjects.current; i++) {
+            objectArray.push(createObjectGroup())
+            addObjectEvents(objectArray[i])
         }
     }
 }
@@ -248,10 +246,10 @@ function renderScene(timestamp) {
 
         physicsWorld.fixedStep()
 
-        // Sync dice mesh and dice physics-body for each dice
-        for (const dice of diceArray) {
-            dice.mesh.position.copy(dice.body.position)
-            dice.mesh.quaternion.copy(dice.body.quaternion)
+        // Sync object mesh and object physics-body for each object
+        for (const object of objectArray) {
+            object.mesh.position.copy(object.body.position)
+            object.mesh.quaternion.copy(object.body.quaternion)
         }
 
         renderer.render(scene, camera)
@@ -270,7 +268,7 @@ async function updateScene() {
     camera.aspect = container.aspect
     await clearScene()
     await createRoom()
-    await createDice()
+    await createObject()
 
     camera.position.y = ((100 * container.aspect) / camera.aspect) / (2 * Math.tan(fov / 2 * (Math.PI / 180)))
 
@@ -278,7 +276,7 @@ async function updateScene() {
     renderer.setSize(container.width, container.height)
     //renderer.setPixelRatio(window.devicePixelRatio);
 
-    throwDice()
+    throwObjects()
 
 }
 
@@ -303,12 +301,12 @@ function clearScene() {
 
     return new Promise ( async (resolve, reject) => {
 
-        // GET & LOOP all objects (room & dice, no lights)
-        let objects = scene.children.filter(x => x.appClass == 'room' || x.appClass == 'dice')
+        // GET & LOOP all objects (room & objects, no lights)
+        let objects = scene.children.filter(x => x.appClass == 'appRoom' || x.appClass == 'appObject')
 
         objects.forEach( async object => {
 
-            if (object.appClass == 'room' || object.appClass == 'dice') {
+            if (object.appClass == 'appRoom' || object.appClass == 'appObject') {
 
                 // Remove geometries to free GPU resources
                 if (object.geometry) await object.geometry.dispose()
@@ -329,12 +327,12 @@ function clearScene() {
 
         // REMOVE PHYSICS BODIES
         physicsWorld.bodies.forEach( async object => {
-            if (object.appClass == 'room' || object.appClass == 'dice') {
+            if (object.appClass == 'appRoom' || object.appClass == 'appObject') {
                 await physicsWorld.removeBody(object)
             }
         })
 
-        diceArray.length = 0
+        objectArray.length = 0
 
         resolve()
 
@@ -367,7 +365,7 @@ async function createRoom() {
     floor.mesh.position.y = 0
     floor.mesh.quaternion.setFromAxisAngle(new THREE.Vector3(-1, 0, 0), Math.PI * 0.5)
     floor.mesh.name="floor"
-    floor.mesh.appClass="room"
+    floor.mesh.appClass="appRoom"
     await scene.add(floor.mesh)
 
     floor.physicsBody = new CANNON.Body({
@@ -376,7 +374,7 @@ async function createRoom() {
     })
     floor.physicsBody.position.copy(floor.mesh.position)
     floor.physicsBody.quaternion.copy(floor.mesh.quaternion)
-    floor.physicsBody.appClass = "room"
+    floor.physicsBody.appClass = "appRoom"
     await physicsWorld.addBody(floor.physicsBody)
 
     //updateFloor()
@@ -442,7 +440,7 @@ async function createRoom() {
         wall_scene.quaternion.setFromAxisAngle(new THREE.Vector3(-1, 0, 0), Math.PI * 0.5)
 
         wall_scene.name=wallName
-        wall_scene.appClass="room"
+        wall_scene.appClass="appRoom"
 
 
         await scene.add(wall_scene)
@@ -460,7 +458,7 @@ async function createRoom() {
         })
         wall_body.position.copy(wall_scene.position)
         wall_body.quaternion.copy(wall_scene.quaternion)
-        wall_body.appClass = "room"
+        wall_body.appClass = "appRoom"
         await physicsWorld.addBody(wall_body)
 
         // STORE THE BODY
@@ -520,33 +518,33 @@ function setupFormation() {
 
     // Base of stack (ie pyramid); blocks get rendered from bottom-left first and get stacked upward.
     // This is to assure that regrdless of number of blocks, we always have a pleasing formation.
-    let colBase = getPyramidBase(diceArray.length)
+    let colBase = getPyramidBase(objectArray.length)
 
     let col = 1
     let row = 1
-    //let gap = diceParams.scale/4
+    //let gap = objectParams.scale/4
 
     // Offsets to help re-center the entire grouping
     // TODO: Ideally we don't need to do this. In any case, needs scrutiny if it's actually still accurate.
-    let xOffset = (colBase * ((diceParams.scale/3)*2) + ((diceParams.scale) * col) + (col * (diceParams.scale/4))) //(colBase * diceParams.scale / 2) // (((floorSize/2) * container.aspect))// - (diceParams.scale/2)
-    let yOffset = 2 * diceParams.scale
+    let xOffset = (colBase * ((objectParams.scale/3)*2) + ((objectParams.scale) * col) + (col * (objectParams.scale/4))) //(colBase * objectParams.scale / 2) // (((floorSize/2) * container.aspect))// - (objectParams.scale/2)
+    let yOffset = 2 * objectParams.scale
 
     /*
     console.log("---------------------")
-    console.log("form diceArray.length: " + diceArray.length)
+    console.log("form objectArray.length: " + objectArray.length)
     console.log("form colBase: " + colBase)
     console.log("form col: " + col)
     console.log("form row: " + row)
     console.log("form xOffset: " + xOffset)
     console.log("form floorSize: " + floorSize)
     console.log("form container.aspect: " + container.aspect)
-    console.log("form diceParams.scale: " + diceParams.scale)
+    console.log("form objectParams.scale: " + objectParams.scale)
     */
     // LIGHTING
     // Appears in front of formation, for the screenshot. We do not touch the other scene lights.
     /*
     const formationLight = new THREE.PointLight(0xffffff, 0.3)
-    formationLight.position.set(0, diceParams.scale * 2, diceParams.scale * 4)
+    formationLight.position.set(0, objectParams.scale * 2, objectParams.scale * 4)
     formationLight.castShadow = true
     formationLight.shadow.mapSize.width = 2048
     formationLight.shadow.mapSize.height = 2048
@@ -562,33 +560,33 @@ function setupFormation() {
     //floor.mesh.receiveShadow = false
 
     let group = new THREE.Group()
-    group.name = "diceFormation"
+    group.name = "objectFormation"
 
-    for (var i = 0; i < diceArray.length; i++) {
+    for (var i = 0; i < objectArray.length; i++) {
 
-        let die = diceArray[i]
+        let object = objectArray[i]
 
-        //die.mesh.castShadow = false
+        //object.mesh.castShadow = false
 
         // MOTION
-        die.body.velocity.setZero()
-        die.body.angularVelocity.setZero()
+        object.body.velocity.setZero()
+        object.body.angularVelocity.setZero()
 
         // ROTATION
         //console.log("getRandomFloatWithExclusion(-0.15,0.15,0,0.05): " + getRandomFloatWithExclusion(-0.15,0.15,0,0.1))
         //getRandomFloatWithExclusion(-0.15,0.15,0,0.05)
-        die.mesh.rotation.set(0, 0, THREE.MathUtils.degToRad( getRandomRotationPosition() + getRandomFloatWithExclusion(-15,15,0,5)) )
-        die.body.quaternion.copy(die.mesh.quaternion)
+        object.mesh.rotation.set(0, 0, THREE.MathUtils.degToRad( getRandomRotationPosition() + getRandomFloatWithExclusion(-15,15,0,5)) )
+        object.body.quaternion.copy(object.mesh.quaternion)
 
         // POSITION
         // ROW
-        let x = (row * ((diceParams.scale/3)*2) + ((diceParams.scale) * col) + (col * (diceParams.scale/4))) - xOffset //(row * (diceParams.scale/2)) + ((diceParams.scale+gap) * col) + (gap) - xOffset
+        let x = (row * ((objectParams.scale/3)*2) + ((objectParams.scale) * col) + (col * (objectParams.scale/4))) - xOffset //(row * (objectParams.scale/2)) + ((objectParams.scale+gap) * col) + (gap) - xOffset
         // COL
-        let z = -(diceParams.scale * row) + yOffset
+        let z = -(objectParams.scale * row) + yOffset
         // IN-OUT
         let y = 0
-        die.body.position = new CANNON.Vec3(x, y, z)
-        die.mesh.position.copy(die.body.position)
+        object.body.position = new CANNON.Vec3(x, y, z)
+        object.mesh.position.copy(object.body.position)
 
         // ANALYZE STEP
         if ((col + 1) > (colBase - (row-1))) {
@@ -600,7 +598,7 @@ function setupFormation() {
             col = col + 1
         }
 
-        group.add( die.mesh )
+        group.add( object.mesh )
 
 
     }
@@ -613,8 +611,8 @@ function setupFormation() {
 
     /*
     // CAMERA
-    camera.position.set(0, diceParams.scale * 5, diceParams.scale * 4)
-    //camera.lookAt(0, diceParams.scale * 2, 0)
+    camera.position.set(0, objectParams.scale * 5, objectParams.scale * 4)
+    //camera.lookAt(0, objectParams.scale * 2, 0)
     //camera.rotation.y = 100 //set(0, 100, 100)
     //camera.zoom(-10)
     camera.updateProjectionMatrix()
@@ -889,102 +887,102 @@ async function createScreenshot(object) {
         document.body.appendChild(overlayCanvas)
     }
 
-//var factor  = Math.min ( canvas.width / img.width, canvas.height / img.height );
-//ctx.scale(factor, factor);
-//ctx.drawImage(img, 0, 0);
-//ctx.scale(1 / factor, 1 / factor);
+    //var factor  = Math.min ( canvas.width / img.width, canvas.height / img.height );
+    //ctx.scale(factor, factor);
+    //ctx.drawImage(img, 0, 0);
+    //ctx.scale(1 / factor, 1 / factor);
 
 
     let ctx = overlayCanvas.getContext('2d')
 
     //let coordsToCapture = getPixelCoordsOfObject(object, canvasEl, camera)
 
-//let coordsToCapture = computeScreenSpaceBoundingBox(object, camera)
+    //let coordsToCapture = computeScreenSpaceBoundingBox(object, camera)
 
-//console.log("screenshot coords are 111: %O", coordsToCapture)
+    //console.log("screenshot coords are 111: %O", coordsToCapture)
 
-  //
-/*
-  // Convert normalized screen coordinates [-1, 1] to pixel coordinates:
-  console.log("canvasEl.width: %O", canvasEl.width)
-  console.log("canvasEl.height: %O", canvasEl.height)
-
-
-   // let bb = new THREE.Box3().setFromObject(object)
-//var boundingBox2D = computeScreenSpaceBoundingBox(object, camera)
-
-   // let size = boundingBox2D.getSize(new THREE.Vector3())
+    //
+    /*
+    // Convert normalized screen coordinates [-1, 1] to pixel coordinates:
+    console.log("canvasEl.width: %O", canvasEl.width)
+    console.log("canvasEl.height: %O", canvasEl.height)
 
 
-   let bb22 = getPixelCoordsOfObject(object, canvasEl, camera)
-console.log("bb22: %O", bb22)
+    // let bb = new THREE.Box3().setFromObject(object)
+    //var boundingBox2D = computeScreenSpaceBoundingBox(object, camera)
 
-   // let bb22 = computeScreenSpaceBoundingBox(object, camera)
-
-
-  var coordsToCaptureMin = normalizedToPixels(bb22.min, canvasEl)
-console.log("coordsToCaptureMin: %O", coordsToCaptureMin)
-
-    //console.log("bb22: %O", bb22)
- var coordsToCapture = normalizedToPixels(bb22.max, canvasEl)
-
-console.log("pixelCoordScale: %O", coordsToCapture)
-
-*/
-//console.log("screenshot coords are x1: %O", normalizedToPixels(coordsToCapture.min, canvasEl))
-//console.log("screenshot coords are x: %O", normalizedToPixels(coordsToCapture.max, canvasEl))
-/*
-const boundingBox2D = new THREE.Box2();
- computeScreenSpaceBoundingBox333(boundingBox2D, object, camera);
-  // Convert normalized screen coordinates [-1, 1] to pixel coordinates:
-  const x = (boundingBox2D.min.x + 1) * renderWidthHalf;
-  const y = (1 - boundingBox2D.max.y) * renderHeightHalf;
-  const w = (boundingBox2D.max.x - boundingBox2D.min.x) * renderWidthHalf;
-  const h = (boundingBox2D.max.y - boundingBox2D.min.y) * renderHeightHalf;
-*/
-
-var size = new THREE.Vector3(); // create once and reuse
+    // let size = boundingBox2D.getSize(new THREE.Vector3())
 
 
+    let bb22 = getPixelCoordsOfObject(object, canvasEl, camera)
+    console.log("bb22: %O", bb22)
+
+    // let bb22 = computeScreenSpaceBoundingBox(object, camera)
+
+
+    var coordsToCaptureMin = normalizedToPixels(bb22.min, canvasEl)
+    console.log("coordsToCaptureMin: %O", coordsToCaptureMin)
+
+        //console.log("bb22: %O", bb22)
+    var coordsToCapture = normalizedToPixels(bb22.max, canvasEl)
+
+    console.log("pixelCoordScale: %O", coordsToCapture)
+
+    */
+    //console.log("screenshot coords are x1: %O", normalizedToPixels(coordsToCapture.min, canvasEl))
+    //console.log("screenshot coords are x: %O", normalizedToPixels(coordsToCapture.max, canvasEl))
+    /*
+    const boundingBox2D = new THREE.Box2();
+    computeScreenSpaceBoundingBox333(boundingBox2D, object, camera);
+    // Convert normalized screen coordinates [-1, 1] to pixel coordinates:
+    const x = (boundingBox2D.min.x + 1) * renderWidthHalf;
+    const y = (1 - boundingBox2D.max.y) * renderHeightHalf;
+    const w = (boundingBox2D.max.x - boundingBox2D.min.x) * renderWidthHalf;
+    const h = (boundingBox2D.max.y - boundingBox2D.min.y) * renderHeightHalf;
+    */
+
+    var size = new THREE.Vector3(); // create once and reuse
 
 
 
 
-var box3 = new THREE.Box3();
-var helper = new THREE.BoxHelper(object, 0xff0000);
 
-        //let dice_geometry = new THREE.BoxGeometry(1, 1, 1)
-helper.update();
-// If you want a visible bounding box
-scene.add(helper);
-// If you just want the numbers
-//box3.setFromObject( helper )
 
-//box3.getSize( size ); // pass in size so a new Vector3 is not allocated
+    var box3 = new THREE.Box3()
+    var helper = new THREE.BoxHelper(object, 0xff0000)
 
-console.log("Helper is: %O", helper)
-console.log("size is: %O", size)
+    //let object_geometry = new THREE.BoxGeometry(1, 1, 1)
+    helper.update();
+    // If you want a visible bounding box
+    scene.add(helper);
+    // If you just want the numbers
+    //box3.setFromObject( helper )
 
-//let bb22 = box3
+    //box3.getSize( size ); // pass in size so a new Vector3 is not allocated
 
-        //let dice_geometry = new THREE.BoxGeometry(1, 1, 1)
-        let mesh = new THREE.Mesh(object.geometry, 0xff0000)
-       // mesh.setFromObject( object )
-       scene.add(mesh);
-        
-const aabb = new THREE.Box3()
-aabb.setFromObject( object )
-console.log("aabb is: %O", aabb)
- let bb22 = computeScreenSpaceBoundingBox777(mesh, camera)
+    console.log("Helper is: %O", helper)
+    console.log("size is: %O", size)
 
- //let bb22 = computeScreenSpaceBoundingBox2(helper, camera)
-console.log("bb22: %O", bb22)
+    //let bb22 = box3
 
-  var coordsToCaptureMin = normalizedToPixels(bb22.min, canvasEl)
- var coordsToCaptureMax = normalizedToPixels(bb22.max, canvasEl)
+    //let object_geometry = new THREE.BoxGeometry(1, 1, 1)
+    let mesh = new THREE.Mesh(object.geometry, 0xff0000)
+    // mesh.setFromObject( object )
+    scene.add(mesh);
+    
+    const aabb = new THREE.Box3()
+    aabb.setFromObject( object )
+    console.log("aabb is: %O", aabb)
+    let bb22 = computeScreenSpaceBoundingBox777(mesh, camera)
 
-console.log("coordsToCaptureMin: %O", coordsToCaptureMin)
-console.log("coordsToCaptureMax: %O", coordsToCaptureMax)
+    //let bb22 = computeScreenSpaceBoundingBox2(helper, camera)
+    console.log("bb22: %O", bb22)
+
+    var coordsToCaptureMin = normalizedToPixels(bb22.min, canvasEl)
+    var coordsToCaptureMax = normalizedToPixels(bb22.max, canvasEl)
+
+    console.log("coordsToCaptureMin: %O", coordsToCaptureMin)
+    console.log("coordsToCaptureMax: %O", coordsToCaptureMax)
 
     let canvShot = {
         width: 400,
@@ -1045,28 +1043,28 @@ function saveBlob (blob, filename) {
 
 
 // ----------------------------------
-// DICE FUNCTIONS
+// OBJECT FUNCTIONS
 // ----------------------------------
 
-function createDiceGroup(die) {
+function createObjectGroup(object) {
 
     let mesh
 
-    console.log("createDiceGroup die %O", die)
+    console.log("createObjectGroup object %O", object)
 
-    if (die != null && die.type != 'classic') {
+    if (object != null && object.type != 'classic') {
 
         let loader = new THREE.TextureLoader()
         let cubeMaterials = []
 
-        for (let i = 0; i < die.faces.length; i++) {
-            //let loadItem = new THREE.MeshBasicMaterial({ map: loader.load('images/'+die.faces[i].image_src), transparent: true })//, opacity: 0.5, color: 0xFF0000 })
+        for (let i = 0; i < object.faces.length; i++) {
+            //let loadItem = new THREE.MeshBasicMaterial({ map: loader.load('images/'+object.faces[i].image_src), transparent: true })//, opacity: 0.5, color: 0xFF0000 })
 
             let map
-            if (die.faces[i].type == 'text') {
-                map = createFontTexture(die.faces[i].text_src)
-            } else if (die.faces[i].type == 'image') {
-                map = loader.load('images/'+die.faces[i].image_src)
+            if (object.faces[i].type == 'text') {
+                map = createFontTexture(object.faces[i].text_src)
+            } else if (object.faces[i].type == 'image') {
+                map = loader.load('images/'+object.faces[i].image_src)
             }
             
             let loadItem = new THREE.MeshStandardMaterial({
@@ -1110,26 +1108,26 @@ function createDiceGroup(die) {
             cubeMaterials.push(loadItem)
         }
 
-        console.log("we got a die %O", die)
+        console.log("we got a object %O", object)
 
         // USING SQUARE MESH
-        let dice_geometry = new THREE.BoxGeometry(1, 1, 1)
-        mesh = new THREE.Mesh(dice_geometry, cubeMaterials)
+        let object_geometry = new THREE.BoxGeometry(1, 1, 1)
+        mesh = new THREE.Mesh(object_geometry, cubeMaterials)
 
         //Create material, color, or image texture
-        //mesh = createDiceMesh(useHoles, cubeMaterials)
+        //mesh = createObjectMesh(useHoles, cubeMaterials)
 
-    } else if (!die || die.type == 'classic') {
+    } else if (!object || object.type == 'classic') {
         mesh = mesh_classicDice.clone()
     }
 
-    mesh.scale.set(diceParams.scale,diceParams.scale,diceParams.scale)
+    mesh.scale.set(objectParams.scale,objectParams.scale,objectParams.scale)
     mesh.frustumCulled = false
-    mesh.appClass = "dice"
+    mesh.appClass = "appObject"
     scene.add(mesh)
 
     // PHYSICS
-    let physicsBoxGeometry = [ diceParams.scale/2, diceParams.scale/2, diceParams.scale/2 ]
+    let physicsBoxGeometry = [ objectParams.scale/2, objectParams.scale/2, objectParams.scale/2 ]
     const body = new CANNON.Body({
         mass: 1,
         //shape: new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 0.5)),
@@ -1137,7 +1135,7 @@ function createDiceGroup(die) {
         sleepTimeLimit: 0.1,
         //sleepSpeedLimit: 0.1
     })
-    body.appClass = "dice"
+    body.appClass = "appObject"
     physicsWorld.addBody(body)
 
     //mesh.scale.set(10,10,10);
@@ -1148,13 +1146,12 @@ function createDiceGroup(die) {
 
 
 // ===============================================
-// DICE MESH CREATION
+// OBJECT MESH CREATION
 // ===============================================
-// These are used one-time to create a rounded-edge/corner dice mesh
 
-function createDiceMesh(useHoles, cubeMaterials) {
+function createObjectMesh(useHoles, cubeMaterials) {
 
-    const diceMeshgroup = new THREE.Group()
+    const objectMeshGroup = new THREE.Group()
 
     let boxMaterialOuter
 
@@ -1175,26 +1172,26 @@ function createDiceMesh(useHoles, cubeMaterials) {
             metalness: 1,
             side: THREE.DoubleSide
         })
-        innerMesh = new THREE.Mesh(createDiceMesh_InnerGeometry(), boxMaterialInner)
+        innerMesh = new THREE.Mesh(createObjectMesh_InnerGeometry(), boxMaterialInner)
     }
 
-    // rest of the die (gray, rounded)
-    const outerMesh = new THREE.Mesh(createDiceMesh_BoxGeometry(useHoles), boxMaterialOuter)
+    // rest of the object (gray, rounded)
+    const outerMesh = new THREE.Mesh(createObjectMesh_BoxGeometry(useHoles), boxMaterialOuter)
     
     outerMesh.castShadow = true
 
     if (useHoles) {
-        diceMeshgroup.add(innerMesh, outerMesh)
+        objectMeshGroup.add(innerMesh, outerMesh)
     } else {
-        diceMeshgroup.add(outerMesh)
+        objectMeshGroup.add(outerMesh)
     }
 
-    return diceMeshgroup
+    return objectMeshGroup
 }
 
-function createDiceMesh_BoxGeometry(useHoles) {
+function createObjectMesh_BoxGeometry(useHoles) {
 
-    let segments = useHoles ? diceParams.segments_ClassicDice : diceParams.segments
+    let segments = useHoles ? objectParams.segments_ClassicDice : objectParams.segments
 
     let boxGeometry = new THREE.BoxGeometry(1,1,1,segments,segments,segments)
 
@@ -1202,7 +1199,7 @@ function createDiceMesh_BoxGeometry(useHoles) {
 
         // DOTS (notches)
         const positionAttr = boxGeometry.attributes.position
-        const subCubeHalfSize = 0.5 - diceParams.edgeRadius
+        const subCubeHalfSize = 0.5 - objectParams.edgeRadius
         for (let i = 0; i < positionAttr.count; i++) {
 
             let position = new THREE.Vector3().fromBufferAttribute(positionAttr, i)
@@ -1220,14 +1217,14 @@ function createDiceMesh_BoxGeometry(useHoles) {
             Math.abs(position.y) > subCubeHalfSize &&
             Math.abs(position.z) > subCubeHalfSize
             ) {
-                addition.normalize().multiplyScalar(diceParams.edgeRadius)
+                addition.normalize().multiplyScalar(objectParams.edgeRadius)
                 position = subCube.add(addition)
             } else if (
             Math.abs(position.x) > subCubeHalfSize &&
             Math.abs(position.y) > subCubeHalfSize
             ) {
                 addition.z = 0
-                addition.normalize().multiplyScalar(diceParams.edgeRadius)
+                addition.normalize().multiplyScalar(objectParams.edgeRadius)
                 position.x = subCube.x + addition.x
                 position.y = subCube.y + addition.y
             } else if (
@@ -1235,7 +1232,7 @@ function createDiceMesh_BoxGeometry(useHoles) {
             Math.abs(position.z) > subCubeHalfSize
             ) {
                 addition.y = 0
-                addition.normalize().multiplyScalar(diceParams.edgeRadius)
+                addition.normalize().multiplyScalar(objectParams.edgeRadius)
                 position.x = subCube.x + addition.x
                 position.z = subCube.z + addition.z
             } else if (
@@ -1243,15 +1240,15 @@ function createDiceMesh_BoxGeometry(useHoles) {
             Math.abs(position.z) > subCubeHalfSize
             ) {
                 addition.x = 0
-                addition.normalize().multiplyScalar(diceParams.edgeRadius)
+                addition.normalize().multiplyScalar(objectParams.edgeRadius)
                 position.y = subCube.y + addition.y
                 position.z = subCube.z + addition.z
             }
 
             const notchWave = (v) => {
-                v = (1 / diceParams.notchRadius) * v
+                v = (1 / objectParams.notchRadius) * v
                 v = Math.PI * Math.max(-1, Math.min(1, v))
-                return diceParams.notchDepth * (Math.cos(v) + 1)
+                return objectParams.notchDepth * (Math.cos(v) + 1)
             }
 
             const notch = (pos) => notchWave(pos[0]) * notchWave(pos[1])
@@ -1304,13 +1301,13 @@ function createDiceMesh_BoxGeometry(useHoles) {
 
 
 // DOTS
-function createDiceMesh_InnerGeometry() {
+function createObjectMesh_InnerGeometry() {
 
     // Creates an inner box, slightly smaller, that just serves to fill divots with black color
 
     const baseGeometry = new THREE.PlaneGeometry(
-        1 - 2 * diceParams.edgeRadius,
-        1 - 2 * diceParams.edgeRadius
+        1 - 2 * objectParams.edgeRadius,
+        1 - 2 * objectParams.edgeRadius
     )
 
     const offset = 0.48
@@ -1340,13 +1337,13 @@ function createDiceMesh_InnerGeometry() {
     )
 }
 
-function addDiceEvents(dice) {
+function addObjectEvents(object) {
 
-    dice.body.addEventListener("sleep", (e) => {
+    object.body.addEventListener("sleep", (e) => {
 
-        dice.body.allowSleep = false
+        object.body.allowSleep = false
 
-        // CALCULATE FINAL DICE LANDING POSITION (ie what face is pointing up)
+        // CALCULATE FINAL OBJECT LANDING POSITION (ie what face is pointing up)
         const euler = new CANNON.Vec3()
         e.target.quaternion.toEuler(euler)
 
@@ -1367,7 +1364,7 @@ function addDiceEvents(dice) {
                 showRollResults(6)
             } else {
                 // landed on edge => wait to fall on side and fire the event again
-                dice.body.allowSleep = true
+                object.body.allowSleep = true
             }
         } else if (isHalfPi(euler.z)) {
             showRollResults(2)
@@ -1375,21 +1372,21 @@ function addDiceEvents(dice) {
             showRollResults(5)
         } else {
             // landed on edge => wait to fall on side and fire the event again
-            dice.body.allowSleep = true
+            object.body.allowSleep = true
         }
 
-        checkDiceStoppedMoving()
+        checkObjectStoppedMoving()
     })
 }
 
-function checkDiceStoppedMoving() {
+function checkObjectStoppedMoving() {
 
-    let diceStillMoving = diceArray.filter( x => x.body.allowSleep == true)
+    let objectStillMoving = objectArray.filter( x => x.body.allowSleep == true)
 
     let timeDiff = Math.round(new Date() - rollTimer  / 1000)
 
-    if (diceStillMoving.length == 0 || timeDiff > 2.5) {
-        console.log("All dice stopped")
+    if (objectStillMoving.length == 0 || timeDiff > 2.5) {
+        console.log("All objects stopped")
         store.rolling = false
 
         /*
@@ -1401,46 +1398,46 @@ function checkDiceStoppedMoving() {
 
 }
 
-function throwDice() {
+function throwObjects() {
 
     store.rolling = true
     rollTimer = new Date()
 
     scoreResult.value = null
 
-    diceArray.forEach((die, index) => {
+    objectArray.forEach((object, index) => {
 
         // MOTION
-        die.body.velocity.setZero()
-        die.body.angularVelocity.setZero()
+        object.body.velocity.setZero()
+        object.body.angularVelocity.setZero()
 
         // POSITION
         //d.body.position = new CANNON.Vec3(2, index * 1.5, 0)
         const throwHeight = () => {
-            return generateRandomInteger(40, 150) //(index+2) * (diceParams.scale - ((40 / 100) * diceParams.scale))
+            return generateRandomInteger(40, 150) //(index+2) * (objectParams.scale - ((40 / 100) * objectParams.scale))
         }
-        die.body.position = new CANNON.Vec3(generateRandomInteger(-10,10), generateRandomInteger(70, 150), generateRandomInteger(-10,10))
-        die.mesh.position.copy(die.body.position)
+        object.body.position = new CANNON.Vec3(generateRandomInteger(-10,10), generateRandomInteger(70, 150), generateRandomInteger(-10,10))
+        object.mesh.position.copy(object.body.position)
 
         // ROTATION
-        //die.mesh.rotation.set( 2 * Math.PI * Math.random(),   0,  2 * Math.PI * Math.random()  )
-        die.mesh.rotation.set( 2 * Math.PI * Math.random(), 2 * Math.PI * Math.random(), 2 * Math.PI * Math.random())
-        die.body.quaternion.copy(die.mesh.quaternion)
+        //object.mesh.rotation.set( 2 * Math.PI * Math.random(),   0,  2 * Math.PI * Math.random()  )
+        object.mesh.rotation.set( 2 * Math.PI * Math.random(), 2 * Math.PI * Math.random(), 2 * Math.PI * Math.random())
+        object.body.quaternion.copy(object.mesh.quaternion)
 
         // RANDOM FORCE
         const force = 33 + (35 * Math.random())
 
         // APPLY
-        die.body.applyImpulse(
+        object.body.applyImpulse(
 
             // POSITION
             new CANNON.Vec3(generateRandomInteger(-4,32), force, -generateRandomInteger(-8,32)), // left-right, gravity, top-bottom
 
             // ROTATION
-            new CANNON.Vec3(generateRandomInteger(3,4)*(100/diceParams.scale), generateRandomInteger(3,4)*(100/diceParams.scale), -generateRandomInteger(3,4)*(100/diceParams.scale))
+            new CANNON.Vec3(generateRandomInteger(3,4)*(100/objectParams.scale), generateRandomInteger(3,4)*(100/objectParams.scale), -generateRandomInteger(3,4)*(100/objectParams.scale))
         )
 
-        die.body.allowSleep = true
+        object.body.allowSleep = true
     })
 }
 
