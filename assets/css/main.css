@@ -53,10 +53,18 @@
     @apply rounded-full bg-teal-800 hover:bg-teal-700 text-white hover:scale-105 transition cursor-pointer;
 }
 
-.btn_picto.small {
+.btn_small {
     @apply p-2 px-4 text-xs xs:text-sm md:text-lg;
 }
 
-.btn_picto.large {
+.btn_large {
     @apply p-4 px-8 text-sm xs:text-base md:text-xl;
+}
+
+.app-width {
+    @apply max-w-5xl;
+}
+
+.app-padding {
+    @apply p-4;
 }

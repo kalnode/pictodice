@@ -121,13 +121,12 @@ async function findRouteObject(array, key1, key2, value) {
 
 <template>
     <div class="flex items-center space-x-4">
-        <div class="text-xs text-teal-900">/</div>
         <client-only>
             <StaggeredTransition animType='slideRight' :duration="100" tag="div" class="text-xs sm:text-md md:text-xl flex space-x-4">
                 <div v-for="(crumb, index) in breadcrumbs" :key="'crumb-' + index" class="flex items-center space-x-4">
 
                     <!-- TODO: We want to know when breadcrumb animates, then after 100ms we fade in this slash -->
-                    <div v-if="index > 0" class="text-xs text-teal-900">/</div>
+                    <div class="text-xs text-teal-900">/</div>
 
                     <NuxtLink :to="crumb.active ? crumb.path : null">
                         <div :class="crumb.active ? '' : 'disabled'" class="link">

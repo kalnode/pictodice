@@ -35,7 +35,7 @@ function setLimit(newLimit) {
 </script>
 
 <template>
-    <div v-if="itemsToDisplay" class="w-full h-full flex flex-col">
+    <div v-if="itemsToDisplay" class="w-full h-full flex flex-col items-center overflow-auto">
 
         <!--
         <div class="flex space-x-4">
@@ -47,9 +47,9 @@ function setLimit(newLimit) {
         </div>
         -->
 
-        <div class="flex-1 flex justify-center items-center overflow-hidden">
+        <div class="app-width w-full flex-1 flex justify-center items-center">
             <client-only>
-                <StaggeredTransition animType='slideUp' :duration="50" tag="div" class="w-full h-full gap-6 grid auto-rows-min overflow-auto" style="grid-template-columns: repeat(auto-fit, minmax(14rem, auto))">
+                <StaggeredTransition animType='slideUp' :duration="50" tag="div" class="w-full h-full gap-6 grid auto-rows-min" style="grid-template-columns: repeat(auto-fit, minmax(14rem, auto))">
                     <div v-for="(set, index) in itemsToDisplay" :key="'diceset-'+index" :data-index="index">
                         <div class="max-h-48 py-8 pb-4 card hover:bg-opacity-60 transition group">
                             <NuxtLink :to="'/sets/'+index" class="w-full h-full flex flex-col justify-center items-center">

@@ -24,7 +24,7 @@ const route = useRoute()
                                 </NuxtLink>
                             </div>-->
                             <div v-if="route.name != 'index'" :key="'LinkHome'" class="p-2 rounded text-teal-700 hover:text-teal-200 hover:scale-110 transition-transform">
-                                <NuxtLink to="/" class="block p-1.5">
+                                <NuxtLink to="/" class="block p-1.5" v-motion-pop>
                                     <IconsBase name="home" class="w-16 h-auto" />
                                 </NuxtLink>
                             </div>
@@ -36,7 +36,7 @@ const route = useRoute()
                         <transition name="fade" mode="out-in">
                             <div v-if="route.name != 'about'" class="p-2 rounded text-teal-700 hover:text-teal-200 hover:scale-110 transition-transform">
                                 <!-- TODO: Use a proper named link here instead of to="" -->
-                                <NuxtLink to="/about" class="block p-1.5">
+                                <NuxtLink to="/about" class="block p-1.5" v-motion-pop>
                                     <IconsBase name="gear" class="w-16 h-auto" />
                                 </NuxtLink>
                             </div>

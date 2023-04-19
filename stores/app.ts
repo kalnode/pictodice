@@ -129,12 +129,12 @@ export const usePhotodiceAppStore = defineStore('PhotoDiceApp', {
         // TODO: Apply type "Die" here. See above "Die" interface.
         dice: [
             {
-                name: 'Classic Dice',
+                name: 'Classic Die',
                 type: 'classic', // 'preset' die, or 'custom' for user-made die
                 active: true,
             },
             {
-                name: 'Classic Dice PNG',
+                name: 'Classic Die PNG',
                 type: 'preset', // 'preset' die, or 'custom' for user-made die
                 active: true,
                 faces: [
@@ -153,12 +153,12 @@ export const usePhotodiceAppStore = defineStore('PhotoDiceApp', {
                 active: true,
                 faces: [
                     // type: static, remote, localStorage
-                    { type: 'text', text_src: 'Yes' },
-                    { type: 'text', text_src: 'No' },
-                    { type: 'text', text_src: 'Maybe' },
-                    { type: 'text', text_src: 'Ask again later' },
-                    { type: 'text', text_src: 'Possibly' },
-                    { type: 'text', text_src: 'Absolutely' }
+                    { type: 'text', text_src: 'Yes', text_color: 'white', bg_color: 'purple', font: 'sans', text_size: '18px' },
+                    { type: 'text', text_src: 'No', text_color: 'white', bg_color: 'purple', font: 'sans', text_size: '18px' },
+                    { type: 'text', text_src: 'Maybe', text_color: 'white', bg_color: 'purple', font: 'sans', text_size: '18px' },
+                    { type: 'text', text_src: 'Ask again later', text_color: 'white', bg_color: 'purple', font: 'sans', text_size: '18px' },
+                    { type: 'text', text_src: 'Possibly', text_color: 'white', bg_color: 'purple', font: 'sans', text_size: '18px' },
+                    { type: 'text', text_src: 'Absolutely', text_color: 'white', bg_color: 'purple', font: 'sans', text_size: '18px' }
                 ]
             },
             {

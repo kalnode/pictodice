@@ -5,13 +5,16 @@
     ]">
 
         <div class="absolute z-50 w-full flex justify-between items-center pointer-events-none">
+
+            <!-- LEFT -->
             <div>
                 <div v-if="currentRoute.name != 'index' && currentRoute.name != 'roll'" @click="router.back()"
                 class="p-4 text-teal-900 hover:text-teal-200 hover:scale-105 transition cursor-pointer pointer-events-auto">
-                    <IconsBase name="arrowBack" class="w-10 h-auto" />
+                    <IconsBase name="arrowBack" class="w-6 h-auto" />
                 </div>
             </div>
 
+            <!-- CENTER -->
             <div>
                 <transition name="fade">
                     <!-- TODO: Support page meta here for class, instead of doing stupid route lookups -->
@@ -28,6 +31,9 @@
                     </header>
                 </transition>
             </div>
+
+            <!-- RIGHT -->
+            <!--OVERFLOW (triple dots) -->
             <div class="absolute right-2 top-1 pointer-events-auto">...</div>
         </div>
 
