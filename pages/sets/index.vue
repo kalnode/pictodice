@@ -47,13 +47,13 @@ function setLimit(newLimit) {
         </div>
         -->
 
-        <div class="app-width w-full flex-1 flex justify-center items-center">
+        <div class="app-width-max app-padding-x w-full flex-1 flex justify-center items-center">
             <client-only>
                 <StaggeredTransition animType='slideUp' :duration="50" tag="div" class="w-full h-full gap-6 grid auto-rows-min" style="grid-template-columns: repeat(auto-fit, minmax(14rem, auto))">
                     <div v-for="(set, index) in itemsToDisplay" :key="'diceset-'+index" :data-index="index">
-                        <div class="max-h-48 py-8 pb-4 card hover:bg-opacity-60 transition group">
-                            <NuxtLink :to="'/sets/'+index" class="w-full h-full flex flex-col justify-center items-center">
-                                <div class="mt-4 mb-8 flex-1 flex items-center">
+                        <div class="max-h-48 card hover:bg-opacity-60 transition group">
+                            <NuxtLink :to="'/sets/'+index" class="w-full h-full flex flex-col justify-center items-center py-8 pb-4">
+                                <div class="mt-4 mb-4 md:mb-8 flex-1 flex items-center">
                                     <IconsBase name="die" class="w-16 h-auto transition group-hover:scale-105" />
                                 </div>
                                 <div class="inline-block px-4 pb-4 text-lg text-black">

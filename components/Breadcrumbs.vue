@@ -1,15 +1,26 @@
 <script setup>
 import { onBeforeRouteUpdate } from "vue-router"
 import { ref } from "vue"
+import { usePhotodiceAppStore } from '~/stores/app'
+const store = usePhotodiceAppStore()
+
 
 const breadcrumbs = ref([])
 
+const viewportWidth = ref('mobile')
+
 onMounted(async () => {
-    await setBreadcrumbs(useRoute())
+
+    if (viewportWidth != 'mobile') {
+        await setBreadcrumbs(useRoute())
+    }
 })
 
 onBeforeRouteUpdate(async (newRoute) => {
-    await setBreadcrumbs(newRoute)
+
+    if (viewportWidth != 'mobile') {
+        await setBreadcrumbs(newRoute)
+    }
 })
 
 async function setBreadcrumbs(currentRoute) {
@@ -55,7 +66,13 @@ async function setBreadcrumbs(currentRoute) {
     // --------------------------
     // Build final breadcrumbs array for rendering
     // --------------------------
-    let finalOutput = []
+    let finalOutput = [
+        {
+            path: '/',
+            title: 'Home',
+            active: true
+        }
+    ]
 
     // Loop through route names and look for a matched route object
     for (let i = 0; i < routeNamesFinal.length; i++) {
@@ -120,27 +137,33 @@ async function findRouteObject(array, key1, key2, value) {
 </script>
 
 <template>
-    <div class="flex items-center space-x-4">
-        <client-only>
-            <StaggeredTransition animType='slideRight' :duration="100" tag="div" class="text-xs sm:text-md md:text-xl flex space-x-4">
-                <div v-for="(crumb, index) in breadcrumbs" :key="'crumb-' + index" class="flex items-center space-x-4">
+    <div class="flex items-center space-x-4 text-lg md:text-xl">
+        <div v-if="store.device.viewport.context == 'narrow'">
+            <NuxtLink v-if="breadcrumbs.at(-2)" :to="breadcrumbs.at(-2).path" class="link group" style="text-decoration: none !important">
+                <span class="text-teal-600 group-hover:text-white">&#60;&#60;</span> <span class="underline">{{ breadcrumbs.at(-2).title }}</span>
+            </NuxtLink>
+        </div>
+        <div v-else>
+            <client-only>
+                <StaggeredTransition animType='slideRight' :duration="100" tag="div" class="flex flex-wrap space-x-1">
+                    <div v-for="(crumb, index) in breadcrumbs" :key="'crumb-' + index" class="flex items-center space-x-1">
+                        <!-- TODO: We want to know when breadcrumb animates, then after 100ms we fade in this slash -->
+                        <div v-if="index > 0" class="text-xs text-teal-900">&#47;</div>
 
-                    <!-- TODO: We want to know when breadcrumb animates, then after 100ms we fade in this slash -->
-                    <div class="text-xs text-teal-900">/</div>
-
-                    <NuxtLink :to="crumb.active ? crumb.path : null">
-                        <div :class="crumb.active ? '' : 'disabled'" class="link">
-                            {{ crumb.title }}
-                        </div>
-                    </NuxtLink>
-                </div>
-            </StaggeredTransition>
-        </client-only>
+                        <NuxtLink :to="crumb.active ? crumb.path : null">
+                            <div :class="crumb.active ? '' : 'disabled'" class="link">
+                                {{ crumb.title }}
+                            </div>
+                        </NuxtLink>
+                    </div>
+                </StaggeredTransition>
+            </client-only>
+        </div>
     </div>
 </template>
 <style scoped>
 .link {
-  @apply cursor-pointer underline text-teal-600 hover:text-white;
+  @apply p-4 cursor-pointer underline text-teal-600 hover:text-white;
 }
 
 .link.disabled {

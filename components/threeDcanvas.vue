@@ -110,6 +110,7 @@ onMounted ( () => {
 // FUNCTIONS
 // =================================
 
+// TODO: Use global 'debounce' for this
 function debounceKal (func, time) {
     var time = time || 100
     var timer

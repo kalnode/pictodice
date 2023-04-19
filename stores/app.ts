@@ -66,6 +66,10 @@ export const usePhotodiceAppStore = defineStore('PhotoDiceApp', {
             version: ''
         },
 
+        device: {
+            viewport: {}
+        },
+
         // MISC
         showDevTools: false,
 

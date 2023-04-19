@@ -26,6 +26,7 @@ export default defineNuxtConfig({
     },
 
     ssr: true,
+
     app: {
 
         head: {
@@ -59,9 +60,12 @@ export default defineNuxtConfig({
           { autoImports: ['defineStore', 'acceptHMRUpdate'] }
         ],
         '@vite-pwa/nuxt',
-        '@vueuse/motion/nuxt'
-
+        '@vueuse/motion/nuxt',
+        '@nuxt/image-edge',
     ],
+
+    //modules: ['@pinia/nuxt'],
+
     pwa: {
       /* PWA options */
     }
@@ -71,9 +75,6 @@ export default defineNuxtConfig({
         dirs: ['stores'],
     },
     */
-
-
-    //modules: ['@pinia/nuxt'],
     /*
     pinia: {
         autoImports: [
@@ -83,5 +84,4 @@ export default defineNuxtConfig({
         ],
     },
     */
-
 })

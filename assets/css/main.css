@@ -54,17 +54,21 @@
 }
 
 .btn_small {
-    @apply p-2 px-4 text-xs xs:text-sm md:text-lg;
+    @apply p-2 px-6 text-sm xs:text-base md:text-lg;
 }
 
 .btn_large {
     @apply p-4 px-8 text-sm xs:text-base md:text-xl;
 }
 
-.app-width {
+.app-width-max {
     @apply max-w-5xl;
 }
 
-.app-padding {
-    @apply p-4;
+.app-padding-x {
+    @apply px-4;
+}
+
+.app-margin-x-neg {
+    @apply -mx-4;
 }

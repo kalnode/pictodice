@@ -8,10 +8,14 @@
 
             <!-- LEFT -->
             <div>
+
+                <!-- BACK ARROW -->
+                <!--
                 <div v-if="currentRoute.name != 'index' && currentRoute.name != 'roll'" @click="router.back()"
                 class="p-4 text-teal-900 hover:text-teal-200 hover:scale-105 transition cursor-pointer pointer-events-auto">
                     <IconsBase name="arrowBack" class="w-6 h-auto" />
                 </div>
+                -->
             </div>
 
             <!-- CENTER -->
@@ -107,7 +111,7 @@ const router = useRouter()
 const currentRoute = useRoute()
 // ------------------------------------
 
-const { $event } = useNuxtApp()
+const { $event, $getViewportDimensions, $debounce } = useNuxtApp()
 
 
 // ==========================================
@@ -171,6 +175,7 @@ if (Capacitor.isNativePlatform()) {
 // Right now we import this here via CDN, but the proper way is to import this as a plugin. Dunno how to do that.
 // TODO2: Are we actually leveraging the features within?
 // See: https://capacitorjs.com/docs/web/pwa-elements
+/*
 useHead({
     script: [
         {
@@ -181,6 +186,12 @@ useHead({
         }
     ]
 })
+*/
+
+
+function recordViewportDimensions() {
+    store.device.viewport = $getViewportDimensions()
+}
 
 
 
@@ -192,10 +203,28 @@ onMounted (async () => {
 
     console.log("mounted")
 
+    // TODO: Currently localStorage has bugs on mobile. For now, we only enable it on web.
+    // This means on mobile apps, user can make die customizations but they won't be saved for next session.
     if (store.app.subtype == 'web') {
         await store.getLocalStorage_CustomDice()
         .catch( (error) => { })
     }
+
+    recordViewportDimensions()
+
+    window.addEventListener("resize", $debounce( (e) => {
+
+        recordViewportDimensions()
+
+        // Emit to app that viewport resized
+        // TODO: Check if we need this, and, make the emit a proper command
+        //emit('viewportResize')
+
+    }, 200))
+
+
+
+
 
     let gradientBackground = document.getElementById("gradientBackground")
     let gradientMouse = document.getElementById("gradientMouse")
