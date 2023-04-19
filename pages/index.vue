@@ -84,7 +84,7 @@ definePageMeta({
 
             <div class="w-full flex flex-col sm:flex-row sm:justify-center">
                 <!-- LEFT --> 
-                <section v-motion-slide-left :delay="700" class="flex-1 card card_padding mb-4 sm:mb-0 sm:mr-4 flex justify-center items-center overflow-hidden">
+                <section v-motion-slide-bottom :delay="700" class="flex-1 card card_padding mb-4 sm:mb-0 sm:mr-4 flex justify-center items-center overflow-hidden">
                     <!-- TODO: Ideally we want to use a named route with params, but apparently that is ill-advised, and now throws an error (from VueRouter) -->
                     <!-- <NuxtLink :to="{ name: 'Roll', params: { 'set': 'classic' } }" tabindex=-1 class="flex flex-col items-center"> -->
                     <!-- SEE: https://github.com/vuejs/router/blob/main/packages/router/CHANGELOG.md#414-2022-08-22 -->
@@ -126,7 +126,7 @@ definePageMeta({
                     </NuxtLink>
                 </section>
                 <!-- RIGHT -->
-                <section v-motion-slide-right :delay="1900" class="flex-1 card card_padding flex justify-center items-center">
+                <section v-motion-slide-bottom :delay="1900" class="flex-1 card card_padding flex justify-center items-center">
                     <NuxtLink to="/roll?classic" class="flex-1 flex flex-col justify-end items-center" tabindex=-1>
                         <div class="mb-2 flex justify-center transition hover:scale-105 space-x-4 p-4">
                             <IconsBase name="pencil" class="w-20 h-auto" />
