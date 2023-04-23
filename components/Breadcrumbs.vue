@@ -140,7 +140,7 @@ async function findRouteObject(array, key1, key2, value) {
     <div class="flex items-center space-x-4 text-lg md:text-xl">
         <div v-if="store.device.viewport.context == 'narrow'">
             <NuxtLink v-if="breadcrumbs.at(-2)" :to="breadcrumbs.at(-2).path" class="link group" style="text-decoration: none !important">
-                <span class="text-teal-600 group-hover:text-white">&#60;&#60;</span> <span class="underline">{{ breadcrumbs.at(-2).title }}</span>
+                <span class="group-hover:opacity-50">&#60;&#60;</span> <span class="underline">{{ breadcrumbs.at(-2).title }}</span>
             </NuxtLink>
         </div>
         <div v-else>
@@ -148,12 +148,9 @@ async function findRouteObject(array, key1, key2, value) {
                 <StaggeredTransition animType='slideRight' :duration="100" tag="div" class="flex flex-wrap space-x-1">
                     <div v-for="(crumb, index) in breadcrumbs" :key="'crumb-' + index" class="flex items-center space-x-1">
                         <!-- TODO: We want to know when breadcrumb animates, then after 100ms we fade in this slash -->
-                        <div v-if="index > 0" class="text-xs text-teal-900">&#47;</div>
-
-                        <NuxtLink :to="crumb.active ? crumb.path : null">
-                            <div :class="crumb.active ? '' : 'disabled'" class="link">
-                                {{ crumb.title }}
-                            </div>
+                        <div v-if="index > 0" class="text-xs">&#47;</div>
+                        <NuxtLink :to="crumb.active ? crumb.path : null" :class="crumb.active ? '' : 'disabled'" class="link">
+                            {{ crumb.title }}
                         </NuxtLink>
                     </div>
                 </StaggeredTransition>
@@ -163,10 +160,10 @@ async function findRouteObject(array, key1, key2, value) {
 </template>
 <style scoped>
 .link {
-  @apply p-4 cursor-pointer underline text-teal-600 hover:text-white;
+  @apply p-4 cursor-pointer underline;
 }
 
 .link.disabled {
-  @apply pointer-events-none no-underline text-black;
+  @apply pointer-events-none no-underline opacity-50;
 }
 </style>

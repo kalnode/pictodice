@@ -8,43 +8,34 @@ const route = useRoute()
 </script>
 
 <template>
-    <div class="pointer-events-none">
-        <header>
-            <nav>
-
-                <div class="flex justify-between items-center m-2">
-
-                    <!-- LEFT -->
-                    <div class="relative pointer-events-auto">
-                        <transition name="fade" mode="out-in">
-                            <!--
-                            <div v-if="route.name == 'index'" :key="'LinkUpload'" class="p-2 rounded text-teal-700 hover:text-teal-200 hover:scale-110 transition-transform">
-                                <NuxtLink to="/upload" class="block p-1.5">
-                                    <IconsBase name="grid" class="w-16 h-auto" />
-                                </NuxtLink>
-                            </div>-->
-                            <div v-if="route.name != 'index'" :key="'LinkHome'" class="p-2 rounded text-teal-700 hover:text-teal-200 hover:scale-110 transition-transform">
-                                <NuxtLink to="/" class="block p-1.5" v-motion-pop>
-                                    <IconsBase name="home" class="w-16 h-auto" />
-                                </NuxtLink>
-                            </div>
-                        </transition>
-                    </div>
-
-                    <!-- RIGHT -->
-                    <div class="pointer-events-auto">
-                        <transition name="fade" mode="out-in">
-                            <div v-if="route.name != 'about'" class="p-2 rounded text-teal-700 hover:text-teal-200 hover:scale-110 transition-transform">
-                                <!-- TODO: Use a proper named link here instead of to="" -->
-                                <NuxtLink to="/about" class="block p-1.5" v-motion-pop>
-                                    <IconsBase name="gear" class="w-16 h-auto" />
-                                </NuxtLink>
-                            </div>
-                            <!-- <div class="p-2 rounded bg-orange-700 text-white"><NuxtLink to="/about">About</NuxtLink></div> -->
-                        </transition>
-                    </div>
+    <div class="pointer-events-none flex justify-between items-center m-2">
+        <!-- LEFT -->
+        <div class="pointer-events-auto">
+            <transition name="fade" mode="out-in">
+                <!--
+                <div v-if="route.name == 'index'" :key="'LinkUpload'" v-motion-pop>
+                    <NuxtLink to="/upload" class="block p-1.5 rounded-full hover:scale-110 transition-transform">
+                        <IconsBase name="grid" class="w-16 h-auto" />
+                    </NuxtLink>
+                </div>-->
+                <div v-if="route.name != 'index'" :key="'LinkHome'" v-motion-pop>
+                    <NuxtLink to="/" class="block p-1.5 rounded-full hover:scale-110 transition-transform">
+                        <IconsBase name="home" class="w-16 h-auto" />
+                    </NuxtLink>
                 </div>
-            </nav>
-        </header>
+            </transition>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="pointer-events-auto">
+            <transition name="fade" mode="out-in">
+                <div v-if="route.name != 'about'" :key="'LinkAbout'" v-motion-pop>
+                    <!-- TODO: Use a proper named link here instead of to="" -->
+                    <NuxtLink to="/about" class="block p-1.5 rounded-full hover:scale-110 transition-transform">
+                        <IconsBase name="gear" class="w-16 h-auto" />
+                    </NuxtLink>
+                </div>
+            </transition>
+        </div>
     </div>
 </template>

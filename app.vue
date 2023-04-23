@@ -4,43 +4,39 @@
         store.safeAreaInset.bottom ? 'padding-bottom:'+(store.safeAreaInset.bottom+store.safeAreaPadding)+'px' : ''
     ]">
 
-        <div class="absolute z-50 w-full flex justify-between items-center pointer-events-none">
+        <header class="absolute z-50 w-full flex justify-between items-center pointer-events-none">
 
             <!-- LEFT -->
             <div>
-
                 <!-- BACK ARROW -->
                 <!--
                 <div v-if="currentRoute.name != 'index' && currentRoute.name != 'roll'" @click="router.back()"
-                class="p-4 text-teal-900 hover:text-teal-200 hover:scale-105 transition cursor-pointer pointer-events-auto">
+                class="p-4 hover:text-[color:var(--color-primary)] hover:scale-105 transition cursor-pointer pointer-events-auto">
                     <IconsBase name="arrowBack" class="w-6 h-auto" />
                 </div>
                 -->
             </div>
 
             <!-- CENTER -->
-            <div>
-                <transition name="fade">
-                    <!-- TODO: Support page meta here for class, instead of doing stupid route lookups -->
-                    <header v-if="showTopTitle && !store.rolling" id="Header"
-                    :class="currentRoute.name == 'roll' ? 'absolute z-50' : ''"
-                    :style="currentRoute.name == 'index' ? 'top:'+ (store.safeAreaInset.top+store.safeAreaPadding) +'px' : ''"
-                    class="w-full flex justify-center p-2 pointer-events-auto">
-                        <transition name="fade" mode="out-in">
-                            <NuxtLink :to="currentRoute.name == 'index' ? '/' : currentRoute.name" :key="'title-'+currentRoute.name">
-                                <h1 class="p-1.5 text-3xl font-bold uppercase text-teal-900 hover:text-teal-200 hover:scale-110 transition-transform">{{ currentRoute.meta.title }}</h1>
-                            </NuxtLink>
-                        </transition>
-                        <!-- <Logo /> -->
-                    </header>
-                </transition>
-            </div>
+            <transition name="fade">
+                <!-- TODO: Support page meta here for class, instead of doing stupid route lookups -->
+                <!-- TODO: Is this even necessary? -->
+                <div v-if="showTopTitle && !store.rolling" id="Header"
+                :class="currentRoute.name == 'roll' ? 'absolute z-50' : ''"
+                :style="currentRoute.name == 'index' ? 'top:'+ (store.safeAreaInset.top+store.safeAreaPadding) +'px' : ''"
+                class="w-full flex justify-center p-2 pointer-events-auto">
+                    <NuxtLink :to="currentRoute.name == 'index' ? '/' : currentRoute.name" :key="'title-'+currentRoute.name">
+                        <h1 class="p-1.5 text-3xl font-bold uppercase hover:scale-110 transition-transform">{{ currentRoute.meta.title }}</h1>
+                    </NuxtLink>
+                </div>
+            </transition>
 
             <!-- RIGHT -->
             <!--OVERFLOW (triple dots) -->
             <div class="absolute right-2 top-1 pointer-events-auto">...</div>
-        </div>
+        </header>
 
+        <!-- MOTION PERMISSION PROMPT (custom; mostly for iOS/Safari use) -->
         <div v-if="store.showPromptMotionPermission"
         class="flex justify-center space-x-2 items-center absolute top-4 mt-12 mx-4 z-50 pointer-events-auto bg-yellow-200 text-xs p-2 text-orange-800"
         :style="'top:'+ (store.safeAreaInset.top+store.safeAreaPadding) +'px'">
@@ -58,18 +54,18 @@
         <!-- CONTENT -->
         <main class="w-full h-full flex-1">
             <!-- TODO: Look into page-key; why static? -->
-            <NuxtPage id="Content" />
             <!-- :page-key="'pagekey-'+currentRoute.name" -->
             <!--  page-key="static" -->
+            <NuxtPage id="Content" />
         </main>
 
         <!-- NAVIGATION -->
-        <nav class="z-40 absolute bottom-0 w-full pointer-events-none"
+        <transition name="fade">
+            <nav v-if="!store.rolling" class="z-40 absolute bottom-0 w-full pointer-events-none"
         :style="'bottom:'+ (store.safeAreaInset.bottom) +'px'">
-            <transition name="fade">
-                <Navigation v-if="!store.rolling" id="Navigation" class="w-full" />
-            </transition>
-        </nav>
+                <Navigation class="w-full" />
+            </nav>
+        </transition>
 
         <!-- OFFLINE EXPERIENCE -->
         <!-- TODO: Look into offline mode using:
@@ -86,10 +82,13 @@
         </NuxtErrorBoundary>
 
         <!-- BACKGROUND -->
+        <!-- FROM EARLY VERSIONS; maybe we still use -->
+        <!--
         <div id="bgGradient" class="absolute w-full h-full top-0" style="z-index: -1">
             <div id="gradientBackground" class="w-full h-full"></div>
             <div id="gradientMouse" class="absolute z-50 w-full h-full top-0"></div>
         </div>
+        -->
 
         <!-- MODAL -->
         <Modal />
@@ -542,36 +541,9 @@ function setMotionListenersEXPERIMENTAL() {
 
 }
 
-
-
-
-
-
 </script>
 
-<style>
-body {
-    overflow: hidden;
-    width: 100%;
-    height: 100%;
-    position: fixed;
-}
-
-html,body, #__nuxt, #__layout{
-  height:100%!important;
-  width: 100%!important;
-}
-
-.page-enter-active,
-.page-leave-active {
-    transition: filter 0.4s, opacity 0.4s;
-     /* transition: all 33s;*/
-}
-.page-enter-from,
-.page-leave-to {
-    opacity: 0;
-    filter: blur(1rem);
-}
+<style scoped>
 
 /* GRADIENT BG */
 .gradientMouse {

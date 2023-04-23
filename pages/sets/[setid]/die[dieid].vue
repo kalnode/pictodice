@@ -34,7 +34,7 @@ definePageMeta({
                         class="flex justify-center">
                             <div class="w-48 py-8 pb-4 flex flex-col justify-center items-center">
 
-                                <div class="rounded-lg border-2 border-teal-800 hover:bg-white hover:bg-opacity-60 transition w-48 h-48 overflow-hidden"
+                                <div class="rounded-lg border-2 border-[color:var(--color-primary)] hover:bg-white hover:bg-opacity-60 transition w-48 h-48 overflow-hidden"
                                 :style="[
                                         face.text_color ? 'color: '+face.text_color : 'color: black',
                                         face.bg_color ? 'background-color: '+face.bg_color : 'background-color: white'
@@ -49,7 +49,7 @@ definePageMeta({
                                 </div>
 
                                 <!-- DETAILS BOX -->
-                                <div v-if="store.dice[currentRoute.params.dieid].type == 'custom'" class="w-full p-4 rounded text-lg text-black bg-gray-100">
+                                <div v-if="store.dice[currentRoute.params.dieid].type == 'custom'" class="w-full p-4 rounded text-lg bg-gray-100">
                                     <div class="flex justify-between">Type: {{ face.type }}<div class="border border-black w-10 h-10 p-1 rounded-full">=</div></div>
                                     <div>BG Color: []</div>
                                 </div>
@@ -63,8 +63,8 @@ definePageMeta({
                 </client-only>
 
                 <div class="relative flex justify-end items-center my-3">
-                    <NuxtLink :to="'/sets/' + currentRoute.params.setid" class="p-4">
-                        <div class="btn_picto btn_large uppercase" v-motion-slide-bottom>Back to Set</div>
+                    <NuxtLink :to="'/sets/' + currentRoute.params.setid" class="btnapp btn_large uppercase" v-motion-slide-bottom>
+                        Back to Set
                     </NuxtLink>
                 </div>
 

@@ -24,4 +24,5 @@ module.exports = {
         // Disables hover on mobile
         hoverOnlyWhenSupported: true,
     },
+    darkMode: 'class'
 }

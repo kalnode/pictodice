@@ -30,19 +30,19 @@
 
                     <div class="relative flex flex-col md:flex-row md:justify-end items-center mb-3">
                         <!--
-                        <NuxtLink to="/roll?classic" v-motion-slide-right class="mb-4 md:mb-0 md:mr-4 btn_picto btn_large uppercase">
+                        <NuxtLink to="/roll?classic" v-motion-slide-right class="mb-4 md:mb-0 md:mr-4 btnapp btn_large uppercase">
                             Roll
                         </NuxtLink>
                         -->
-                        <div @click="throwDice()" tabindex=0 v-motion-slide-right class="mb-4 md:mb-0 md:mr-4 btn_picto btn_large uppercase">
+                        <div @click="throwDice()" tabindex=0 v-motion-slide-right class="mb-4 md:mb-0 md:mr-4 btnapp btn_large uppercase">
                             Roll
                         </div>
-                        <div @click="selectSet()" tabindex=0 class="btn_picto btn_small text-sm whitespace-nowrap uppercase" v-motion-slide-left>
+                        <div @click="selectSet()" tabindex=0 class="btnapp btn_small text-sm whitespace-nowrap uppercase" v-motion-slide-left>
                             Set Preset & Roll
                         </div>
 
                         <!--
-                        <div @click="takeScreenshot()" tabindex=0 class="btn_picto btn_small text-sm whitespace-nowrap uppercase" v-motion-slide-left>
+                        <div @click="takeScreenshot()" tabindex=0 class="btnapp btn_small text-sm whitespace-nowrap uppercase" v-motion-slide-left>
                             Take Screenshot
                         </div>
                         -->
@@ -51,10 +51,10 @@
                     <!--
                     <nav class="relative flex justify-end items-center">
                         <div @click="selectSet()" class="z-50">
-                            <div class="btn_picto btn_large mb-3" v-motion-pop>Roll</div>
+                            <div class="btnapp btn_large mb-3" v-motion-pop>Roll</div>
                         </div>
                         <div @click="selectSet()" class="absolute z-0 ml-4" style="left:100%">
-                            <div class="btn_picto btn_small mb-3 text-sm whitespace-nowrap" v-motion-slide-left>Set Preset & Roll</div>
+                            <div class="btnapp btn_small mb-3 text-sm whitespace-nowrap" v-motion-slide-left>Set Preset & Roll</div>
                         </div>
                     </nav>
                     -->
@@ -70,7 +70,7 @@
                 <client-only>
                     <StaggeredTransition animType='slideUp' :duration="50" tag="div" class="diceSet_column w-full h-full gap-6 grid auto-rows-min">
                         <div v-for="(die, index) in store.diceSets[currentRoute.params.setid].dies" :key="'die-'+index" :data-index="index"
-                        class="rounded-lg border-2 border-teal-800 focus:bg-white active:bg-white hover:bg-white focus:bg-opacity-60 active:bg-opacity-60 hover:bg-opacity-60 transition-colors group">
+                        class="rounded-lg border-2 border-[color:var(--color-primary)] focus:bg-white active:bg-white hover:bg-white focus:bg-opacity-60 active:bg-opacity-60 hover:bg-opacity-60 transition-colors group">
                             <NuxtLink :to="'/sets/'+currentRoute.params.setid + '/die' + die"
                              class="w-full h-full flex flex-col justify-center items-center overflow-hidden p-4 md:p-8">
                                 <!--
@@ -79,7 +79,7 @@
                                 </div>
                                 -->
                                 <nuxt-img :src="'images/dice_screenshots/test1.png'" class="max-h-32 object-contain px-8 md:px-0 py-8 mb-8 group-focus:scale-105 group-active:scale-105 group-hover:scale-105 transition-transform drop-shadow-lg" />
-                                <div class="absolute bottom-0 inline-block px-4 pb-4 text-lg text-black">
+                                <div class="absolute bottom-0 inline-block px-4 pb-4 text-lg">
                                     {{ store.dice[die].name }}
                                 </div>
                             </NuxtLink>
@@ -103,11 +103,9 @@
 
         <!--
         <nav class="relative flex justify-end items-center">
-            <div @click="selectSet()" class="z-50">
-                <div class="btn_picto btn_large mb-3" v-motion-pop>Roll</div>
-            </div>
+            <div @click="selectSet()" class="z-50 btnapp btn_large mb-3" v-motion-pop>Roll</div>
             <div @click="selectSet()" class="absolute z-0 ml-4" style="left:100%">
-                <div class="btn_picto btn_small mb-3 text-sm whitespace-nowrap" v-motion-slide-left>Set Preset & Roll</div>
+                <div class="btnapp btn_small mb-3 text-sm whitespace-nowrap" v-motion-slide-left>Set Preset & Roll</div>
             </div>
         </nav>
         -->

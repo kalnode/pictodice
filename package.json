@@ -29,6 +29,7 @@
   "devDependencies": {
     "@capacitor/cli": "^4.7.3",
     "@nuxt/image-edge": "^1.0.0-28020728.5df24eb",
+    "@nuxtjs/color-mode": "^3.2.0",
     "@vite-pwa/nuxt": "^0.0.7",
     "autoprefixer": "^10.4.14",
     "nuxt": "^3.4.1",

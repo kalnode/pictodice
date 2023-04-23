@@ -6,10 +6,10 @@ definePageMeta({
 })
 </script>
 <template>
-    <div id="indexWrapper" class="w-full h-full app-padding-x flex flex-col items-center text-teal-800 overflow-auto">
+    <div id="indexWrapper" class="w-full h-full app-padding-x flex flex-col items-center overflow-auto">
 
         <div class="h-1/3 p-8 flex justify-center items-center">
-            <Logo />
+            <Logo tabindex=0 />
         </div>
 
         <nav class="w-full max-w-4xl pb-48">
@@ -26,8 +26,8 @@ definePageMeta({
                             <IconsBase name="die" class="w-12 h-auto" />
                         </div>
                     </NuxtLink>
-                    <NuxtLink to="/roll?classic">
-                        <div class="btn_picto btn_large uppercase whitespace-nowrap">Roll Classic</div>
+                    <NuxtLink to="/roll?classic" class="btnapp btn_large hover:scale-105 transition cursor-pointer uppercase whitespace-nowrap">
+                        Roll Classic
                     </NuxtLink>
                 </section>
                 <!-- RIGHT -->
@@ -43,38 +43,40 @@ definePageMeta({
                             </NuxtLink>
 
                             <div class="relative flex items-center">
-                                <NuxtLink :to="{ name: 'Roll'}" class="z-50">
-                                    <div class="btn_picto btn_large uppercase">Roll Preset</div>
+                                <NuxtLink :to="{ name: 'Roll'}" class="z-50 btnapp btn_large uppercase hover:scale-105 transition cursor-pointer">
+                                    Roll Preset
                                 </NuxtLink>
                                 <!-- TODO: v-motion conflicts with hover transform... we want both. How to make it work? -->
                                 <!-- v-motion-slide-left :delay="700" -->
-                                <NuxtLink v-if="store.currentDiceSet != 0" :to="{ name: 'Sets'}"
-                                class="w-3/4 -right-12 sm:-right-14 absolute z-0 btn_large flex justify-end rounded-full bg-white group hover:translate-x-2 transition-transform"
-                                style="padding-right: 1em">
-                                    <!-- ml-16 sm:ml-24 -->
-                                    <span class="invisible">-</span>
-                                    <IconsBase name="gear" class="w-5 sm:w-6 h-auto transform scale-125 text-teal-800 group-hover:scale-150 transition-transform" />
-                                </NuxtLink>
+                                <div v-motion-slide-left class="btn_large w-full -right-14 sm:-right-18 absolute z-0" style="padding-right: 1em">
+                                    <NuxtLink v-if="store.currentDiceSet != 0" :to="{ name: 'Sets'}"
+                                    class="w-full flex-1 ml-4 flex justify-end rounded-full bg-white group hover:translate-x-2 transition-transform"
+                                    style="padding: 0.8em">
+                                        <!-- ml-16 sm:ml-24 -->
+                                        <span class="invisible">-</span>
+                                        <IconsBase name="gear" class="w-5 sm:w-6 h-auto transform scale-125 group-hover:scale-150 transition-transform" />
+                                    </NuxtLink>
+                                </div>
                             </div>
                         </div>
 
                         <div v-else>
                             <NuxtLink :to="{ name: 'Sets'}" class="flex flex-col items-center z-50" tabindex=-1>
-                                <div class="border-2 border-teal-800 hover:bg-white hover:scale-105 transition-all border-dashed mb-8 p-10 flex-1 flex flex-col justify-center items-center">
+                                <div class="border-2 border-[color:var(--color-primary)] hover:bg-white hover:scale-105 transition-all border-dashed mb-8 p-10 flex-1 flex flex-col justify-center items-center">
                                     <div class="text-7xl font-bold">?</div>
                                     <div class="whitespace-nowrap">Select a Preset</div>
                                 </div>
                             </NuxtLink>
 
-                            <NuxtLink :to="{ name: 'Sets'}">
-                                <div class="btn_picto btn_large uppercase whitespace-nowrap">Roll Preset</div>
+                            <NuxtLink :to="{ name: 'Sets'}" class="btnapp btn_large hover:scale-105 transition cursor-pointer uppercase whitespace-nowrap">
+                                Roll Preset
                             </NuxtLink>
                         </div>
                     </div>
 
                     <!-- 
-                    <NuxtLink :to="{ name: 'Sets'}" tabindex=-1>
-                        <div class="mt-4 p-2 text-teal-800 hover:scale-105 hover:underline transition cursor-pointer">Select new preset</div>
+                    <NuxtLink :to="{ name: 'Sets'}" tabindex=-1 class="mt-4 p-2 hover:scale-105 hover:underline transition cursor-pointer">
+                        Select new preset
                     </NuxtLink>
                     -->
                 </section>
@@ -92,7 +94,7 @@ definePageMeta({
                     <NuxtLink :to="{ name: 'Sets'}" class="flex-1 flex flex-col justify-end items-center" tabindex=-1>
                         <div class="mb-4 flex transition hover:scale-105 space-x-6 p-6">
 
-                            <div class="flex items-end pr-6 border-r border-teal-600">
+                            <div class="flex items-end pr-6 border-r border-[color:var(--color-primary)]">
                                 <div>
                                     <IconsBase name="die" class="w-6 h-auto" />
                                     <IconsBase name="die" class="w-6 h-auto" />
@@ -103,7 +105,7 @@ definePageMeta({
                                 </div>
                             </div>
 
-                            <div class="flex items-end pr-6 border-r border-teal-600">
+                            <div class="flex items-end pr-6 border-r border-[color:var(--color-primary)]">
                                 <IconsBase name="die" class="w-10 h-auto" />
                                 <IconsBase name="die" class="w-10 h-auto" />
                             </div>
@@ -121,8 +123,8 @@ definePageMeta({
                             </div>
                         </div>
                     </NuxtLink>
-                    <NuxtLink :to="{ name: 'Sets'}">
-                        <div class="btn_picto btn_small whitespace-nowrap uppercase">Browse Dice Sets</div>
+                    <NuxtLink :to="{ name: 'Sets'}" class="btnapp btn_small hover:scale-105 transition cursor-pointer uppercase whitespace-nowrap">
+                        Browse Dice Sets
                     </NuxtLink>
                 </section>
                 <!-- RIGHT -->
@@ -132,8 +134,8 @@ definePageMeta({
                             <IconsBase name="pencil" class="w-20 h-auto" />
                         </div>
                     </NuxtLink>
-                    <NuxtLink :to="{ name: 'Sets'}">
-                        <div class="btn_picto btn_small whitespace-nowrap uppercase">Create Custom Dice</div>
+                    <NuxtLink :to="{ name: 'Sets'}" class="btnapp btn_small hover:scale-105 transition cursor-pointer uppercase whitespace-nowrap">
+                        Create Custom Dice
                     </NuxtLink>
                 </section>
             </div>

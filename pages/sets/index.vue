@@ -58,7 +58,7 @@ function setLimit(newLimit) {
                             </div>
                             -->
                             <nuxt-img :src="'images/dice_screenshots/test1.png'" class="max-h-48 object-contain px-8 md:px-0 py-8 mb-8 group-focus:scale-105 group-active:scale-105 group-hover:scale-105 transition-transform drop-shadow-lg" />
-                            <div class="absolute bottom-0 inline-block px-4 pb-4 text-lg text-black">
+                            <div class="absolute bottom-0 inline-block px-4 pb-4 text-lg">
                                 {{ set.name}}
                             </div>
                         </NuxtLink>

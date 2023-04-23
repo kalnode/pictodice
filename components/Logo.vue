@@ -1,7 +1,7 @@
 <template>
-    <h1 class="text-3xl font-bold uppercase text-teal-700 hover:text-teal-200 hover:scale-110 transition-transform">
-        <NuxtLink to="/">
+    <NuxtLink to="/">
+        <h1 class="p-1.5 text-3xl font-bold uppercase hover:scale-110 transition-transform">
             Pictodice
-        </NuxtLink>
-    </h1>
+        </h1>
+    </NuxtLink>
 </template>

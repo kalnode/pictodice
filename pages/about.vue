@@ -10,7 +10,9 @@
 <template>
     <div class="w-full h-full flex flex-col items-center p-4 overflow-auto">
 
-        <div class="max-w-lg space-y-4 pb-48 text-black text-opacity-80">
+        <div class="max-w-lg space-y-4 pb-48">
+
+            <ColorModePicker />
 
             <section>
                 <h2 class="font-bold">A technical demo by Kal</h2>
@@ -52,32 +54,33 @@
 
             <!-- -->
 
-            <NuxtLink to="/privacy" class="inline-block p-3 text-lg bg-white hover:bg-gray-100 text-black rounded m-1 cursor-pointer">
-                Privacy Policy
-            </NuxtLink>
+            <NuxtLink to="/privacy" class="btnapp">Privacy Policy</NuxtLink>
 
             <div>
                 App version: <span v-html="store.app.version"></span> ({{ store.app.type }})
             </div>
 
-            <div v-if="store.app.subtype == 'android'">
-                <div @click="$openAndroid('ApplicationDetails')" class="inline-block p-3 text-lg bg-white hover:bg-gray-100 text-black rounded m-1 cursor-pointer">
-                    Open App Details
-                </div>
 
-                <div @click="$openAppStore()" class="inline-block p-3 text-lg bg-white hover:bg-gray-100 text-black rounded m-1 cursor-pointer">
+            <button>hello</button>
+
+            <div v-if="store.app.subtype == 'android'">
+                <button @click="$openAndroid('ApplicationDetails')" class="inline-block p-3 text-lg bg-white hover:bg-gray-100 text-black rounded m-1 cursor-pointer">
+                    Open App Details
+                </button>
+
+                <button @click="$openAppStore()" class="inline-block p-3 text-lg bg-white hover:bg-gray-100 text-black rounded m-1 cursor-pointer">
                     Open App Store
-                </div>
+                </button>
             </div>
 
             <div v-if="store.app.subtype == 'iOS'" class="inline-block p-3 text-lg bg-white hover:bg-gray-100 text-black rounded m-1 cursor-pointer">
-                <div @click="$openIOS('App') ">
+                <button @click="$openIOS('App') ">
                     Open App Details
-                </div>
+                </button>
 
-                <div @click="$openAppStore()" class="inline-block p-3 text-lg bg-white hover:bg-gray-100 text-black rounded m-1 cursor-pointer">
+                <button @click="$openAppStore()" class="inline-block p-3 text-lg bg-white hover:bg-gray-100 text-black rounded m-1 cursor-pointer">
                     Open App Store
-                </div>
+                </button>
             </div>
 
         </div>

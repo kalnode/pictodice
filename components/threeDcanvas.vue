@@ -19,11 +19,11 @@
 
         <transition name="fade">
             <div v-if="showDevTools" class="absolute left-8 bottom-20 mb-6 pointer-events-auto z-50 flex flex-col items-center justify-center space-y-4">
-                <div @click="setupFormation()" class="p-4 px-8 text-sm rounded-full bg-white hover:bg-gray-100 text-teal-800 hover:scale-105 transition cursor-pointer">Formation</div>
-                <div @click="rotateObject()" class="p-4 px-8 text-sm rounded-full bg-white hover:bg-gray-100 text-teal-800 hover:scale-105 transition cursor-pointer">Rotate</div>
-                <div @click="createScreenshot()" class="p-4 px-8 text-sm rounded-full bg-white hover:bg-gray-100 text-teal-800 hover:scale-105 transition cursor-pointer">Screenshot</div>
-                <div @click="stopAnimation()" class="p-4 px-8 text-sm rounded-full bg-white hover:bg-gray-100 text-teal-800 hover:scale-105 transition cursor-pointer">Stop Anim</div>
-                <div @click="throwObjects()" class="p-4 px-8 text-sm rounded-full bg-white hover:bg-gray-100 text-teal-800 hover:scale-105 transition cursor-pointer">Roll</div>
+                <div @click="setupFormation()" class="p-4 px-8 text-sm rounded-full bg-white hover:bg-gray-100 hover:scale-105 transition cursor-pointer">Formation</div>
+                <div @click="rotateObject()" class="p-4 px-8 text-sm rounded-full bg-white hover:bg-gray-100 hover:scale-105 transition cursor-pointer">Rotate</div>
+                <div @click="createScreenshot()" class="p-4 px-8 text-sm rounded-full bg-white hover:bg-gray-100 hover:scale-105 transition cursor-pointer">Screenshot</div>
+                <div @click="stopAnimation()" class="p-4 px-8 text-sm rounded-full bg-white hover:bg-gray-100 hover:scale-105 transition cursor-pointer">Stop Anim</div>
+                <div @click="throwObjects()" class="p-4 px-8 text-sm rounded-full bg-white hover:bg-gray-100 hover:scale-105 transition cursor-pointer">Roll</div>
             </div>
         </transition>
 
