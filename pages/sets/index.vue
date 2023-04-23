@@ -35,7 +35,7 @@ function setLimit(newLimit) {
 </script>
 
 <template>
-    <div v-if="itemsToDisplay" class="w-full h-full flex flex-col items-center overflow-auto">
+    <div v-if="itemsToDisplay" class="w-full h-full flex flex-col items-center pt-1 overflow-auto">
 
         <!--
         <div class="flex space-x-4">
@@ -51,16 +51,17 @@ function setLimit(newLimit) {
             <client-only>
                 <StaggeredTransition animType='slideUp' :duration="50" tag="div" class="w-full h-full gap-6 grid auto-rows-min" style="grid-template-columns: repeat(auto-fit, minmax(14rem, auto))">
                     <div v-for="(set, index) in itemsToDisplay" :key="'diceset-'+index" :data-index="index">
-                        <div class="max-h-48 card hover:bg-opacity-60 transition group">
-                            <NuxtLink :to="'/sets/'+index" class="w-full h-full flex flex-col justify-center items-center py-8 pb-4">
-                                <div class="mt-4 mb-4 md:mb-8 flex-1 flex items-center">
-                                    <IconsBase name="die" class="w-16 h-auto transition group-hover:scale-105" />
-                                </div>
-                                <div class="inline-block px-4 pb-4 text-lg text-black">
-                                    {{ set.name}}
-                                </div>
-                            </NuxtLink>
-                        </div>
+                        <NuxtLink :to="'/sets/'+index" class="w-full h-full flex flex-col justify-center items-center card hover:bg-opacity-60 transition group overflow-hidden p-4 md:p-8">
+                            <!--
+                            <div class="mt-4 mb-4 md:mb-8 flex-1 flex items-center">
+                                <IconsBase name="die" class="w-16 h-auto transition group-hover:scale-105" />
+                            </div>
+                            -->
+                            <nuxt-img :src="'images/dice_screenshots/test1.png'" class="max-h-48 object-contain px-8 md:px-0 py-8 mb-8 group-focus:scale-105 group-active:scale-105 group-hover:scale-105 transition-transform drop-shadow-lg" />
+                            <div class="absolute bottom-0 inline-block px-4 pb-4 text-lg text-black">
+                                {{ set.name}}
+                            </div>
+                        </NuxtLink>
                     </div>
                 </StaggeredTransition>
             </client-only>

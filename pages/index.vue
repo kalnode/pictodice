@@ -127,12 +127,12 @@ definePageMeta({
                 </section>
                 <!-- RIGHT -->
                 <section v-motion-slide-bottom :delay="1900" class="flex-1 card card_padding flex justify-center items-center">
-                    <NuxtLink to="/roll?classic" class="flex-1 flex flex-col justify-end items-center" tabindex=-1>
+                    <NuxtLink :to="{ name: 'Sets'}" class="flex-1 flex flex-col justify-end items-center" tabindex=-1>
                         <div class="mb-2 flex justify-center transition hover:scale-105 space-x-4 p-4">
                             <IconsBase name="pencil" class="w-20 h-auto" />
                         </div>
                     </NuxtLink>
-                    <NuxtLink to="/roll?classic">
+                    <NuxtLink :to="{ name: 'Sets'}">
                         <div class="btn_picto btn_small whitespace-nowrap uppercase">Create Custom Dice</div>
                     </NuxtLink>
                 </section>

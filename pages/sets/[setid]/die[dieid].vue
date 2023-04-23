@@ -58,6 +58,10 @@ definePageMeta({
                     </StaggeredTransition>
                 </client-only>
 
+                <client-only>
+                    <threeDcanvas :Objects="[store.dice[currentRoute.params.dieid]]" :showDevTools="true" :screenshotMode="false" class="flex-1" />
+                </client-only>
+
                 <div class="relative flex justify-end items-center my-3">
                     <NuxtLink :to="'/sets/' + currentRoute.params.setid" class="p-4">
                         <div class="btn_picto btn_large uppercase" v-motion-slide-bottom>Back to Set</div>

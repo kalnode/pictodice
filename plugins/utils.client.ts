@@ -40,6 +40,11 @@ const debounce = (func:Function, time:number) => {
     }
 }
 
+const takeScreenshot = (setid:string) => {
+    
+    return setid
+
+}
 
 
 export default defineNuxtPlugin(() => {
@@ -47,7 +52,8 @@ export default defineNuxtPlugin(() => {
     return {
         provide: {
             getViewportDimensions: () => getViewportDimensions(),
-            debounce: (func:Function, time:number) => debounce(func, time)
+            debounce: (func:Function, time:number) => debounce(func, time),
+            takeScreenshot: (setid:string) => takeScreenshot(setid)
         }
       }
 

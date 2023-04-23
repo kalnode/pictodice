@@ -13,20 +13,39 @@
 
             <div class="md:w-1/2 sm:mr-4 mb-4 md:mb-0">
                 <section class="diceSet_column card card_padding flex flex-col justify-end items-center">
-                    <NuxtLink to="/roll?classic" tabindex=-1 class="flex-1 flex flex-col justify-center mb-4">
-                        <div class="flex transition hover:scale-105 space-x-4 p-8 md:p-12">
+                    <div class="flex-1 w-full flex flex-col justify-center mb-4">
+                        <!-- focus:scale-105 active:scale-105 hover:scale-105 transition-transform -->
+                        <!--
+                        <div class="flex space-x-4 p-8 md:p-12">
                             <IconsBase name="die" class="w-12 h-auto" />
                             <IconsBase name="die" class="w-12 h-auto" />
                         </div>
-                    </NuxtLink>
+                        -->
+                        <!-- <nuxt-img :src="'images/dice_screenshots/test1.png'" class="object-contain p-8 md:p-12 drop-shadow-lg" /> -->
+
+                        <client-only>
+                            <threeDcanvas v-if="showPage" :Objects="store.diceSets[currentRoute.params.setid].dies.map(e => store.dice[e])" class="flex-1" />
+                        </client-only>
+                    </div>
 
                     <div class="relative flex flex-col md:flex-row md:justify-end items-center mb-3">
-                        <NuxtLink to="/roll?classic" class="mb-4 md:mb-0 md:mr-4">
-                            <div class="btn_picto btn_large uppercase" v-motion-slide-right>Roll</div>
+                        <!--
+                        <NuxtLink to="/roll?classic" v-motion-slide-right class="mb-4 md:mb-0 md:mr-4 btn_picto btn_large uppercase">
+                            Roll
                         </NuxtLink>
-                        <div @click="selectSet()" tabindex=0>
-                            <div class="btn_picto btn_small text-sm whitespace-nowrap uppercase" v-motion-slide-left>Set Preset & Roll</div>
+                        -->
+                        <div @click="throwDice()" tabindex=0 v-motion-slide-right class="mb-4 md:mb-0 md:mr-4 btn_picto btn_large uppercase">
+                            Roll
                         </div>
+                        <div @click="selectSet()" tabindex=0 class="btn_picto btn_small text-sm whitespace-nowrap uppercase" v-motion-slide-left>
+                            Set Preset & Roll
+                        </div>
+
+                        <!--
+                        <div @click="takeScreenshot()" tabindex=0 class="btn_picto btn_small text-sm whitespace-nowrap uppercase" v-motion-slide-left>
+                            Take Screenshot
+                        </div>
+                        -->
                     </div>
 
                     <!--
@@ -51,13 +70,16 @@
                 <client-only>
                     <StaggeredTransition animType='slideUp' :duration="50" tag="div" class="diceSet_column w-full h-full gap-6 grid auto-rows-min">
                         <div v-for="(die, index) in store.diceSets[currentRoute.params.setid].dies" :key="'die-'+index" :data-index="index"
-                        class="max-h-48 rounded-lg border-2 border-teal-800 hover:bg-white hover:bg-opacity-60 transition group">
+                        class="rounded-lg border-2 border-teal-800 focus:bg-white active:bg-white hover:bg-white focus:bg-opacity-60 active:bg-opacity-60 hover:bg-opacity-60 transition-colors group">
                             <NuxtLink :to="'/sets/'+currentRoute.params.setid + '/die' + die"
-                            class="w-full h-full pt-8 pb-2 md:pb-4 flex flex-col justify-center items-center">
+                             class="w-full h-full flex flex-col justify-center items-center overflow-hidden p-4 md:p-8">
+                                <!--
                                 <div class="mb-4 md:mb-8 flex-1 flex items-center">
                                     <IconsBase name="die" class="w-16 h-auto transition group-hover:scale-105" />
                                 </div>
-                                <div class="inline-block px-4 pb-4 text-lg text-black">
+                                -->
+                                <nuxt-img :src="'images/dice_screenshots/test1.png'" class="max-h-32 object-contain px-8 md:px-0 py-8 mb-8 group-focus:scale-105 group-active:scale-105 group-hover:scale-105 transition-transform drop-shadow-lg" />
+                                <div class="absolute bottom-0 inline-block px-4 pb-4 text-lg text-black">
                                     {{ store.dice[die].name }}
                                 </div>
                             </NuxtLink>
@@ -102,6 +124,13 @@ const currentRoute = useRoute()
 import { usePhotodiceAppStore } from '~/stores/app'
 const store = usePhotodiceAppStore()
 import { ref } from 'vue'
+const { $event } = useNuxtApp()
+const showPage = ref(true)
+
+
+function throwDice() {
+    $event('rollDice')
+}
 
 /*
 useHead({
@@ -126,10 +155,15 @@ definePageMeta({
 })
 
 async function selectSet() {
+    showPage.value = false
     store.currentDiceSet = currentRoute.params.setid
-
     // TODO: Do we need await here? Does it a serve a purpose? Perhaps it stops user from doing other stuff just before link loads????
-    await navigateTo('/roll') // TODO: Can we use proper named route here, instead of raw string with slash?
+    navigateTo('/roll') // TODO: Can we use proper named route here, instead of raw string with slash?
+
+}
+
+async function takeScreenshot() {
+
 
 }
 </script>

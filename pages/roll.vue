@@ -20,8 +20,10 @@ function throwDice() {
 </script>
 <template>
     <div class="w-full h-full flex justify-center items-center">
-<!-- 'classic' in currentRoute.query -->
-        <threeDcanvas :Objects="currentRoute.query['set'] && currentRoute.query['set'] == 'classic' ? store.diceSets[0].dies.map(e => store.dice[e]) : store.currentDice" />
+        <!-- 'classic' in currentRoute.query -->
+        <client-only>
+            <threeDcanvas :rollOnMount="true" :Objects="currentRoute.query['set'] && currentRoute.query['set'] == 'classic' ? store.diceSets[0].dies.map(e => store.dice[e]) : store.currentDice" />
+        </client-only>
 
         <!-- TODO: Support old style 2d dice, displayed as a grid -->
         <!-- <Dice /> -->
