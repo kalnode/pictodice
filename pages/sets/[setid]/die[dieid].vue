@@ -3,7 +3,7 @@ const router = useRouter()
 const currentRoute = useRoute()
 import { usePhotodiceAppStore } from '~/stores/app'
 const store = usePhotodiceAppStore()
-
+const config = useRuntimeConfig()
 definePageMeta({
     title: 'Die',
     breadcrumb: 'Die #%dieid%'
@@ -44,7 +44,7 @@ definePageMeta({
                                         {{ face.text_src }}
                                     </div>
                                     <div v-else-if="face.type == 'image'" class="w-full h-full flex justify-center items-center">
-                                        <nuxt-img :src="'images/'+face.image_src" />
+                                        <img :src="config.app.baseURL+'images/'+face.image_src" />
                                     </div>
                                 </div>
 
@@ -58,9 +58,11 @@ definePageMeta({
                     </StaggeredTransition>
                 </client-only>
 
+                <!--
                 <client-only>
-                    <threeDcanvas :Objects="[store.dice[currentRoute.params.dieid]]" :showDevTools="true" :screenshotMode="false" class="flex-1" />
+                    <threeDcanvas :Objects="[store.dice[currentRoute.params.dieid]]" :showDevTools="true" :screenshotMode="true" class="flex-1" />
                 </client-only>
+                -->
 
                 <div class="relative flex justify-end items-center my-3">
                     <NuxtLink :to="'/sets/' + currentRoute.params.setid" class="btnapp btn_large uppercase" v-motion-slide-bottom>

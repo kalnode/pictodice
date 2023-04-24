@@ -14,7 +14,7 @@
                     face.type == 'text' ? 'bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-800 to-violet-900 text-white' : 'bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-gray-100 to-gray-300 text-black'
                 ]"
                 class="border-2 border-white">
-                <!-- :style="!face.type == 'text' && !useBGmap ? 'background-image: url(' + (face.image_type == 'localStorage' ? face.image_src : 'images/' + face.image_src) + ')' : ''"> -->
+                <!-- :style="!face.type == 'text' && !useBGmap ? 'background-image: url(' + (face.image_type == 'localStorage' ? face.image_src : config.app.baseURL+'images/' + face.image_src) + ')' : ''"> -->
                 <!-- bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-gray-100 to-gray-300 -->
 
                     <img v-if="face.image_type && face.image_src != '' && face.type != 'text'"

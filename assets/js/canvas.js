@@ -16,8 +16,8 @@ export default class DiceCanvas {
 
         // TODO: Convert this component to typescript, and make use of these interfaces
         //import { Die, DieState, DiceSet } from '~/stores/app'
-        console.log("constructor 111")
-        //Object.assign(this, {containerEl, canvasEl, renderer, scene, container, camera, mesh_classicDice, physicsWorld, controls, rollTimer, animationHolder})
+
+        //Object.assign(this, {containerEl, canvasEl, renderer, scene, container, camera, mesh_classicDice, physicsWorld, controls, rollTimer, animReq})
         this.containerEl
         this.canvasEl
         this.renderer
@@ -28,18 +28,15 @@ export default class DiceCanvas {
         this.physicsWorld
         this.controls
         this.rollTimer
-        this.animationHolder
+        this.animReq
         this.screenshotMode = screenshotMode
         this.objectGroupScreenshot
         this.baseURL = baseURL
         this.rollOnMount = rollOnMount
+        this.allowedToAnimate = true
 
-        console.log("constructor 222aaa, containerLabel %O", containerLabel)
-
-        console.log("constructor 222bbb,     this.containerEl111 %O",     this.containerEl)
         this.containerEl = document.getElementById(containerLabel)
 
-        console.log("constructor 222ccc,     this.containerEl222 %O",     this.containerEl)
         this.canvasEl = document.getElementById(canvasLabel)
 
         this.props = {
@@ -83,9 +80,6 @@ export default class DiceCanvas {
         // TODO: DOes this work well? Is it extraneous? Doesn't requestAnimationFrame manage all of this for us?
         this.frameLengthMS = 1000/60 //60 fps
         this.previousTime = 0
-        console.log("constructor 777")
-
-
 
         //this.init()
 
@@ -94,6 +88,8 @@ export default class DiceCanvas {
     init() {
 
         return new Promise((resolve, reject) => {
+
+            console.log("CANVAS INIT")
             this.updateContainer()
             this.initPhysics()
             this.initScene()
@@ -111,7 +107,7 @@ export default class DiceCanvas {
 
 
             resolve()
-            console.log("init 777")
+
         })
     
     }
@@ -121,13 +117,14 @@ export default class DiceCanvas {
     // =================================
 
 
-    resizeEvent() {
-        console.log("canvas resize event!!!")
-        this.updateContainer()
-        this.clearScene()
-        this.buildScene()
-
+    async resizeEvent() {
+        console.log("resizeEvent111")
+        //this.stopAnimation()
+        await this.updateContainer()
+        await this.clearScene(['appRoom', 'appObject'])
+        await this.buildScene()
         this.camera.position.y = this.camera.position.y + 20
+        this.throwObjects()
     }
 
     // TODO: Use global 'debounce' for this
@@ -143,15 +140,11 @@ export default class DiceCanvas {
 
     updateContainer() {
 
-        console.log("updateContainer 111")
         this.container = {
             width: this.containerEl.clientWidth,
             height: this.containerEl.clientHeight,
             aspect: this.containerEl.clientWidth / this.containerEl.clientHeight
         }
-
-        console.log("updateContainer 111 %O", this.container)
-
 
         let numObjects = this.props.Objects.length
         // SET OBJECT SCALE
@@ -166,7 +159,6 @@ export default class DiceCanvas {
         
         // We calculate maximum object size being 85
         let maximumSize = (smallerDimensionSize - ((75 / 100) * smallerDimensionSize))
-        console.log("numObjects from props: " + numObjects)
 
         this.objectParams.scale = Math.min(baselineObjectScale, maximumSize) // (smallerDimensionSize - ((10 / 100) * smallerDimensionSize))
     }
@@ -175,8 +167,11 @@ export default class DiceCanvas {
 
         // SCENE
         this.renderer = new THREE.WebGLRenderer({
+
+            // TODO: If we can maintain solid color bg's, then we can possibly disable canvas transparency, and use a solid color instead
             alpha: true,
-            antialias: true,
+
+            antialias: false,
             canvas: this.canvasEl,
             //preserveDrawingBuffer: true
         })
@@ -184,11 +179,11 @@ export default class DiceCanvas {
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
         this.renderer.setSize(this.container.width, this.container.height)
         // TODO: Look into setPixelRatio esp when it comes to mobile screens
-        //renderer.setPixelRatio(window.devicePixelRatio)
+        this.renderer.setPixelRatio(2) //window.devicePixelRatio
         this.scene = new THREE.Scene()
 
         // CAMERA
-        this.camera = new THREE.PerspectiveCamera(30, this.container.width / this.container.height, 1, 2000)
+        this.camera = new THREE.PerspectiveCamera(30, this.container.width / this.container.height, 1, 300)
         this.camera.position.set(0,1,0) // TODO: Why "1" here? If we do all zero's, scene is blank (until first interaction with orbit controls)
         //camera.lookAt(0, 0, 0)
         //camera.position.set(2, 4, 10).multiplyScalar(7)
@@ -198,6 +193,8 @@ export default class DiceCanvas {
         //orbit = new MapControls(camera, canvasEl)
         //orbit.enableDamping = true
         this.controls = new OrbitControls(this.camera, this.renderer.domElement)
+        this.controls.target.set(0, 0, 0)
+        this.controls.update()
 
         // STATS
         /*
@@ -263,38 +260,38 @@ export default class DiceCanvas {
     }
 
     renderScene(timestamp) {
+        console.log("attempting render scene")
+        if (this.allowedToAnimate) {
+            console.log("this.animReq... %O", this.animReq)
 
+            if (timestamp - this.previousTime > this.frameLengthMS) {
 
-        //console.log("renderScene 111")
+                if (this.physicsWorld) {
+                    this.physicsWorld.fixedStep()
+                }
 
-        if (timestamp - this.previousTime > this.frameLengthMS){
+                // Sync object mesh and object physics-body for each object
+                // TODO: Why do we need this?
+                for (const object of this.objectArray) {
+                    object.mesh.position.copy(object.body.position)
+                    object.mesh.quaternion.copy(object.body.quaternion)
+                    //if (object.body.velocity < 0.1)
+                }
 
-            this.physicsWorld.fixedStep()
-           // console.log("renderScene 222")
-            // Sync object mesh and object physics-body for each object
-            for (const object of this.objectArray) {
-                object.mesh.position.copy(object.body.position)
-                object.mesh.quaternion.copy(object.body.quaternion)
+                this.renderer.render(this.scene, this.camera)
 
-                //if (object.body.velocity < 0.1) console.log("object not moving 1111111")
+                this.previousTime = timestamp
             }
-           // console.log("renderScene 333")
-            this.renderer.render(this.scene, this.camera)
 
-            this.previousTime = timestamp
-       }
-        //console.log("renderScene 444")
-
-        this.animationHolder = requestAnimationFrame(this.renderScene.bind(this)) //.bind(this) needed to keep context of class instance
-
+            this.animReq = window.requestAnimationFrame(this.renderScene.bind(this)) //.bind(this) needed to keep context of class instance
+        }
     }
 
     stopAnimation() {
-            console.log("running stopAnimation()")
-        cancelAnimationFrame(this.animationHolder)
+        this.allowedToAnimate = false
+        console.log("stop animation")
+        window.cancelAnimationFrame(this.animReq)
     }
-
-
 
     async buildScene() {
         await this.createRoom()
@@ -305,8 +302,6 @@ export default class DiceCanvas {
         this.camera.updateProjectionMatrix()
         this.renderer.setSize(this.container.width, this.container.height)
         //renderer.setPixelRatio(window.devicePixelRatio)
-
-        //this.throwObjects()
 
     }
 
@@ -320,54 +315,95 @@ export default class DiceCanvas {
         const topLight = new THREE.PointLight(0xffffff, 0.5)
         topLight.position.set(0, 150, 20)
         topLight.castShadow = true
-        topLight.shadow.mapSize.width = 2048
-        topLight.shadow.mapSize.height = 2048
+        topLight.shadow.mapSize.width = 1024
+        topLight.shadow.mapSize.height = 1024
         topLight.shadow.camera.near = 80
         topLight.shadow.camera.far = 400
         this.scene.add(topLight)
     }
 
-    clearScene() {
+    async clearScene(classes) {
 
         return new Promise ( async (resolve, reject) => {
 
             // GET & LOOP all objects (room & objects, no lights)
-            let objects = this.scene.children.filter(x => x.appClass == 'appRoom' || x.appClass == 'appObject')
 
-            objects.forEach( async object => {
+            if (this.scene.children && this.scene.children != null && this.scene.children.length > 0) {
 
-                if (object.appClass == 'appRoom' || object.appClass == 'appObject') {
+                let objects = this.scene.children
+                if (classes && classes.length > 0) {
+                    objects = this.scene.children.filter(x => x.appClass == 'appRoom' || x.appClass == 'appObject')
+                }
 
-                    // Remove geometries to free GPU resources
-                    if (object.geometry) await object.geometry.dispose()
+                objects.forEach( async object => {
 
-                    // Remove materials to free GPU resources
-                    if (object.material) {
-                        if (object.material instanceof Array) {
-                            await object.material.forEach(material => material.dispose())
-                        } else {
-                            await object.material.dispose()
+                    if (object.appClass == 'appRoom' || object.appClass == 'appObject') {
+
+                        // Remove geometries to free GPU resources
+                        if (object.geometry) await object.geometry.dispose()
+
+                        // Remove materials to free GPU resources
+                        if (object.material) {
+                            if (object.material instanceof Array) {
+                                await object.material.forEach(material => material.dispose())
+                            } else {
+                                await object.material.dispose()
+                            }
                         }
+
+                        // Remove object from scene
+                        await this.scene.remove(object) // OR object.removeFromParent()
+                    }
+                })
+
+                // REMOVE PHYSICS BODIES
+                this.physicsWorld.bodies.forEach( async object => {
+                    
+                    if (classes && !classes.includes(object.appClass)) {
+                        return
                     }
 
-                    // Remove object from scene
-                    await this.scene.remove(object) // OR object.removeFromParent()
-                }
-            })
-
-            // REMOVE PHYSICS BODIES
-            this.physicsWorld.bodies.forEach( async object => {
-                if (object.appClass == 'appRoom' || object.appClass == 'appObject') {
                     await this.physicsWorld.removeBody(object)
-                }
-            })
 
-            this.objectArray.length = 0
+                })
+
+                this.objectArray.length = 0
+            }
 
             resolve()
 
         })
     }
+
+    async disposeEverything() {
+
+        this.stopAnimation()
+
+        await this.clearScene()
+
+        this.renderer.clear()
+
+        this.scene ? this.scene = null : null
+        this.physicsWorld ? this.physicsWorld = null : null
+
+        this.camera = null
+        this.renderer && this.renderer.renderLists.dispose()
+        this.renderer = null
+
+        this.container = null
+        this.mesh_classicDice = null
+        this.controls = null
+        this.rollTimer = null
+        this.animReq = null
+        this.screenshotMode = null
+        this.objectGroupScreenshot = null
+        this.baseURL = null
+        this.rollOnMount = null
+    }
+
+
+
+
 
     async createRoom() {
 
@@ -377,8 +413,6 @@ export default class DiceCanvas {
         this.walls.meshes = []
         this.walls.physicsBodies = []
 
-        // CREATE FLOOR AND WALLS
-
         let floorWidth = this.floorSize * this.container.aspect
         let floorHeight = this.floorSize
 
@@ -386,18 +420,21 @@ export default class DiceCanvas {
         // FLOOR
         // ----------------
         this.floor.mesh = new THREE.Mesh(
-            //new THREE.PlaneBufferGeometry(floorWidth, floorHeight)
-            new THREE.PlaneGeometry(floorWidth + 100, floorHeight + 100),
+            //TODO: Should this be PlaneBufferGeometry ???
+            new THREE.PlaneGeometry(floorWidth + 50, floorHeight + 50),
             //new THREE.MeshBasicMaterial( { color: 0xff0000, opacity: 0.7 } )
             new THREE.ShadowMaterial({ opacity: 0.1 })
         )
         this.floor.mesh.receiveShadow = true
         this.floor.mesh.position.y = 0
         this.floor.mesh.quaternion.setFromAxisAngle(new THREE.Vector3(-1, 0, 0), Math.PI * 0.5)
+
+        // Add visual floor to scene
         this.floor.mesh.name="floor"
         this.floor.mesh.appClass="appRoom"
         await this.scene.add(this.floor.mesh)
 
+        // PHYSICS
         this.floor.physicsBody = new CANNON.Body({
             type: CANNON.Body.STATIC,
             shape: new CANNON.Plane()
@@ -405,9 +442,8 @@ export default class DiceCanvas {
         this.floor.physicsBody.position.copy(this.floor.mesh.position)
         this.floor.physicsBody.quaternion.copy(this.floor.mesh.quaternion)
         this.floor.physicsBody.appClass = "appRoom"
-        await this.physicsWorld.addBody(this.floor.physicsBody)
+        this.physicsWorld.addBody(this.floor.physicsBody)
 
-        //updateFloor()
 
         // ----------------
         // WALLS
@@ -435,63 +471,48 @@ export default class DiceCanvas {
             }
         }
 
-        let wall_material = new THREE.MeshBasicMaterial( { transparent: true, opacity: 0 } ) // , color: 0x0000ff, wireframe: true
+        let wall_material = new THREE.MeshBasicMaterial( { transparent: true, alphaTest:0, opacity: 0 } ) // , color: 0x0000ff, wireframe: true
+        let wall_vertex = new THREE.Vector3(-1, 0, 0)
 
         Object.entries(wallPresets).forEach(async entry => {
-            //console.log("entry %O", entry)
             let [wallName, wall] = entry
 
+            // TODO: Can we use planes here? Would it be more performant?
+            // TODO: Should this be BoxBufferGeometry ?
+            let wall_geometry = new THREE.BoxGeometry(...wall.geometry)
 
             // WALL VISUAL
-            let wall_geometry = new THREE.BoxGeometry(...wall.geometry)
-            let wall_scene = new THREE.Mesh( wall_geometry, wall_material ) // , wall_material
-            wall_scene.receiveShadow = true
-            //wall_scene.castShadow = false
+            // Form initial wall positions.
+            // Future: Maybe we make solid visual walls, like a wooden box.
+            let wall_scene = new THREE.Mesh( wall_geometry, wall_material )
             wall_scene.position.x = wall.position[0]
             wall_scene.position.y = wall.position[1]
             wall_scene.position.z = wall.position[2]
+            wall_scene.quaternion.setFromAxisAngle(wall_vertex, Math.PI * 0.5)
 
-            // WORKS:
-            //wall.position.y = 0
-            //wall.position.x = -10
-
-            // TESTING
-            //wall.position.y = 3 / 2
-            //wall.rotation.x = Math.PI / 3
-            //wall_scene.rotateX(85);
-            // wall.rotateY(44);
-            // wall.rotateZ(77);
+            // -------------------------------
+            // Add wall mesh to scene
+            // -------------------------------
             /*
-            wall.rotation.x = 45
-            wall.rotation.y = 45
-            wall.rotation.z = 45
+            wall_scene.receiveShadow = true
+            wall_scene.castShadow = true
+            wall_scene.name = wallName
+            wall_scene.appClass = "appRoom"
+            await this.scene.add(wall_scene)
+            this.walls.meshes.push(wall_scene)
             */
 
-            wall_scene.quaternion.setFromAxisAngle(new THREE.Vector3(-1, 0, 0), Math.PI * 0.5)
-
-            wall_scene.name=wallName
-            wall_scene.appClass="appRoom"
-
-
-            await this.scene.add(wall_scene)
-
-            // STORE THE WALL
-            this.walls.meshes.push(wall_scene)
-
-
             // WALL PHYSICS
-            //let wallShape = new CANNON.Box(new CANNON.Vec3(15 / 2, 3 / 2, 0.5 / 2))
+            // Uses wall positions and geometry
+            // Essentially just allows dice to bounce off walls
             let wall_body = new CANNON.Body({
                 type: CANNON.Body.STATIC,
-                shape: new CANNON.Box(new CANNON.Vec3(...wall.geometry)), //new CANNON.Plane(),
-                //material: new THREE.MeshBasicMaterial( { color: 0x0000ff, wireframe: true } )
+                shape: new CANNON.Box(new CANNON.Vec3(...wall.geometry)),
             })
             wall_body.position.copy(wall_scene.position)
             wall_body.quaternion.copy(wall_scene.quaternion)
             wall_body.appClass = "appRoom"
-            await this.physicsWorld.addBody(wall_body)
-
-            // STORE THE BODY
+            this.physicsWorld.addBody(wall_body)
             this.walls.physicsBodies.push(wall_scene)
         })
 
@@ -499,7 +520,7 @@ export default class DiceCanvas {
     }
 
     createSkybox() {
-        var skyBoxGeometry = new THREE.CubeGeometry(10000, 10000, 10000)
+        var skyBoxGeometry = new THREE.CubeBufferGeometry(10000, 10000, 10000)
         var skyBoxMaterial = new THREE.MeshPhongMaterial({
             color: 0x9999ff,
             side: THREE.BackSide
@@ -533,7 +554,6 @@ export default class DiceCanvas {
     // ----------------------------------
 
     getPyramidBase(num) {
-        console.log("getPyramidBase num is: %O", num)
         return Math.floor(Math.sqrt(2 * num) + 1/2)
     }
 
@@ -541,7 +561,6 @@ export default class DiceCanvas {
     getRandomRotationPosition() {
         let positions = [0,90,180,-90]
         let randomPos = positions.sort(() => 0.5 - Math.random())[0]
-        //console.log("randomPos: %O", randomPos)
         return randomPos
     }
 
@@ -636,8 +655,6 @@ export default class DiceCanvas {
 
     async createScreenshot(objectInput) {
 
-        console.log("CREATE SCREENSHOT ========================")
-
         let object = objectInput ? objectInput : this.objectGroupScreenshot
 
         // This needs to be early enough to set image
@@ -689,10 +706,6 @@ export default class DiceCanvas {
         let offset = 0 //25
         let padding = 0 //50
 
-        console.log("width = " + width)
-        console.log("height = " + height)
-
-
         overlayCanvas.width = width
         overlayCanvas.height = height
         let ctx = overlayCanvas.getContext('2d')
@@ -718,13 +731,12 @@ export default class DiceCanvas {
 
 
 
-
         // Need to invoke render (re-render) in the moment before capture, otherwise screenshot may be blank
         this.renderer.render(this.scene, this.camera)
-
+        console.log("Screenshot 555")
         ctx.drawImage(this.canvasEl, posX, posY, width, height, 0, 0, width, height)
 
-
+        console.log("Screenshot 666")
         // Make temporary <a> link as a way to invoke file download
         const a = document.createElement('a')
         document.body.appendChild(a)
@@ -733,17 +745,13 @@ export default class DiceCanvas {
         let blobWork = await overlayCanvas.toBlob( (blob) => {
             //this.saveBlob(blob, `screencapture.png`)
             //const url = window.URL.createObjectURL(blob)
-            //console.log("url screenshot is %O", url)
-            
             const url = window.URL.createObjectURL(blob)
-            console.log("url screenshot is %O", url)
             a.href = url
             a.download = 'screencapture.png'
             a.click()
         })
 
         ctx.clearRect(0, 0, width, height)
-
 
     }
 
@@ -842,26 +850,33 @@ export default class DiceCanvas {
 
         let mesh
 
-        console.log("createObjectGroup object %O", object)
-
+        // BOX DICE (ie pictodice dice)
         if (object != null && object.type != 'classic') {
 
             let loader = new THREE.TextureLoader()
             let cubeMaterials = []
 
+            // MATERIAL
             for (let i = 0; i < object.faces.length; i++) {
-                //let loadItem = new THREE.MeshBasicMaterial({ map: loader.load('images/'+object.faces[i].image_src), transparent: true })//, opacity: 0.5, color: 0xFF0000 })
+                /*
+                let loadItem = new THREE.MeshBasicMaterial(
+                    {
+                        map: loader.load('images/'+object.faces[i].image_src), transparent: true
+                    })
+                    , opacity: 0.5, color: 0xFF0000 })
+                */
 
-                let map
+
+                let mapImage
                 if (object.faces[i].type == 'text') {
-                    map = this.createFontTexture(object.faces[i].text_src)
+                    mapImage = this.createFontTexture(object.faces[i].text_src)
                 } else if (object.faces[i].type == 'image') {
-                    map = loader.load(this.baseURL+'images/'+object.faces[i].image_src)
+                    mapImage = loader.load(this.baseURL+'images/'+object.faces[i].image_src)
                 }
                 
                 let loadItem = new THREE.MeshStandardMaterial({
-                    map: map,
-                    alphaTest: 1,
+                    map: mapImage,
+                    //alphaTest: 1, // Makes it light passes through transparent parts of png texture.
                     color: 0xffffff,
                     //specular: 0x000005,
                     //reflectivity: 1,
@@ -874,6 +889,7 @@ export default class DiceCanvas {
                     }
                     */
 
+                    // TODO: What's all this for?
                     onBeforeCompile: shader => {
 
                         //shader.fragmentShader = shader.fragmentShader.replace('#include <alphatest_fragment>', `
@@ -890,7 +906,6 @@ export default class DiceCanvas {
                     }
                 })
 
-            
                 //const tex = sprite.material.map;
                 //const scaleY = tex.image.height / tex.image.width;
                 //sprite.scale.setX(width).setY(width * scaleY);
@@ -900,21 +915,24 @@ export default class DiceCanvas {
                 cubeMaterials.push(loadItem)
             }
 
-            console.log("we got a object %O", object)
-
-            // USING SQUARE MESH
+            // MESH: USING BASIC BOX MESH
+            // TODO: Future: We use same rounded-corner mesh as classic dice
+            // TODO: Should this be BoxBufferGeometry ?
             let object_geometry = new THREE.BoxGeometry(1, 1, 1)
             mesh = new THREE.Mesh(object_geometry, cubeMaterials)
+            mesh.castShadow = true
+            //mesh.receiveShadow = true // Enable if we want dice to cast shadow on other dice. Leaving disabled for better performance.
 
-            //Create material, color, or image texture
+            // USING CUSTOM ROUNDED-EDGE MESH
             //mesh = createObjectMesh(useHoles, cubeMaterials)
 
+        // CLASSIC DICE (rounded corners, dots, etc)
         } else if (!object || object.type == 'classic') {
             mesh = this.mesh_classicDice.clone()
         }
 
         mesh.scale.set(this.objectParams.scale,this.objectParams.scale,this.objectParams.scale)
-        mesh.frustumCulled = false
+        //mesh.frustumCulled = false // On every frame, checks whether object is in camera frame. 
         mesh.appClass = "appObject"
 
         //mesh.position.y = 0
@@ -924,7 +942,6 @@ export default class DiceCanvas {
         let physicsBoxGeometry = [this.objectParams.scale/2, this.objectParams.scale/2, this.objectParams.scale/2]
         const body = new CANNON.Body({
             mass: 1,
-            //shape: new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 0.5)),
             shape: new CANNON.Box(new CANNON.Vec3(...physicsBoxGeometry)), // Values should be HALF of what the mesh geometry values are
             sleepTimeLimit: 0.1,
             //sleepSpeedLimit: 0.1
@@ -932,8 +949,6 @@ export default class DiceCanvas {
         body.appClass = "appObject"
         this.physicsWorld.addBody(body)
 
-        //mesh.scale.set(10,10,10);
-        //body.scale.set(10,10,10);
 
         return { mesh, body }
     }
@@ -987,6 +1002,7 @@ export default class DiceCanvas {
 
         let segments = useHoles ? this.objectParams.segments_ClassicDice : this.objectParams.segments
 
+        // TODO: Should this be BoxBufferGeometry ?
         let boxGeometry = new THREE.BoxGeometry(1,1,1,segments,segments,segments)
 
         if (useHoles) {
@@ -1099,6 +1115,7 @@ export default class DiceCanvas {
 
         // Creates an inner box, slightly smaller, that just serves to fill divots with black color
 
+                                // TODO: Should this be PlaneBufferGeometry?
         const baseGeometry = new THREE.PlaneGeometry(
             1 - 2 * this.objectParams.edgeRadius,
             1 - 2 * this.objectParams.edgeRadius
@@ -1195,13 +1212,10 @@ export default class DiceCanvas {
         && (obj.body.angularVelocity.z < 0.1 && obj.body.angularVelocity.x < 0.1 && obj.body.angularVelocity.y < 0.1)
         )
 
-        console.log("objectArray %O", this.objectArray)
-        console.log("objectStillMoving %O", objectStillMoving)
         let timeDiff = Math.round(new Date() - this.rollTimer / 1000)
 
 
         if (objectStillMoving.length == 0 || timeDiff > 5.5) {
-            console.log("All objects stopped")
 
             // TODO: Move this
             //this.store.rolling = false
@@ -1218,17 +1232,16 @@ export default class DiceCanvas {
     }
 
     throwObjects() {
+        console.log("throw objects")
+        this.allowedToAnimate = true
         this.renderScene()
-        //console.log("throwObjects 111")
         // TODO: Move this
         //this.store.rolling = true
         this.rollTimer = new Date()
 
         //this.scoreResult = null
-        //console.log("throwObjects 222 %O", this.objectArray)
-        this.objectArray.forEach((object, index) => {
 
-            //console.log("throwObjects 333")
+        this.objectArray.forEach((object, index) => {
 
             // MOTION
             object.body.velocity.setZero()

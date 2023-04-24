@@ -1,7 +1,8 @@
 <template>
     <div id="threeDcanvas" class="w-full h-full relative flex justify-center">
 
-        <div :style="screenshotMode ? 'position:absolute; left:-200%;':''" class="w-full h-full">
+        <div v-if="showCanvas" class="w-full h-full">
+            <!-- :style="screenshotMode ? 'position:absolute; left:-200%;':''" -->
 
             <canvas id="canvas" class="h-full w-full relative z-10"></canvas>
             <!--  style="width: 4000px; height: 4000px" -->
@@ -41,6 +42,8 @@ const { $event, $listen, $debounce } = useNuxtApp()
 
 const store = usePhotodiceAppStore()
 
+const showCanvas = ref(true)
+
 const props = defineProps({
     Objects: Object,
     rollOnMount: Boolean,
@@ -53,8 +56,6 @@ let canvasInstance
 onMounted ( () => {
 
     canvasInstance = new DiceCanvas(props.Objects, 'threeDcanvas', 'canvas', config.app.baseURL, true)
-
-
 
     canvasInstance.init()
     /*
@@ -88,6 +89,17 @@ onMounted ( () => {
 })
 
 
+
+onBeforeUnmount( async () => {
+    console.log("CANVAS VUE UN-MOUNTED")
+
+    await canvasInstance.disposeEverything()
+
+    console.log("CANVAS VUE scene cleared")
+
+    showCanvas.value = false
+
+})
 
 function setupFormation() {
     canvasInstance.setupFormation()

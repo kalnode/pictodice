@@ -102,6 +102,7 @@ import { ref } from 'vue'
 import { Capacitor } from '@capacitor/core'
 import { Motion } from '@capacitor/motion'
 import { usePhotodiceAppStore } from '~/stores/app'
+import Stats from 'three/examples/jsm/libs/stats.module.js'
 
 // ----- FOR DYNAMIC HEADER TITLE -----
 // TODO: Double check if this is correct. Because <Nav> occurs outside of <NuxtPage />, we need this import to make currentRoute reactive, otherwise it never changes after initial landing.
@@ -119,7 +120,7 @@ const { $event, $getViewportDimensions, $debounce } = useNuxtApp()
 const store = usePhotodiceAppStore()
 const appReady = ref(false)
 const showTopTitle = ref(false)
-
+let stats
 
 // ==========================================
 // INTERACTIONS
@@ -256,6 +257,14 @@ onMounted (async () => {
     setMouseTouchListeners()
     await checkMotionPermission()
 
+
+
+    stats = new Stats()
+    stats.showPanel(1) // 0: fps, 1: ms, 2: mb, 3+: custom
+    document.body.appendChild(stats.dom)
+
+    requestAnimationFrame(animate)
+
 })
 
 
@@ -268,6 +277,15 @@ onMounted (async () => {
 // ---------------------------------------------
 // GENERAL
 // ---------------------------------------------
+function animate() {
+
+    stats.begin()
+    // monitored code goes here
+    stats.end()
+    requestAnimationFrame(animate)
+
+}
+
 
 function setHeaderPadding() {
     // Get final computed values of safe-area from CSS property values (see main.css).

@@ -1,6 +1,7 @@
 <script setup>
 import { usePhotodiceAppStore } from '@/stores/app'
 const store = usePhotodiceAppStore()
+const config = useRuntimeConfig()
 definePageMeta({
     title: 'Pictodice'
 })
@@ -22,8 +23,11 @@ definePageMeta({
                     <!-- FOR NOW: This works, we go to a raw path: -->
                     <NuxtLink to="/roll?classic" class="flex-1 flex flex-col items-center" tabindex=-1>
                         <div class="flex-1 mb-4 flex transition hover:scale-105 space-x-4 p-4 pb-8 sm:p-12">
+                            <!--
                             <IconsBase name="die" class="w-12 h-auto" />
                             <IconsBase name="die" class="w-12 h-auto" />
+                            -->
+                            <img :src="config.app.baseURL+'images/dice_screenshots/test1.png'" class="max-h-32 object-contain group-focus:scale-105 group-active:scale-105 group-hover:scale-105 transition-transform drop-shadow-lg" />
                         </div>
                     </NuxtLink>
                     <NuxtLink to="/roll?classic" class="btnapp btn_large hover:scale-105 transition cursor-pointer uppercase whitespace-nowrap">
@@ -48,7 +52,7 @@ definePageMeta({
                                 </NuxtLink>
                                 <!-- TODO: v-motion conflicts with hover transform... we want both. How to make it work? -->
                                 <!-- v-motion-slide-left :delay="700" -->
-                                <div v-motion-slide-left class="btn_large w-full -right-14 sm:-right-18 absolute z-0" style="padding-right: 1em">
+                                <div v-motion-slide-left class="btn_large w-full -right-10 sm:-right-18 absolute z-0" style="padding-right: 1em">
                                     <NuxtLink v-if="store.currentDiceSet != 0" :to="{ name: 'Sets'}"
                                     class="w-full flex-1 ml-4 flex justify-end rounded-full bg-white group hover:translate-x-2 transition-transform"
                                     style="padding: 0.8em">
@@ -60,7 +64,7 @@ definePageMeta({
                             </div>
                         </div>
 
-                        <div v-else>
+                        <div v-else class="flex flex-col">
                             <NuxtLink :to="{ name: 'Sets'}" class="flex flex-col items-center z-50" tabindex=-1>
                                 <div class="border-2 border-[color:var(--color-primary)] hover:bg-white hover:scale-105 transition-all border-dashed mb-8 p-10 flex-1 flex flex-col justify-center items-center">
                                     <div class="text-7xl font-bold">?</div>
@@ -68,7 +72,7 @@ definePageMeta({
                                 </div>
                             </NuxtLink>
 
-                            <NuxtLink :to="{ name: 'Sets'}" class="btnapp btn_large hover:scale-105 transition cursor-pointer uppercase whitespace-nowrap">
+                            <NuxtLink :to="{ name: 'Sets'}" class="btnapp btn_large text-center hover:scale-105 transition cursor-pointer uppercase whitespace-nowrap">
                                 Roll Preset
                             </NuxtLink>
                         </div>

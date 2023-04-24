@@ -38,7 +38,7 @@
                     @click.stop.self="deleteImage(index)" class="w-10 h-10 absolute top-1 right-1 z-50 flex justify-center items-center font-bold rounded-full shadow bg-white hover:bg-gray-100 p-2 hover:scale-110 transition">X</div>
 
                     <img v-if="image.type && image.src != '' && image.type != 'text'"
-                    :src="image.type == 'localStorage' ? image.src : config.app.baseURL+'images/'+image.src"
+                    :src="image.type == 'localStorage' ? image.src : config.app.baseURL+'/images/'+image.src"
                     class="relative w-full h-full object-cover object-center" />
 
                     <span v-else-if="image.type == 'text'" class="p-2 text-base md:text-2xl text-center font-bold italic uppercase">{{ image.src }}</span>

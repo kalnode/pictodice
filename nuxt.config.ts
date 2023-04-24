@@ -67,6 +67,26 @@ export default defineNuxtConfig({
     ],
 
 
+    runtimeConfig: {
+        ipx: {
+            //dir: path.resolve('./public'),
+            dir: '../../public/images',
+
+            //domains: [
+            //    'assets.mycompany.com',
+            //]
+        }
+    },
+
+    image: {
+        image: {
+            provider: 'ipx'
+        },
+        dir: 'public/images',
+        // Generate images to `/_nuxt/images/file.png`
+        //staticFilename: 'images/[name]-[hash][ext]'
+      },
+
     colorMode: {
         //preference: 'system',// default value of $colorMode.preference
         //fallback: 'light', // fallback value if not system preference found
