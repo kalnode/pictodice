@@ -4,6 +4,20 @@
         <div v-if="showCanvas" class="w-full h-full">
             <!-- :style="screenshotMode ? 'position:absolute; left:-200%;':''" -->
 
+            <!-- TODO: Need to scrutinize multiple webgl contexts and garbage collection:
+            Basically as we create/destroy canvas instances, how can we ensure the browser is not bogged-down by other elements?
+            We have destroy logic inside our canvas script, but is it enough? THe browser does manage webgl cotnexts, at some threshold
+            it gets rid of the oldest context (like after loading 10 <canvas>'s)
+
+            Do we even care about all this? Already done some effective optimizations (mainly, stopping requestAnimationFrame when no motion is occurring.)
+                
+            This one thread has interesting solutions... perhaps an A and B channel
+            https://stackoverflow.com/questions/17382321/requestanimationframe-garbage-collection
+
+            and this:
+            https://stackoverflow.com/questions/10823408/performance-drops-when-trying-to-reset-whole-scene-with-three-js
+            -->
+
             <canvas id="canvas" class="h-full w-full relative z-10"></canvas>
             <!--  style="width: 4000px; height: 4000px" -->
 

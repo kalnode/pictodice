@@ -37,6 +37,7 @@
                     <div v-if="image.type && image.src != '' && image.type == 'localStorage'"
                     @click.stop.self="deleteImage(index)" class="w-10 h-10 absolute top-1 right-1 z-50 flex justify-center items-center font-bold rounded-full shadow bg-white hover:bg-gray-100 p-2 hover:scale-110 transition">X</div>
 
+                    <!-- TODO: For whole app, Ideally we use <nuxt-img> instead of regular <img>, however, Nuxt3 version of nuxt-img has problems with staticly-generated apps. Need to look at this again in the future. For now, using regular <img> -->
                     <img v-if="image.type && image.src != '' && image.type != 'text'"
                     :src="image.type == 'localStorage' ? image.src : config.app.baseURL+'images/'+image.src"
                     class="relative w-full h-full object-cover object-center" />

@@ -29,9 +29,9 @@ const route = useRoute()
         <!-- RIGHT -->
         <div class="pointer-events-auto">
             <transition name="fade" mode="out-in">
-                <div v-if="route.name != 'about'" :key="'LinkAbout'" v-motion-pop>
+                <div v-if="route.name != 'settings'" :key="'LinkSettings'" v-motion-pop>
                     <!-- TODO: Use a proper named link here instead of to="" -->
-                    <NuxtLink to="/about" class="block p-1.5 rounded-full hover:scale-110 transition-transform">
+                    <NuxtLink to="/settings" class="block p-1.5 rounded-full hover:scale-110 transition-transform">
                         <IconsBase name="gear" class="w-16 h-auto" />
                     </NuxtLink>
                 </div>

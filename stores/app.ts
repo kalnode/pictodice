@@ -227,7 +227,6 @@ export const usePhotodiceAppStore = defineStore('PhotoDiceApp', {
 
     getters: {
 
-
         // TODO: From Die.vue component, move ax/ay calculations here
         //ax: () => { },
         //ay: () => { },
