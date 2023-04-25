@@ -1,0 +1,1 @@
+import{b as e,e as t,o,f as s}from"./entry.eb383ce5.js";const c={class:"w-full h-full flex flex-col items-center p-4 overflow-auto"},a=s("div",{class:"max-w-lg space-y-4 pb-48 text-black text-opacity-80"}," Dice ",-1),l=[a],p={__name:"index",setup(_){return e(),(i,r)=>(o(),t("div",c,l))}};export{p as default};
