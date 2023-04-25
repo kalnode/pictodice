@@ -56,7 +56,7 @@ export interface DiceSet {
 // ========================================
 // DEFINE STORE
 // ========================================
-export const usePhotodiceAppStore = defineStore('PhotoDiceApp', {
+export const usePictodiceAppStore = defineStore('PictodiceApp', {
     state: () => ({
 
         // APP - Only set once, on app load

@@ -13,9 +13,9 @@
 
 <script setup>
 import { Camera, CameraResultType } from '@capacitor/camera'
-import { usePhotodiceAppStore } from '~/stores/app'
+import { usePictodiceAppStore } from '~/stores/app'
 
-const store = usePhotodiceAppStore()
+const store = usePictodiceAppStore()
 const selectedImage = ref('')
 
 // TODO: Invesigate all this. Necessary?

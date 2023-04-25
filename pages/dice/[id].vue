@@ -1,6 +1,6 @@
 <script setup>
-    import { usePhotodiceAppStore } from '~/stores/app'
-    const store = usePhotodiceAppStore()
+    import { usePictodiceAppStore } from '~/stores/app'
+    const store = usePictodiceAppStore()
 
     definePageMeta({
         title: 'Die'

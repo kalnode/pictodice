@@ -30,13 +30,13 @@
 </template>
 
 <script lang="ts" setup>
-import { usePhotodiceAppStore, Die, DieState } from '~/stores/app'
+import { usePictodiceAppStore, Die, DieState } from '~/stores/app'
 
 
 // ==========================================
 // GENERAL
 // ==========================================
-const store = usePhotodiceAppStore()
+const store = usePictodiceAppStore()
 const config = useRuntimeConfig()
 const useBGmap = ref(false)
 

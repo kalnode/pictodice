@@ -1,8 +1,8 @@
 <script setup>
 import { onBeforeRouteUpdate } from "vue-router"
 import { ref } from "vue"
-import { usePhotodiceAppStore } from '~/stores/app'
-const store = usePhotodiceAppStore()
+import { usePictodiceAppStore } from '~/stores/app'
+const store = usePictodiceAppStore()
 
 
 const breadcrumbs = ref([])

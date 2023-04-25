@@ -2,8 +2,8 @@
 import { useRoute } from 'vue-router'
 const currentRoute = useRoute()
 
-import { usePhotodiceAppStore } from '~/stores/app'
-const store = usePhotodiceAppStore()
+import { usePictodiceAppStore } from '~/stores/app'
+const store = usePictodiceAppStore()
 
 definePageMeta({
     name: 'Roll',

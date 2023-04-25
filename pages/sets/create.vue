@@ -54,12 +54,12 @@
 import { Camera, CameraResultType } from '@capacitor/camera'
 import useModal from "@/stores/modal"
 import ImageCropper from "@/components/ImageCropper.vue"
-import { usePhotodiceAppStore } from '~/stores/app'
+import { usePictodiceAppStore } from '~/stores/app'
 import { ref } from 'vue'
 const { $convertBlobToBase64, $writeFile, $deleteFile } = useNuxtApp()
 
 const modal = useModal()
-const store = usePhotodiceAppStore()
+const store = usePictodiceAppStore()
 const config = useRuntimeConfig()
 const loading = ref(false)
 

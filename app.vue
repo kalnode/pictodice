@@ -101,7 +101,7 @@
 import { ref } from 'vue'
 import { Capacitor } from '@capacitor/core'
 import { Motion } from '@capacitor/motion'
-import { usePhotodiceAppStore } from '~/stores/app'
+import { usePictodiceAppStore } from '~/stores/app'
 import Stats from 'three/examples/jsm/libs/stats.module.js'
 
 // ----- FOR DYNAMIC HEADER TITLE -----
@@ -117,7 +117,7 @@ const { $event, $getViewportDimensions, $debounce } = useNuxtApp()
 // ==========================================
 // GENERAL
 // ==========================================
-const store = usePhotodiceAppStore()
+const store = usePictodiceAppStore()
 const appReady = ref(false)
 const showTopTitle = ref(false)
 let stats

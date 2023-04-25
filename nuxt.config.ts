@@ -41,7 +41,7 @@ export default defineNuxtConfig({
             //mode: 'out-in' // Disabled this mode because it brings up errors especially when running animations on pages. However, looks like pages are cross-fading just fine without this???
         },
 
-        baseURL: process.env.NUXT_WTF === 'productionweb' ? '/photodice/' : '/'
+        baseURL: process.env.NUXT_WTF === 'productionweb' ? '/pictodice/' : '/'
 
     },
 

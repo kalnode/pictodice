@@ -1,8 +1,8 @@
 <script setup>
 const router = useRouter()
 const currentRoute = useRoute()
-import { usePhotodiceAppStore } from '~/stores/app'
-const store = usePhotodiceAppStore()
+import { usePictodiceAppStore } from '~/stores/app'
+const store = usePictodiceAppStore()
 const config = useRuntimeConfig()
 definePageMeta({
     title: 'Die',

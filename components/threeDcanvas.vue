@@ -47,14 +47,14 @@
 </template>
 
 <script setup>
-import { usePhotodiceAppStore } from '~/stores/app'
+import { usePictodiceAppStore } from '~/stores/app'
 import DiceCanvas from '~/assets/js/canvas.js'
 
 const config = useRuntimeConfig()
 
 const { $event, $listen, $debounce } = useNuxtApp()
 
-const store = usePhotodiceAppStore()
+const store = usePictodiceAppStore()
 
 const showCanvas = ref(true)
 

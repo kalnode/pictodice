@@ -119,8 +119,8 @@
 import { useRoute, useRouter } from 'vue-router'
 const router = useRouter()
 const currentRoute = useRoute()
-import { usePhotodiceAppStore } from '~/stores/app'
-const store = usePhotodiceAppStore()
+import { usePictodiceAppStore } from '~/stores/app'
+const store = usePictodiceAppStore()
 import { ref } from 'vue'
 const { $event } = useNuxtApp()
 const config = useRuntimeConfig()

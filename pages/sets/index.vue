@@ -1,8 +1,8 @@
 <script setup>
-import { usePhotodiceAppStore } from '~/stores/app'
+import { usePictodiceAppStore } from '~/stores/app'
 import { nextTick, ref } from "vue"
 const config = useRuntimeConfig()
-const store = usePhotodiceAppStore()
+const store = usePictodiceAppStore()
 definePageMeta({
     title: 'Dice Sets',
     breadcrumb: 'Dice Sets',

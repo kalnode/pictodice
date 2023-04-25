@@ -23,14 +23,14 @@
 </template>
 
 <script setup>
-import { usePhotodiceAppStore } from '~/stores/app'
+import { usePictodiceAppStore } from '~/stores/app'
 
 const { $listen } = useNuxtApp()
 
 // ==========================================
 // GENERAL
 // ==========================================
-const store = usePhotodiceAppStore()
+const store = usePictodiceAppStore()
 const showDevTools = ref(false)
 
 // TODO: This must be reactive() in order for changes to pass to Die component. Somehow, ref() doesn't do the trick! Why?
