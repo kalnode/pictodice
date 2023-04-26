@@ -93,8 +93,8 @@ export default defineNuxtConfig({
         //hid: 'nuxt-color-mode-script',
         //globalName: '__NUXT_COLOR_MODE__',
         //componentName: 'ColorScheme',
-        //classPrefix: '',
-        classSuffix: '-mode',
+        classPrefix: 'ColorMode-',
+        classSuffix: '',
         //storageKey: 'nuxt-color-mode'
     },
     //colorMode: {

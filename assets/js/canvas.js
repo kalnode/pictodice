@@ -89,7 +89,6 @@ export default class DiceCanvas {
 
         return new Promise((resolve, reject) => {
 
-            console.log("CANVAS INIT")
             this.updateContainer()
             this.initPhysics()
             this.initScene()
@@ -118,8 +117,7 @@ export default class DiceCanvas {
 
 
     async resizeEvent() {
-        console.log("resizeEvent111")
-        //this.stopAnimation()
+        this.stopAnimation()
         await this.updateContainer()
         await this.clearScene(['appRoom', 'appObject'])
         await this.buildScene()
@@ -260,10 +258,7 @@ export default class DiceCanvas {
     }
 
     renderScene(timestamp) {
-        console.log("attempting render scene")
-        if (this.allowedToAnimate) {
-            console.log("this.animReq... %O", this.animReq)
-
+        if (this.allowedToAnimate && this.renderer) {
             if (timestamp - this.previousTime > this.frameLengthMS) {
 
                 if (this.physicsWorld) {
@@ -288,8 +283,8 @@ export default class DiceCanvas {
     }
 
     stopAnimation() {
+        console.log("stop animation!")
         this.allowedToAnimate = false
-        console.log("stop animation")
         window.cancelAnimationFrame(this.animReq)
     }
 
@@ -733,10 +728,8 @@ export default class DiceCanvas {
 
         // Need to invoke render (re-render) in the moment before capture, otherwise screenshot may be blank
         this.renderer.render(this.scene, this.camera)
-        console.log("Screenshot 555")
         ctx.drawImage(this.canvasEl, posX, posY, width, height, 0, 0, width, height)
 
-        console.log("Screenshot 666")
         // Make temporary <a> link as a way to invoke file download
         const a = document.createElement('a')
         document.body.appendChild(a)
@@ -1220,19 +1213,19 @@ export default class DiceCanvas {
             // TODO: Move this
             //this.store.rolling = false
 
-            this.stopAnimation()
+            //this.stopAnimation()
 
-            /*
             if (timeDiff > 2.5) {
-                this.scoreResult = "Roll unfinished"
+                //this.scoreResult = "Roll unfinished"
+                this.stopAnimation()
             }
-            */
+            
         }
 
     }
 
     throwObjects() {
-        console.log("throw objects")
+
         this.allowedToAnimate = true
         this.renderScene()
         // TODO: Move this

@@ -22,7 +22,7 @@ import 'cropperjs/dist/cropper.css'
 import Cropper from 'cropperjs'
 import { nextTick, ref } from "vue"
 
-const emit = defineEmits()
+const emit = defineEmits() // Event bus emit
 
 const props = defineProps({
     imageSrc: String,
@@ -100,7 +100,7 @@ async function cropTheImage() {
         console.log("Image cropper crop work final: %O", blob)
 
         if (props.context_ui == 'modal') {
-            emit("update:modelValue", blob)
+            emit("update:modelValue", blob) // Modal emit
         } else {
             this.$emit("croppedImage", blob)
         }

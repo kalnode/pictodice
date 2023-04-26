@@ -33,7 +33,7 @@
 
             <!-- RIGHT -->
             <!--OVERFLOW (triple dots) -->
-            <div class="absolute right-2 top-1 pointer-events-auto">...</div>
+            <!-- <div class="absolute right-2 top-1 pointer-events-auto">...</div>-->
         </header>
 
         <!-- MOTION PERMISSION PROMPT (custom; mostly for iOS/Safari use) -->
@@ -259,11 +259,13 @@ onMounted (async () => {
 
 
 
+    /*
     stats = new Stats()
     stats.showPanel(1) // 0: fps, 1: ms, 2: mb, 3+: custom
     document.body.appendChild(stats.dom)
 
     requestAnimationFrame(animate)
+    */
 
 })
 

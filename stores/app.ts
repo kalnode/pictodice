@@ -67,11 +67,26 @@ export const usePictodiceAppStore = defineStore('PictodiceApp', {
         },
 
         device: {
-            viewport: {}
+            viewport: {},
+            useMotionSensors: true
+        },
+
+        // COLOR MODES
+        colorModes: {
+            light: [ 'monotone', 'teal', 'sepia'],
+            dark: [ 'monotone', 'teal', 'sepia']
+        },
+        globalColorModeSelected: 'light-monotone',
+        useSystemColorMode: false,
+        systemColorModePreference: {
+            light: 'light-monotone',
+            dark: 'dark-monotone'
         },
 
         // MISC
         showDevTools: false,
+        showStats: false,
+        simulateSlowServer: false,
 
         // LAYOUT
         safeAreaInset: {
@@ -79,6 +94,10 @@ export const usePictodiceAppStore = defineStore('PictodiceApp', {
             bottom: null
         },
         safeAreaPadding: 0, // How much extra padding we give away from the viewport bleed edge (if any)
+
+        // 3D
+        antialiasing: false,
+        
 
         // INTERACTION
         allowMotionSensors: true,

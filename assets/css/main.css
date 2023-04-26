@@ -46,15 +46,16 @@ body {
 /* ------------------------------ */
 
 :root {
-    --color: #243746;
-    --color-primary: #158876;
-    --color-secondary: #0e2233;
-    --color-panel: #076c1717; /* Subtle contrast background for sections/cards/etc */
-    --bg: #f3f5f4;
+    --color: #575757;
+    --color-primary: #919191;
+    --color-secondary: #363636;
+    --color-panel: #00000012; /* Subtle contrast background for sections/cards/etc */
+    --bg: #fcfcfc;
     --bg-secondary: #fff;
-    --border-color: #ddd;
+    --border-color: #e4e4e4;
 }
 
+/*
 .dark-mode {
     --color: #ebf4f1;
     --color-primary: #41b38a;
@@ -64,7 +65,20 @@ body {
     --bg-secondary: #071521;
     --border-color: #0d2538;
 }
+*/
 
+.ColorMode-dark-monotone {
+    --color: #f5f5f5;
+    --color-primary: #b4b4b4;
+    --color-secondary: #ffffff;
+    --color-panel: #ffffff12;
+    --bg: #2c2c2c;
+    --bg-secondary: #202020;
+    --border-color: #3a3a3a;
+}
+
+
+/*
 .sepia-mode {
     --color: #433422;
     --color-primary: #433422;
@@ -74,11 +88,84 @@ body {
     --bg-secondary: #eae0c9;
     --border-color: #ded0bf;
 }
+*/
+
+.ColorMode-light-sepia {
+    --color: #433422;
+    --color-primary: #433422;
+    --color-secondary: #504231;
+    --color-panel: #00000012;
+    --bg: #f1e7d0;
+    --bg-secondary: #eae0c9;
+    --border-color: #ded0bf;
+}
+
+.ColorMode-dark-sepia {
+    --color: #f1e7d0;
+    --color-primary: #eae0c9;
+    --color-secondary: #ded0bf;
+    --color-panel: #ffffff12;
+    --bg: #433422;
+    --bg-secondary: #433422;
+    --border-color: #504231;
+}
+
+
+
+
+.ColorMode-light-teal {
+    --color: #243746;
+    --color-primary: #158876;
+    --color-secondary: #0e2233;
+    --color-panel: #076c1717; /* Subtle contrast background for sections/cards/etc */
+    --bg: #f3f5f4;
+    --bg-secondary: #fff;
+    --border-color: #ddd;
+}
+
+.ColorMode-dark-teal {
+    --color: #ebf4f1;
+    --color-primary: #41b38a;
+    --color-secondary: #fdf9f3;
+    --color-panel: #ffffff12;
+    --bg: #091a28;
+    --bg-secondary: #071521;
+    --border-color: #0d2538;
+}
+
+
 
 
 
 /* ------------------------------ */
-/* LINKS, BUTTONS, TEXT */
+/* LAYOUT */
+/* ------------------------------ */
+.app-width-max {
+    @apply max-w-5xl;
+}
+
+.app-padding-x {
+    @apply px-4;
+}
+
+.app-margin-x-neg {
+    @apply -mx-4;
+}
+
+.card {
+    @apply bg-[color:var(--color-panel)] rounded-lg;
+}
+
+.card_padding {
+    @apply p-4 xs:p-6 md:p-10;
+}
+
+
+
+
+
+/* ------------------------------ */
+/* LINKS, BUTTONS */
 /* ------------------------------ */
 a {
     color: var(--color-primary);
@@ -101,9 +188,27 @@ a:hover {
     @apply p-4 px-8 text-sm xs:text-base md:text-xl;
 }
 
+
+
 /* ------------------------------ */
+/* TITLES, TEXT */
+/* ------------------------------ */
+
+h1 {
+    @apply text-xl;
+}
+
+h2 {
+    @apply text-lg;
+}
+
+
+
+/* ------------------------------ */
+/* TRANSITIONS */
+/* ------------------------------ */
+
 /* NUXT PAGE TRANSITIONS */
-/* ------------------------------ */
 .page-enter-active,
 .page-leave-active {
     transition: filter 0.4s, opacity 0.4s;
@@ -116,10 +221,23 @@ a:hover {
 }
 
 
+/* VUE NAMED-TRANSITIONS */
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
 
 
 
 
+/* ------------------------------ */
+/* MISC */
+/* ------------------------------ */
 
 
 /* Removes ability to select element. E.g. On desktop, drag-hilight content, and observe noselect elements are not selectable */
@@ -136,38 +254,4 @@ a:hover {
 /* Not widely compatible. Seems to be effective in Android Chrome though, where the 'blue flash' is very noticeable. iPhone Safari doesn't have 'blue flash' to start with. */
 .noHighlight {
     -webkit-tap-highlight-color: transparent;
-}
-
-/* VUE NAMED-TRANSITIONS */
-
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.2s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-    opacity: 0;
-}
-
-.card {
-    @apply bg-[color:var(--color-panel)] rounded-lg;
-}
-
-.card_padding {
-    @apply p-4 xs:p-6 md:p-10;
-}
-
-
-
-.app-width-max {
-    @apply max-w-5xl;
-}
-
-.app-padding-x {
-    @apply px-4;
-}
-
-.app-margin-x-neg {
-    @apply -mx-4;
 }
