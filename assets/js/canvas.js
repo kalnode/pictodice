@@ -323,7 +323,7 @@ export default class DiceCanvas {
 
             // GET & LOOP all objects (room & objects, no lights)
 
-            if (this.scene.children && this.scene.children != null && this.scene.children.length > 0) {
+            if (this.scene && this.scene.children && this.scene.children != null && this.scene.children.length > 0) {
 
                 let objects = this.scene.children
                 if (classes && classes.length > 0) {
