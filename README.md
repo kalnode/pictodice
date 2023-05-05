@@ -1,5 +1,7 @@
 # Pictodice app
 
+- WORK IN PROGRESS -
+
 Universal app built using latest Vue3/Nuxt3.
 
 One codebase with deployments to web, Android and iOS app stores.
