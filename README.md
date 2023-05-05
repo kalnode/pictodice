@@ -1,42 +1,18 @@
-# Nuxt 3 Minimal Starter
+# Pictodice app
 
-Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Universal app built using latest Vue3/Nuxt3.
 
-## Setup
+One codebase with deployments to web, Android and iOS app stores.
 
-Make sure to install the dependencies:
 
-```bash
-# yarn
-yarn install
+www.pictodice.com
 
-# npm
-npm install
+Also:
 
-# pnpm
-pnpm install
-```
+ThreeJS for 3d dice rolling
 
-## Development Server
+CannonJS for physics
 
-Start the development server on http://localhost:3000
+DaisyUI for some UI components
 
-```bash
-npm run dev
-```
-
-## Production
-
-Build the application for production:
-
-```bash
-npm run build
-```
-
-Locally preview production build:
-
-```bash
-npm run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+Ionic Capacitor for mobile integration
