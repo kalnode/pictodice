@@ -1,42 +1,55 @@
-# Nuxt 3 Minimal Starter
+# Pictodice
 
-Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+(WORK IN PROGRESS)
 
-## Setup
+Universal app built using latest Vue3/Nuxt3/Typescript.
 
-Make sure to install the dependencies:
+One codebase powering multiple deployments:
 
-```bash
-# yarn
-yarn install
+* web
+* Android app store
+* iOS app store
 
-# npm
-npm install
+www.pictodice.com
 
-# pnpm
-pnpm install
-```
+## Highlights: ##
 
-## Development Server
+#### 3d dice-rolling experience ####
+* Using ThreeJS and CannonJS physics
+* Responsive: dice 'table' adapts to match viewport or containment
+* Internal screenshot functionality
 
-Start the development server on http://localhost:3000
+#### Users can create their own dice sets ####
+* Dice variants: SVG icons, custom text, photo upload
+* Will integrate with external API (ie noun project)
+* (under construction)
 
-```bash
-npm run dev
-```
+#### Product-browsing experience ####
+* Dynamic routes
+* Breadcrumbs
+* Animated views
+* Fully responsive
 
-## Production
+#### Native mobile ####
+* One codebase for web/Android/iOS
+* Uses Ionic Capacitor for bridging
+* Android and iOS builds are native packages that go through app store submission
+* Versioning across all deployments, with update management
 
-Build the application for production:
+#### CSS + UI Components ####
+* Tailwind CSS
+* Mix of DaisyUI and Headless UI
+* Modal abstraction with callback
 
-```bash
-npm run build
-```
+#### Sensors ####
+* Device shake = roll the dice
+* Possible using orientation for dice perspective change
 
-Locally preview production build:
+#### Typescript ####
+* Where it matters
 
-```bash
-npm run preview
-```
+#### Color Modes ####
+* Sync-to-System/Light/Dark/Sepia
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+
+
