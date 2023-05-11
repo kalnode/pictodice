@@ -19,10 +19,7 @@ definePageMeta({
 
         <main class="app-width-max app-padding-x w-full flex flex-col md:flex-row">
 
-            <!-- TODO: For sections below, we use a class diceSet_column on this to get nice looking height for whatever column is shorter in height.
-            Is there a better way? Must we use calc()? If we must, then can we pass a number in inside of a hard 16em (equivalent of header height + some extra breathing space). -->
-
-            <section class="flex-1 diceSet_column card card_padding flex justify-center items-center mb-24">
+            <section class="flex-1 column_height card card_padding flex justify-center items-center mb-24">
                 <header class="flex items-center mb-2 md:mb-8">
                     <h2 class="text-3xl font-bold mr-4 ">Faces</h2>
                     <h3 class="opacity-70">({{ store.diceSets[currentRoute.params.setid].dies.length }})</h3>
@@ -44,7 +41,7 @@ definePageMeta({
                                         {{ face.text_src }}
                                     </div>
                                     <div v-else-if="face.type == 'image'" class="w-full h-full flex justify-center items-center">
-                                        <img :src="config.app.baseURL+'images/'+face.image_src" />
+                                        <img :src="config.app.baseURL+'images/'+face.image_src" class="dice_preview" />
                                     </div>
                                 </div>
 
@@ -77,10 +74,3 @@ definePageMeta({
 
     </div>
 </template>
-<style scoped>
-@media screen and (min-width: 768px) {
-    .diceSet_column {
-        min-height:calc(100vh - 16em)
-    }
-}
-</style>

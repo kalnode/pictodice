@@ -46,91 +46,52 @@ body {
 /* ------------------------------ */
 
 :root {
-    --color: #575757;
-    --color-primary: #919191;
-    --color-secondary: #363636;
-    --color-panel: #00000012; /* Subtle contrast background for sections/cards/etc */
-    --bg: #fcfcfc;
+    --color: rgb(14, 67, 88);
+    --color-primary: #156888;
+    --color-secondary: rgb(14, 67, 88);
+    --color-tertiary: rgb(206, 110, 21);
+    --color-panel: #ffffff; /* Subtle contrast background for sections/cards/etc */
+    --bg: #f7fafc;
     --bg-secondary: #fff;
-    --border-color: #e4e4e4;
+    --border-color: #ddd;
+
+    --color-A: #dddddd;
+    --color-B: #333333;
 }
 
 /*
-.dark-mode {
-    --color: #ebf4f1;
-    --color-primary: #41b38a;
-    --color-secondary: #fdf9f3;
-    --color-panel: #ffffff12;
-    --bg: #091a28;
-    --bg-secondary: #071521;
-    --border-color: #0d2538;
-}
-*/
-
-.ColorMode-dark-monotone {
-    --color: #f5f5f5;
-    --color-primary: #b4b4b4;
-    --color-secondary: #ffffff;
-    --color-panel: #ffffff12;
-    --bg: #2c2c2c;
-    --bg-secondary: #202020;
-    --border-color: #3a3a3a;
-}
-
-
-/*
-.sepia-mode {
-    --color: #433422;
-    --color-primary: #433422;
-    --color-secondary: #504231;
-    --color-panel: #00000012;
-    --bg: #f1e7d0;
-    --bg-secondary: #eae0c9;
-    --border-color: #ded0bf;
-}
-*/
-
-.ColorMode-light-sepia {
-    --color: #433422;
-    --color-primary: #433422;
-    --color-secondary: #504231;
-    --color-panel: #00000012;
-    --bg: #f1e7d0;
-    --bg-secondary: #eae0c9;
-    --border-color: #ded0bf;
-}
-
-.ColorMode-dark-sepia {
-    --color: #f1e7d0;
-    --color-primary: #eae0c9;
-    --color-secondary: #ded0bf;
-    --color-panel: #ffffff12;
-    --bg: #433422;
-    --bg-secondary: #433422;
-    --border-color: #504231;
-}
-
-
-
-
-.ColorMode-light-teal {
+ORIGINAL LIGHT TEAL
+:root {
     --color: #243746;
     --color-primary: #158876;
     --color-secondary: #0e2233;
-    --color-panel: #076c1717; /* Subtle contrast background for sections/cards/etc */
+    --color-panel: #076c1717;
     --bg: #f3f5f4;
     --bg-secondary: #fff;
     --border-color: #ddd;
 }
+*/
 
-.ColorMode-dark-teal {
+.ColorMode-dark {
     --color: #ebf4f1;
     --color-primary: #41b38a;
     --color-secondary: #fdf9f3;
+    --color-tertiary: rgb(206, 110, 21);
     --color-panel: #ffffff12;
     --bg: #091a28;
     --bg-secondary: #071521;
     --border-color: #0d2538;
+}
+
+.ColorMode-sepia {
+    --color: #433422;
+    --color-primary: #433422;
+    --color-secondary: #504231;
+    --color-tertiary: rgb(173, 133, 96);
+    --color-panel: #00000012;
+    --bg: #f1e7d0;
+    --bg-secondary: #eae0c9;
+    --border-color: #ded0bf;
 }
 
 
@@ -145,7 +106,7 @@ body {
 }
 
 .app-padding-x {
-    @apply px-4;
+    @apply px-8;
 }
 
 .app-margin-x-neg {
@@ -153,13 +114,32 @@ body {
 }
 
 .card {
-    @apply bg-[color:var(--color-panel)] rounded-lg;
+
+    /* FYI: Ideally we use drop-shadow-lg because it looks nicer, however it seems to create problems with blurry text
+    in child elements, when the element has translateZ (due to animation like @vueuse's motion) and/or a child has a transform effect
+    (like hover: scale modifier).
+    INSTEAD: using shadow-lg seems to not have these issues
+    */
+    @apply bg-[color:var(--color-panel)] shadow-xl rounded-lg border border-[color:var(--color-A)] border-opacity-20;
+    /* background: linear-gradient(190deg, rgba(0,0,0,0.08727240896358546) 72%, rgba(0,0,0,0.15449929971988796) 100%); */
 }
 
 .card_padding {
     @apply p-4 xs:p-6 md:p-10;
 }
 
+.dice_preview {
+    @apply max-h-32;
+    /* drop-shadow-2xl */
+    filter: drop-shadow(0 10px 25px rgb(159 159 159 / 34%));
+}
+
+@media screen and (min-width: 768px) {
+    .column_height {
+        /* TODO: 16em is arbitrary, however, instead we may want this to match sticky-footer height. Can we feed in a dynamic var here? */
+        min-height:calc(100vh - 16em)
+    }
+}
 
 
 
@@ -172,12 +152,12 @@ a {
     transition: opacity 0.3s;
 }
 
-a:hover {
+a:not(.noHoverOpacity):hover {
     @apply opacity-80;
 }
 
 .btnapp {
-    @apply inline-block rounded-full p-3 m-1 cursor-pointer text-[color:var(--bg-secondary)] bg-[color:var(--color-primary)] hover:opacity-80;
+    @apply ring-offset-4 focus:outline-none focus:ring-4 ring-[color:var(--color-tertiary)] inline-block rounded-full p-3 m-1 cursor-pointer text-[color:var(--bg-secondary)] bg-[color:var(--color-primary)] hover:opacity-80;
 }
 
 .btn_small {
@@ -202,6 +182,16 @@ h2 {
     @apply text-lg;
 }
 
+.textInGroupTransitionFix {
+    /* Potential tricks that attempt to control blurryness or jitter in animated text */
+    /* No silver bullet yet */
+    /*
+    backface-visibility: hidden;
+    transform: perspective(1px) translateZ(0);
+    -webkit-font-smoothing: subpixel-antialiased;
+    zoom: 99.6%;
+    */
+}
 
 
 /* ------------------------------ */

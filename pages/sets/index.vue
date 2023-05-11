@@ -50,16 +50,16 @@ function setLimit(newLimit) {
 
         <div class="app-width-max app-padding-x w-full flex-1 flex justify-center items-center">
             <client-only>
-                <StaggeredTransition animType='slideUp' :duration="50" tag="div" class="w-full h-full gap-6 grid auto-rows-min" style="grid-template-columns: repeat(auto-fit, minmax(14rem, auto))">
+                <StaggeredTransition animType='slideUp' :duration="50" tag="div" class="w-full h-full grid gap-6 auto-rows-min" style="grid-template-columns: repeat(auto-fit, minmax(14rem, auto))">
                     <div v-for="(set, index) in itemsToDisplay" :key="'diceset-'+index" :data-index="index">
-                        <NuxtLink :to="'/sets/'+index" class="w-full h-full flex flex-col justify-center items-center card hover:bg-opacity-60 transition group overflow-hidden p-4 md:p-8">
+                        <NuxtLink :to="'/sets/'+index" class="noHoverOpacity w-full h-full flex flex-col justify-center items-center card group overflow-hidden pt-11 pb-7">
                             <!--
                             <div class="mt-4 mb-4 md:mb-8 flex-1 flex items-center">
                                 <IconsBase name="die" class="w-16 h-auto transition group-hover:scale-105" />
                             </div>
                             -->
-                            <img :src="config.app.baseURL+'images/dice_screenshots/test1.png'" class="max-h-48 object-contain px-8 md:px-0 py-8 mb-8 group-focus:scale-105 group-active:scale-105 group-hover:scale-105 transition-transform drop-shadow-lg" />
-                            <div class="absolute bottom-0 inline-block px-4 pb-4 text-lg">
+                            <img :src="config.app.baseURL+'images/dice_screenshots/test1.png'" class="dice_preview object-contain px-8 md:px-0 py-8 group-focus:scale-105 group-active:scale-105 group-hover:scale-105 transition-transform" />
+                            <div class="px-2 text-lg textInGroupTransitionFix group-hover:underline line-clamp-2 text-center">
                                 {{ set.name}}
                             </div>
                         </NuxtLink>

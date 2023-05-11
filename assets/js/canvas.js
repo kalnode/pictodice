@@ -3,7 +3,7 @@
 // ========================================
 import * as THREE from 'three'
 import * as CANNON from 'cannon-es'
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+//import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 //import { MapControls } from "three/examples/jsm/controls/OrbitControls";
 import * as BufferGeometryUtils from "three/examples/jsm/utils/BufferGeometryUtils"
 import { generateRandomInteger, getRandomFloatWithExclusion } from '~/assets/js/random.js'
@@ -34,6 +34,9 @@ export default class DiceCanvas {
         this.baseURL = baseURL
         this.rollOnMount = rollOnMount
         this.allowedToAnimate = true
+        this.movementFinishedCounter = 0
+        this.rolling
+        this.timeWork
 
         this.containerEl = document.getElementById(containerLabel)
 
@@ -42,6 +45,8 @@ export default class DiceCanvas {
         this.props = {
             Objects: Objects
         }
+
+        this.rollMaxTime = 8000
 
         this.fov = 30 // Lower = shallow perspective (easier on eyes, less "3d"); Higher = deep perspective (harsh, more "3d")
         this.floorSize = 100 // Arbitrary inner world dimensions; "100" is a nice round number that's better for troubleshooting and head-math. Could be anything, like "1920" (e.g. browser viewport).
@@ -77,7 +82,7 @@ export default class DiceCanvas {
         }
 
         // RENDERER WITH FPS LIMITER
-        // TODO: DOes this work well? Is it extraneous? Doesn't requestAnimationFrame manage all of this for us?
+        // TODO: Does this work well? Is it extra? Doesn't requestAnimationFrame manage all of this for us?
         this.frameLengthMS = 1000/60 //60 fps
         this.previousTime = 0
 
@@ -86,29 +91,14 @@ export default class DiceCanvas {
     }
 
     init() {
-
         return new Promise((resolve, reject) => {
-
             this.updateContainer()
             this.initPhysics()
             this.initScene()
             this.buildScene()
-    
             this.renderScene()
-
-
-            // NOTE:
-            // Dice have initial movement when they get added to scene. They drop from a height.
-        
-            if (this.rollOnMount) {
-                this.throwObjects()
-            }
-
-
             resolve()
-
         })
-    
     }
 
     // =================================
@@ -121,20 +111,8 @@ export default class DiceCanvas {
         await this.updateContainer()
         await this.clearScene(['appRoom', 'appObject'])
         await this.buildScene()
-        this.camera.position.y = this.camera.position.y + 20
         this.throwObjects()
     }
-
-    // TODO: Use global 'debounce' for this
-    debounceKal (func, time) {
-        var time = time || 100
-        var timer
-        return function (event) {
-            if (timer) clearTimeout(timer)
-            timer = setTimeout(func, time, event)
-        }
-    }
-
 
     updateContainer() {
 
@@ -181,18 +159,29 @@ export default class DiceCanvas {
         this.scene = new THREE.Scene()
 
         // CAMERA
-        this.camera = new THREE.PerspectiveCamera(30, this.container.width / this.container.height, 1, 300)
+        this.camera = new THREE.PerspectiveCamera(30, this.container.width / this.container.height, 1, 400)
         this.camera.position.set(0,1,0) // TODO: Why "1" here? If we do all zero's, scene is blank (until first interaction with orbit controls)
-        //camera.lookAt(0, 0, 0)
+        //this.camera.rotation.set(30,10,10)
+        //this.camera.position.x = 2
+        this.camera.lookAt(this.scene.position) //new THREE.Vector3(0, 0, 0))
         //camera.position.set(2, 4, 10).multiplyScalar(7)
         //camera.up.set(0, 0, -1)
+
+        //this.renderer.render(this.scene, this.camera)
 
         // CONTROLS
         //orbit = new MapControls(camera, canvasEl)
         //orbit.enableDamping = true
+        /*
         this.controls = new OrbitControls(this.camera, this.renderer.domElement)
-        this.controls.target.set(0, 0, 0)
+
+        this.controls.addEventListener('change', () => {
+            this.renderer.render(this.scene, this.camera)
+        })
+        //this.controls.target.set(0, 0, 0)
+        
         this.controls.update()
+        */
 
         // STATS
         /*
@@ -235,24 +224,26 @@ export default class DiceCanvas {
                 this.addObjectEvents(this.objectArray[i])
             }
         }
+
+        if (this.rollOnMount) {
+            //setTimeout(() => {
+                console.log("rolling on mount")
+                this.throwObjects()    
+            //}, 100)
+            
+        }
+
     }
 
     initPhysics() {
         this.physicsWorld = new CANNON.World({
             allowSleep: true,
-            gravity: new CANNON.Vec3(0, -800, 0)
+            sleepSpeedLimit: 1,
+            gravity: new CANNON.Vec3(0, -900, 0)
         })
 
-        /*
-        var slipperyMat = new CANNON.Material()
-        var friction = 0.0
-        var restitution = 1
-        var slipperyContact = new CANNON.ContactMaterial(slipperyMat,slipperyMat,friction,restitution)
-        */
-        //world.addContactMaterial(slipperyContact)
-
-        //physicsWorld.defaultContactMaterial.friction = 1
-        this.physicsWorld.defaultContactMaterial.restitution = 0.2
+        this.physicsWorld.defaultContactMaterial.friction = 0.001
+        this.physicsWorld.defaultContactMaterial.restitution = 0.1
         // physicsWorld.broadphase = new CANNON.NaiveBroadphase()
         // physicsWorld.solver.iterations = 16
     }
@@ -284,19 +275,31 @@ export default class DiceCanvas {
 
     stopAnimation() {
         console.log("stop animation!")
+        clearTimeout(this.timeWork)
         this.allowedToAnimate = false
         window.cancelAnimationFrame(this.animReq)
     }
 
     async buildScene() {
-        await this.createRoom()
-        await this.createObject()
 
-        this.camera.aspect = this.container.aspect
-        this.camera.position.y = (((100 * this.container.aspect) / this.camera.aspect) / (2 * Math.tan(this.fov / 2 * (Math.PI / 180)))) + 20
-        this.camera.updateProjectionMatrix()
-        this.renderer.setSize(this.container.width, this.container.height)
-        //renderer.setPixelRatio(window.devicePixelRatio)
+        if(this.scene) {
+            await this.createRoom()
+            await this.createObject()
+
+
+
+            
+            this.camera.aspect = this.container.aspect
+            this.camera.position.y = (((100 * this.container.aspect) / this.camera.aspect) / (2 * Math.tan(this.fov / 2 * (Math.PI / 180)))) + 20
+            this.camera.updateProjectionMatrix()
+            this.renderer.setSize(this.container.width, this.container.height)
+            //renderer.setPixelRatio(window.devicePixelRatio)
+
+            //this.camera.position.y = this.camera.position.y + 20
+            this.camera.position.set(0, this.camera.position.y + 20, 30)
+            //this.camera.rotation.set(0,10,0)
+            this.camera.lookAt(this.scene.position)
+        }
 
     }
 
@@ -321,6 +324,8 @@ export default class DiceCanvas {
 
         return new Promise ( async (resolve, reject) => {
 
+            // geometry.dispose(); material.dispose(); texture.dispose(); renderer.dispose();
+
             // GET & LOOP all objects (room & objects, no lights)
 
             if (this.scene && this.scene.children && this.scene.children != null && this.scene.children.length > 0) {
@@ -335,6 +340,9 @@ export default class DiceCanvas {
                     if (object.appClass == 'appRoom' || object.appClass == 'appObject') {
 
                         // Remove geometries to free GPU resources
+                        if (object.mesh) await object.mesh.dispose()
+
+                        // Remove geometries to free GPU resources
                         if (object.geometry) await object.geometry.dispose()
 
                         // Remove materials to free GPU resources
@@ -345,6 +353,15 @@ export default class DiceCanvas {
                                 await object.material.dispose()
                             }
                         }
+
+                        if (object.texture) {
+                            if (object.texture instanceof Array) {
+                                await object.texture.forEach(texture => texture.dispose())
+                            } else {
+                                await object.texture.dispose()
+                            }
+                        }
+
 
                         // Remove object from scene
                         await this.scene.remove(object) // OR object.removeFromParent()
@@ -361,6 +378,8 @@ export default class DiceCanvas {
                     await this.physicsWorld.removeBody(object)
 
                 })
+
+                this.renderer.dispose()
 
                 this.objectArray.length = 0
             }
@@ -463,10 +482,14 @@ export default class DiceCanvas {
             front: {
                 geometry: [floorWidth, wallThickness, wallHeight],
                 position: [0, wallHeight/2, (floorHeight/2) + (wallThickness/2)]
+            },
+            top: {
+                geometry: [floorWidth, floorHeight, wallThickness],
+                position: [0, wallHeight, 0]
             }
         }
 
-        let wall_material = new THREE.MeshBasicMaterial( { transparent: true, alphaTest:0, opacity: 0 } ) // , color: 0x0000ff, wireframe: true
+        let wall_material = new THREE.MeshBasicMaterial( { color: 0x0000ff, wireframe: true  } ) // , color: 0x0000ff, wireframe: true
         let wall_vertex = new THREE.Vector3(-1, 0, 0)
 
         Object.entries(wallPresets).forEach(async entry => {
@@ -936,8 +959,8 @@ export default class DiceCanvas {
         const body = new CANNON.Body({
             mass: 1,
             shape: new CANNON.Box(new CANNON.Vec3(...physicsBoxGeometry)), // Values should be HALF of what the mesh geometry values are
-            sleepTimeLimit: 0.1,
-            //sleepSpeedLimit: 0.1
+            sleepTimeLimit: 1,
+            sleepSpeedLimit: 0.1
         })
         body.appClass = "appObject"
         this.physicsWorld.addBody(body)
@@ -1145,10 +1168,14 @@ export default class DiceCanvas {
 
         object.body.addEventListener("sleep", (e) => {
 
+
+            let timeDiff = Math.round(new Date() - this.rollTimer)
+
             object.body.allowSleep = false
             object.body.landed = false
 
             // CALCULATE FINAL OBJECT LANDING POSITION (ie what face is pointing up)
+            // Note: This logic may trigger and finish before an object has actually fully landed!
             const euler = new CANNON.Vec3()
             e.target.quaternion.toEuler(euler)
 
@@ -1162,65 +1189,93 @@ export default class DiceCanvas {
                 if (isZero(euler.x)) {
                     this.showRollResults(1)
                     object.body.landed = true
-                        // checkObjectStoppedMoving()
                 } else if (isHalfPi(euler.x)) {
                     this.showRollResults(4)
                     object.body.landed = true
-                        // checkObjectStoppedMoving()
                 } else if (isMinusHalfPi(euler.x)) {
                     this.showRollResults(3)
                     object.body.landed = true
-                        //  checkObjectStoppedMoving()
                 } else if (isPiOrMinusPi(euler.x)) {
                     this.showRollResults(6)
                     object.body.landed = true
-                        //  checkObjectStoppedMoving()
                 } else {
                     // landed on edge => wait to fall on side and fire the event again
-                    object.body.allowSleep = true
+                    console.log("###### RE-SLEEPING 111 !!!!")
+                    if (timeDiff < 2000) {
+                        object.body.allowSleep = true
+                    }
                 }
             } else if (isHalfPi(euler.z)) {
                 this.showRollResults(2)
                 object.body.landed = true
-                    // checkObjectStoppedMoving()
             } else if (isMinusHalfPi(euler.z)) {
                 this.showRollResults(5)
                 object.body.landed = true
-                //checkObjectStoppedMoving()
             } else {
                 // landed on edge => wait to fall on side and fire the event again
-                object.body.allowSleep = true
+                console.log("###### RE-SLEEPING 222 !!!!")
+
+                if (timeDiff < 2000) {
+                    object.body.allowSleep = true
+                }
             }
 
             if (object.body.landed = true) {
-                this.checkObjectStoppedMoving()
+                this.movementFinishedCounter += 1
             }
+
+            this.checkObjectStoppedMoving()
+
         })
     }
 
     checkObjectStoppedMoving() {
 
-        let objectStillMoving = this.objectArray.filter( obj => obj.body.landed == false
-        && (obj.body.velocity.z < 0.1 && obj.body.velocity.x < 0.1 && obj.body.velocity.y < 0.1)
+        console.log("checkObjectStoppedMoving ====================")
+
+        let objectStillMoving = this.objectArray.filter( obj => 
+        //obj.body.velocity.norm() < 0.1
+        //&& obj.body.angularVelocity.norm() < 0.1
+        //Math.norm(obj.body.velocity) < 0.1
+        //&& Math.norm(obj.body.angularVelocity) < 0.1
+        (obj.body.velocity.z < 0.1 && obj.body.velocity.x < 0.1 && obj.body.velocity.y < 0.1)
         && (obj.body.angularVelocity.z < 0.1 && obj.body.angularVelocity.x < 0.1 && obj.body.angularVelocity.y < 0.1)
         )
 
-        let timeDiff = Math.round(new Date() - this.rollTimer / 1000)
+        console.log("objectStillMoving.length is %O", objectStillMoving.length)
+        console.log("this.objectArray.length is %O", this.objectArray.length)
+
+        //let timeDiff = Math.round(new Date() - this.rollTimer)
+
+        console.log("new Date() - this.rollTimer is %O", new Date() - this.rollTimer)
+        //console.log("timeDiff is %O", timeDiff)
+
+        if (objectStillMoving.length == this.objectArray.length ) { //this.movementFinishedCounter == this.objectArray.length  || timeDiff > 4000
 
 
-        if (objectStillMoving.length == 0 || timeDiff > 5.5) {
+            this.rolling = false
 
-            // TODO: Move this
-            //this.store.rolling = false
+            this.stopAnimation()
 
-            //this.stopAnimation()
-
-            if (timeDiff > 2.5) {
+           // if (timeDiff > 2.5) {
                 //this.scoreResult = "Roll unfinished"
-                this.stopAnimation()
-            }
+            //    this.stopAnimation()
+            //}
             
         }
+
+    }
+
+    async setTimer() {
+        console.log("set timer inside 111")
+        timeWork = setTimeout( () => {
+            console.log("set timer inside 222")
+            console.log("timer finished")
+            if (this.rolling) {
+                this.rolling = false
+                this.stopAnimation()
+            }
+        }, this.rollMaxTime)
 
     }
 
@@ -1228,11 +1283,29 @@ export default class DiceCanvas {
 
         this.allowedToAnimate = true
         this.renderScene()
-        // TODO: Move this
+        
+        this.rolling = true
         //this.store.rolling = true
         this.rollTimer = new Date()
 
         //this.scoreResult = null
+
+        clearTimeout(this.timeWork)
+
+        console.log("set timer 111")
+        //this.setTimer()
+        console.log("set timer 222")
+
+        this.timeWork = setTimeout( () => {
+            console.log("set timer inside 222")
+            console.log("timer finished")
+            if (this.rolling) {
+                this.rolling = false
+                this.stopAnimation()
+            }
+        }, this.rollMaxTime)
+
+
 
         this.objectArray.forEach((object, index) => {
 
@@ -1250,7 +1323,9 @@ export default class DiceCanvas {
 
             // ROTATION
             //object.mesh.rotation.set( 2 * Math.PI * Math.random(),   0,  2 * Math.PI * Math.random()  )
-            object.mesh.rotation.set( 2 * Math.PI * Math.random(), 2 * Math.PI * Math.random(), 2 * Math.PI * Math.random())
+            // TODO: It seems with these settings, for the same scene, spin is too much for large viewports, and too little for small viewports.
+            // So, we need to scale speed accordingly.
+            object.mesh.rotation.set( 1 * Math.PI * Math.random(), 1 * Math.PI * Math.random(), 1 * Math.PI * Math.random())
             object.body.quaternion.copy(object.mesh.quaternion)
 
             // RANDOM FORCE

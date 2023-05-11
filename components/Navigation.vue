@@ -8,7 +8,7 @@ const route = useRoute()
 </script>
 
 <template>
-    <div class="pointer-events-none flex justify-between items-center m-2">
+    <div class="pointer-events-none flex justify-between items-center p-2">
         <!-- LEFT -->
         <div class="pointer-events-auto">
             <transition name="fade" mode="out-in">

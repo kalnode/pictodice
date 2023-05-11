@@ -137,7 +137,7 @@ async function findRouteObject(array, key1, key2, value) {
 </script>
 
 <template>
-    <div class="flex items-center space-x-4 text-lg md:text-xl">
+    <div class="flex items-center space-x-4 text-lg md:text-xl px-4">
         <div v-if="store.device.viewport.context == 'narrow'">
             <NuxtLink v-if="breadcrumbs.at(-2)" :to="breadcrumbs.at(-2).path" class="link group" style="text-decoration: none !important">
                 <span class="group-hover:opacity-50">&#60;&#60;</span> <span class="underline">{{ breadcrumbs.at(-2).title }}</span>
@@ -145,9 +145,9 @@ async function findRouteObject(array, key1, key2, value) {
         </div>
         <div v-else>
             <client-only>
-                <StaggeredTransition animType='slideRight' :duration="100" tag="div" class="flex flex-wrap space-x-1">
-                    <div v-for="(crumb, index) in breadcrumbs" :key="'crumb-' + index" class="flex items-center space-x-1">
-                        <!-- TODO: We want to know when breadcrumb animates, then after 100ms we fade in this slash -->
+                <StaggeredTransition animType='slideRight' :duration="100" tag="div" class="flex flex-wrap">
+                    <!-- TODO: Ideally we fade-in each separator slash like 100ms after each adjacent breadcrumb slides in -->
+                    <div v-for="(crumb, index) in breadcrumbs" :key="'crumb-' + index" class="flex items-center">
                         <div v-if="index > 0" class="text-xs">&#47;</div>
                         <NuxtLink :to="crumb.active ? crumb.path : null" :class="crumb.active ? '' : 'disabled'" class="link">
                             {{ crumb.title }}
@@ -160,7 +160,7 @@ async function findRouteObject(array, key1, key2, value) {
 </template>
 <style scoped>
 .link {
-  @apply p-4 cursor-pointer underline;
+  @apply p-2 m-2 cursor-pointer underline;
 }
 
 .link.disabled {

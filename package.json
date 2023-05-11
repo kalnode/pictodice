@@ -24,7 +24,7 @@
     "cap open iOS": "npx cap open ios",
     "cap generate assets: icons & splashes": "npx capacitor-assets generate --assetPath /static --iconBackgroundColor '#1bdfd6' --iconBackgroundColorDark '#0e7772' --splashBackgroundColor '#1bdfd6' --splashBackgroundColorDark '#0e7772'",
     "--- DEPLOYMENT ---": "",
-    "deploy to github-pages": "gh-pages -d dist -t true"
+    "deploy to github-pages": "echo 'pictodice.com' > ./dist/CNAME && gh-pages -d dist -t true"
   },
   "devDependencies": {
     "@capacitor/cli": "^4.7.3",
@@ -50,6 +50,7 @@
     "@headlessui/vue": "^1.7.13",
     "@ionic/pwa-elements": "^3.1.1",
     "@pinia/nuxt": "^0.4.8",
+    "@tailwindcss/line-clamp": "^0.4.4",
     "@vueuse/motion": "^2.0.0-beta.25",
     "cannon-es": "^0.20.0",
     "capacitor-native-settings": "^4.0.3",

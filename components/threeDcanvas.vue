@@ -1,7 +1,7 @@
 <template>
-    <div id="threeDcanvas" class="w-full h-full relative flex justify-center">
+    <div id="threeDcanvas" class="w-full h-full relative flex justify-center" style="background: rgb(241 241 241)">
 
-        <div v-if="showCanvas" class="w-full h-full">
+        <div class="w-full h-full" style="background: radial-gradient(circle, rgba(238, 238, 238, 0) 30%, rgba(0, 0, 0, 0.18) 180%)">
             <!-- :style="screenshotMode ? 'position:absolute; left:-200%;':''" -->
 
             <!-- TODO: Need to scrutinize multiple webgl contexts and garbage collection:
@@ -17,17 +17,21 @@
             and this:
             https://stackoverflow.com/questions/10823408/performance-drops-when-trying-to-reset-whole-scene-with-three-js
             -->
+            <transition name="fade">
 
-            <canvas id="canvas" class="h-full w-full relative z-10"></canvas>
-            <!--  style="width: 4000px; height: 4000px" -->
+                <div v-if="showCanvas" class="h-full w-full">
+                    <canvas id="canvas" class="h-full w-full relative z-10"></canvas>
+                    <!--  style="width: 4000px; height: 4000px" -->
 
-            <canvas id="canvasScreenshot" class="absolute top-0 left-0 w-full h-full z-50 pointer-events-none"></canvas>
-            <!--
-            <div class="absolute top-1 left-1 z-50">
-                <div @click="throwObjects()" class="inline-block cursor-pointer p-2 bg-white rounded-full hover:bg-gray-100">Roll</div>
-                <div>Score: <span id="score-result"></span></div>
-            </div>
-            -->
+                    <canvas id="canvasScreenshot" class="absolute top-0 left-0 w-full h-full z-50 pointer-events-none"></canvas>
+                    <!--
+                    <div class="absolute top-1 left-1 z-50">
+                        <div @click="throwObjects()" class="inline-block cursor-pointer p-2 bg-white rounded-full hover:bg-gray-100">Roll</div>
+                        <div>Score: <span id="score-result"></span></div>
+                    </div>
+                    -->
+                </div>
+            </transition>
 
             <!-- :style="'bottom:'+ (store.safeAreaInset.bottom+store.safeAreaPadding) +'px'" -->
         </div>
@@ -69,37 +73,45 @@ let canvasInstance
 
 onMounted ( () => {
 
-    canvasInstance = new DiceCanvas(props.Objects, 'threeDcanvas', 'canvas', config.app.baseURL, true)
+    // TODO: Scrutinize this timeout. We shouldn't have it.
+    setTimeout(() => {
+        // showCanvas.value = true
+        canvasInstance = new DiceCanvas(props.Objects, 'threeDcanvas', 'canvas', config.app.baseURL, props.rollOnMount, props.screenshotMode)
 
-    canvasInstance.init()
-    /*
-    setTimeout(async () => {
-        await canvasInstance.init()
-        .then( () => {
-                    //setTimeout(() => {
+        canvasInstance.init()
+
+        /*
+        setTimeout(async () => {
+            await canvasInstance.init()
+            .then( () => {
+                        //setTimeout(() => {
+                canvasInstance.throwObjects()
+            //}, 1500)
+            })
+
+            //setTimeout(() => {
+            // canvasInstance.throwObjects()
+            //}, 1500)
+        }, 500)
+        */
+
+        window.addEventListener("resize", $debounce( () => {
+            console.log("threeDcanvas got Resize event")
+            canvasInstance.resizeEvent()
             canvasInstance.throwObjects()
-        //}, 1500)
+        }, 300)) //.bind(this) //.bind(this) needed to keep context of class instance
+
+        $listen('deviceShaken', () => {
+            canvasInstance.throwObjects()
         })
 
-        //setTimeout(() => {
-           // canvasInstance.throwObjects()
-        //}, 1500)
+        $listen('rollDice', () => {
+            canvasInstance.throwObjects()
+        })
+
     }, 500)
-    */
 
-    window.addEventListener("resize", $debounce( () => {
-        console.log("threeDcanvas got Resize event")
-        canvasInstance.resizeEvent()
-        canvasInstance.throwObjects()
-    }, 300)) //.bind(this) //.bind(this) needed to keep context of class instance
 
-    $listen('deviceShaken', () => {
-        canvasInstance.throwObjects()
-    })
-
-    $listen('rollDice', () => {
-        canvasInstance.throwObjects()
-    })
 })
 
 

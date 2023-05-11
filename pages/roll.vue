@@ -4,6 +4,7 @@ const currentRoute = useRoute()
 
 import { usePictodiceAppStore } from '~/stores/app'
 const store = usePictodiceAppStore()
+const showCanvas = ref(false)
 
 definePageMeta({
     name: 'Roll',
@@ -11,6 +12,15 @@ definePageMeta({
 })
 
 const { $event } = useNuxtApp()
+
+onMounted ( () => {
+
+    // TODO: We have a timeout here as a bandaid fix for loading the 3d canvas.
+    // Scrutinize this and eliminate timeout.
+    setTimeout(() => {
+        showCanvas.value = true
+    }, 500)
+})
 
 function throwDice() {
     $event('rollDice')

@@ -48,6 +48,7 @@ export interface DieState {
 
 export interface DiceSet {
     name: string,
+    slug: string,
     // TODO: Need to add Die type here
     dies: Array<number>
 }
@@ -69,18 +70,6 @@ export const usePictodiceAppStore = defineStore('PictodiceApp', {
         device: {
             viewport: {},
             useMotionSensors: true
-        },
-
-        // COLOR MODES
-        colorModes: {
-            light: [ 'monotone', 'teal', 'sepia'],
-            dark: [ 'monotone', 'teal', 'sepia']
-        },
-        globalColorModeSelected: 'light-monotone',
-        useSystemColorMode: false,
-        systemColorModePreference: {
-            light: 'light-monotone',
-            dark: 'dark-monotone'
         },
 
         // MISC
@@ -125,26 +114,32 @@ export const usePictodiceAppStore = defineStore('PictodiceApp', {
         diceSets: <DiceSet[]>[
             {
                 name: 'Classic Dice',
+                slug: 'classic',
                 dies: [ 0, 0 ]
             },
             {
-                name: 'Preset 2',
+                name: 'Yoga & Classic',
+                slug: 'yoga-classic',
                 dies: [ 0, 3 ]
             },
             {
-                name: 'Preset 3',
+                name: 'Stock Photos, Yoga & Classic',
+                slug: 'stock-yoga-classic',
                 dies: [ 3, 4, 0 ]
             },
             {
-                name: 'Preset 4',
+                name: 'A bunch of dice',
+                slug: 'bunch-of-dice',
                 dies: [ 3, 4, 0, 3 ]
             },
             {
-                name: 'Preset 5',
+                name: 'Much more dice',
+                slug: 'much-more-dice',
                 dies: [ 0, 0, 0, 3, 4 ]
             },
             {
-                name: 'Preset 6',
+                name: 'Whole lotta dice!',
+                slug: 'whole-lotta-dice',
                 dies: [ 0, 2, 2, 3, 4, 0 ]
             }
         ],

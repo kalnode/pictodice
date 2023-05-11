@@ -1,46 +1,19 @@
-<script setup>
-import { usePictodiceAppStore } from '~/stores/app'
-const store = usePictodiceAppStore()
-
-const emit = defineEmits()
-
-const props = defineProps({
-    shade: String // TODO: make this tyoescript ['dark', 'light']
-})
-
-function setColor(value) {
-    //$colorMode.preference = color+'-dark'
-    emit("update:modelValue", value)
-    emit('close')
-}
-</script>
 <template>
     <div>
-        <ul v-if="!shade || shade == 'light'">
-            <li v-for="color of store.colorModes.light" :key="'light-'+color"
-            :class="{
-                //preferred: !$colorMode.unknown && color === $colorMode.preference,
-                //selected: !$colorMode.unknown && color === $colorMode.value,
-            }">
-                <div @click="setColor('light-'+color)" class="btnapp">
-                    Light {{ color }}
+        <ul>
+            <li v-for="color of ['system', 'light', 'dark', 'sepia']"
+                :key="color"
+                :class="{
+                    preferred: !$colorMode.unknown && color === $colorMode.preference,
+                    selected: !$colorMode.unknown && color === $colorMode.value,
+                }"
+            >
+                <div @click="$colorMode.preference = color" class="btnapp">
+                    {{color}}
                     <!-- <component :is="`icon-${color}`" /> -->
                 </div>
             </li>
         </ul>
-        <ul v-if="!shade || shade == 'dark'">
-            <li v-for="color of store.colorModes.dark" :key="'dark-'+color"
-            :class="{
-                //preferred: !$colorMode.unknown && color === $colorMode.preference,
-                //selected: !$colorMode.unknown && color === $colorMode.value,
-            }">
-                <div @click="setColor('dark-'+color)" class="btnapp">
-                    Dark {{ color }}
-                    <!-- <component :is="`icon-${color}`" /> -->
-                </div>
-            </li>
-        </ul>
-        <!--
         <p>
             {{ $colorMode.value }}
 
@@ -49,7 +22,6 @@ function setColor(value) {
                 <span v-if="$colorMode.preference === 'system'">&nbsp;(<i>{{ $colorMode.value }}</i> mode detected)</span>
             </ColorScheme>
         </p>
-        -->
     </div>
 </template>
 

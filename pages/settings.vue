@@ -6,8 +6,6 @@ const modal = useModal()
 const store = usePictodiceAppStore()
 import ColorModePicker from "@/components/ColorModePicker.vue"
 
-const { $colorMode } = useNuxtApp()
-
 definePageMeta({
     title: 'Settings'
 })
@@ -15,31 +13,17 @@ definePageMeta({
 const toggleValue = ref(false)
 
 
-function openColorPicker(mode) {
+function openColorPicker() {
 
     return new Promise ( async (resolve, reject) => {
         modal.open(ColorModePicker,
             {
-                mode: mode,
+                //mode: mode,
                 context_ui: 'modal'
             },
             [{
                 callback: (selectedColorMode) => {
                     console.log("color modal callback selectedColorMode: %O", selectedColorMode)
-
-                    if (mode == 'global') {
-                        store.globalColorModeSelected = selectedColorMode
-                        //setColor(selectedColorMode)
-                        $colorMode.preference = selectedColorMode
-                    } else {
-
-                        store.systemColorModePreference[mode] = selectedColorMode
-
-                        // Set it right away, if conditions are met
-                        if (store.useSystemColorMode) {
-                            checkColorMode()
-                        }
-                    }
 
                     modal.close()
                     resolve("Success")
@@ -49,34 +33,6 @@ function openColorPicker(mode) {
     })
 }
 
-function getTheme() {
-    if(window.matchMedia && window.matchMedia("(prefers-color-scheme:dark)").matches) {
-        return "dark"
-    } else {
-        return "light"
-    }
-}
-
-function checkColorMode() {
-    let testTheme = getTheme()
-    if (testTheme && store.useSystemColorMode) {
-        //setColor(selectedColorMode)
-        //if ($colorMode.preference === 'system')
-        $colorMode.preference = store.systemColorModePreference[testTheme]
-    }
-    //$colorMode.preference = store.systemColorModePreference[testTheme]
-}
-
-function toggleSystemMode() {
-
-    if (store.useSystemColorMode) {
-        checkColorMode()
-    } else {
-        $colorMode.preference = store.globalColorModeSelected
-    }
-
-
-}
 
 </script>
 
@@ -105,32 +61,14 @@ function toggleSystemMode() {
 
             <section class="card card_padding">
 
-                <h2>Color Modes</h2>
+                <h2>Color Mode</h2>
 
-                <Toggle v-model="store.useSystemColorMode" @update="toggleSystemMode()" :label="'Sync with System Color Mode'" class="p-2 rounded-full bg-white bg-opacity-10" />
+                <ColorScheme placeholder="..." tag="span">
+                    Color mode: <b>{{ $colorMode.preference }}</b>
+                    <span v-if="$colorMode.preference === 'system'">&nbsp;(<i>{{ $colorMode.value }}</i> mode detected)</span>
+                </ColorScheme>
 
-                <div v-if="store.useSystemColorMode">
-                    <div class="p-2 rounded-full bg-white bg-opacity-25">
-                        Current System Color Mode: 
-                        <ColorScheme placeholder="..." tag="span">
-                            (<i>{{ getTheme() }}</i> mode detected)
-                        </ColorScheme>
-                    </div>
-
-                    <div>
-                        System "Dark" Preferred Color Mode:
-                        <div @click="openColorPicker('dark')" class="btnapp btn_small text-center hover:scale-105 transition cursor-pointer uppercase whitespace-nowrap">{{ store.systemColorModePreference.dark }}</div>
-                    </div>
-
-                    <div>
-                        System "Light" Preferred Color Mode:
-                        <div @click="openColorPicker('light')" class="btnapp btn_small text-center hover:scale-105 transition cursor-pointer uppercase whitespace-nowrap">{{ store.systemColorModePreference.light }}</div>
-                    </div>
-                </div>
-                <div v-else>
-                    Preferred Global Color Mode:
-                    <div @click="openColorPicker('global')" class="btnapp btn_small text-center hover:scale-105 transition cursor-pointer uppercase whitespace-nowrap">{{ store.globalColorModeSelected }}</div>
-                </div>
+                <div @click="openColorPicker()" class="btnapp btn_small text-center hover:scale-105 transition cursor-pointer uppercase whitespace-nowrap">Change Color Mode</div>
 
             </section>
 

@@ -17,22 +17,23 @@ definePageMeta({
             <div class="w-full flex flex-col sm:flex-row sm:justify-center">
                 <!-- LEFT -->
                 <section v-motion-slide-left :delay="700" class="card card_padding flex-1 flex justify-end items-center mb-4 sm:mr-4">
+
                     <!-- TODO: Ideally we want to use a named route with params, but apparently that is ill-advised, and now throws an error (from VueRouter) -->
                     <!-- <NuxtLink :to="{ name: 'Roll', params: { 'set': 'classic' } }" class="flex flex-col items-center"> -->
                     <!-- SEE: https://github.com/vuejs/router/blob/main/packages/router/CHANGELOG.md#414-2022-08-22 -->
                     <!-- FOR NOW: This works, we go to a raw path: -->
                     <NuxtLink to="/roll?classic" class="flex-1 flex flex-col items-center" tabindex=-1>
-                        <div class="flex-1 mb-4 flex transition hover:scale-105 space-x-4 p-4 pb-8 sm:p-12">
+                        <div class="flex-1 mb-4 flex transition hover:scale-105 space-x-4 p-8 pb-8 sm:p-12">
                             <!--
                             <IconsBase name="die" class="w-12 h-auto" />
                             <IconsBase name="die" class="w-12 h-auto" />
                             -->
-                            <img :src="config.app.baseURL+'images/dice_screenshots/test1.png'" class="max-h-32 object-contain group-focus:scale-105 group-active:scale-105 group-hover:scale-105 transition-transform drop-shadow-lg" />
+                            <img :src="config.app.baseURL+'images/dice_screenshots/test1.png'" class="dice_preview object-contain group-focus:scale-105 group-active:scale-105 group-hover:scale-105 transition-transform" />
                         </div>
                     </NuxtLink>
-                    <NuxtLink to="/roll?classic" class="btnapp btn_large hover:scale-105 transition cursor-pointer uppercase whitespace-nowrap">
-                        Roll Classic
-                    </NuxtLink>
+                        <NuxtLink to="/roll?classic" class="btnapp btn_large hover:scale-105 transition cursor-pointer uppercase whitespace-nowrap textInGroupTransitionFix">
+                            Roll Classic
+                        </NuxtLink>
                 </section>
                 <!-- RIGHT -->
                 <section v-motion-slide-right :delay="500" class="card card_padding flex-1 flex justify-end items-center mb-4">
@@ -47,14 +48,14 @@ definePageMeta({
                             </NuxtLink>
 
                             <div class="relative flex items-center">
-                                <NuxtLink :to="{ name: 'Roll'}" class="z-50 btnapp btn_large uppercase hover:scale-105 transition cursor-pointer">
+                                <NuxtLink :to="{ name: 'Roll'}" class="z-50 btnapp btn_large uppercase hover:scale-105 transition cursor-pointer textInGroupTransitionFix">
                                     Roll Preset
                                 </NuxtLink>
                                 <!-- TODO: v-motion conflicts with hover transform... we want both. How to make it work? -->
                                 <!-- v-motion-slide-left :delay="700" -->
                                 <div v-motion-slide-left class="btn_large w-full -right-10 sm:-right-18 absolute z-0" style="padding-right: 1em">
                                     <NuxtLink v-if="store.currentDiceSet != 0" :to="{ name: 'Sets'}"
-                                    class="w-full flex-1 ml-4 flex justify-end rounded-full bg-white group hover:translate-x-2 transition-transform"
+                                    class="w-full flex-1 ml-4 flex justify-end rounded-full bg-[color:var(--color-primary)] bg-opacity-10 group hover:translate-x-2 transition-transform"
                                     style="padding: 0.8em">
                                         <!-- ml-16 sm:ml-24 -->
                                         <span class="invisible">-</span>
@@ -68,11 +69,11 @@ definePageMeta({
                             <NuxtLink :to="{ name: 'Sets'}" class="flex flex-col items-center z-50" tabindex=-1>
                                 <div class="border-2 border-[color:var(--color-primary)] hover:bg-white hover:scale-105 transition-all border-dashed mb-8 p-10 flex-1 flex flex-col justify-center items-center">
                                     <div class="text-7xl font-bold">?</div>
-                                    <div class="whitespace-nowrap">Select a Preset</div>
+                                    <div class="whitespace-nowrap textInGroupTransitionFix">Select a Preset</div>
                                 </div>
                             </NuxtLink>
 
-                            <NuxtLink :to="{ name: 'Sets'}" class="btnapp btn_large text-center hover:scale-105 transition cursor-pointer uppercase whitespace-nowrap">
+                            <NuxtLink :to="{ name: 'Sets'}" class="btnapp btn_large text-center hover:scale-105 transition cursor-pointer uppercase whitespace-nowrap textInGroupTransitionFix">
                                 Roll Preset
                             </NuxtLink>
                         </div>
@@ -127,7 +128,7 @@ definePageMeta({
                             </div>
                         </div>
                     </NuxtLink>
-                    <NuxtLink :to="{ name: 'Sets'}" class="btnapp btn_small hover:scale-105 transition cursor-pointer uppercase whitespace-nowrap">
+                    <NuxtLink :to="{ name: 'Sets'}" class="btnapp btn_small hover:scale-105 transition cursor-pointer uppercase whitespace-nowrap textInGroupTransitionFix">
                         Browse Dice Sets
                     </NuxtLink>
                 </section>
@@ -138,7 +139,7 @@ definePageMeta({
                             <IconsBase name="pencil" class="w-20 h-auto" />
                         </div>
                     </NuxtLink>
-                    <NuxtLink :to="{ name: 'Sets'}" class="btnapp btn_small hover:scale-105 transition cursor-pointer uppercase whitespace-nowrap">
+                    <NuxtLink :to="{ name: 'Sets'}" class="btnapp btn_small hover:scale-105 transition cursor-pointer uppercase whitespace-nowrap textInGroupTransitionFix">
                         Create Custom Dice
                     </NuxtLink>
                 </section>

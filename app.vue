@@ -61,7 +61,7 @@
 
         <!-- NAVIGATION -->
         <transition name="fade">
-            <nav v-if="!store.rolling" class="z-40 absolute bottom-0 w-full pointer-events-none"
+            <nav v-if="!store.rolling" class="z-40 absolute w-full pointer-events-none"
         :style="'bottom:'+ (store.safeAreaInset.bottom) +'px'">
                 <Navigation class="w-full" />
             </nav>
