@@ -19,11 +19,11 @@
             -->
             <transition name="fade">
 
-                <div v-if="showCanvas" class="h-full w-full">
-                    <canvas id="canvas" class="h-full w-full relative z-10"></canvas>
+                <div v-if="showCanvas" class="w-full h-full relative flex justify-center items-center">
+                    <canvas id="canvas" class="w-full h-full relative z-10"></canvas>
                     <!--  style="width: 4000px; height: 4000px" -->
 
-                    <canvas id="canvasScreenshot" class="absolute top-0 left-0 w-full h-full z-50 pointer-events-none"></canvas>
+                    <canvas id="canvasScreenshot" class="absolute w-full h-full z-50 pointer-events-none invisible"></canvas>
                     <!--
                     <div class="absolute top-1 left-1 z-50">
                         <div @click="throwObjects()" class="inline-block cursor-pointer p-2 bg-white rounded-full hover:bg-gray-100">Roll</div>
@@ -37,12 +37,25 @@
         </div>
 
         <transition name="fade">
-            <div v-if="showDevTools" class="absolute left-8 bottom-20 mb-6 pointer-events-auto z-50 flex flex-col items-center justify-center space-y-4">
+            <div v-if="showDevTools" class="absolute left-8 top-1 mb-6 pointer-events-auto z-50 flex flex-col items-center justify-center space-y-4">
                 <div @click="setupFormation()" class="p-4 px-8 text-sm rounded-full bg-white hover:bg-gray-100 hover:scale-105 transition cursor-pointer">Formation</div>
                 <div @click="rotateObject()" class="p-4 px-8 text-sm rounded-full bg-white hover:bg-gray-100 hover:scale-105 transition cursor-pointer">Rotate</div>
+                <div @click="groupObjects()" class="p-4 px-8 text-sm rounded-full bg-white hover:bg-gray-100 hover:scale-105 transition cursor-pointer">Group Objects for Shot</div>
                 <div @click="createScreenshot()" class="p-4 px-8 text-sm rounded-full bg-white hover:bg-gray-100 hover:scale-105 transition cursor-pointer">Screenshot</div>
                 <div @click="stopAnimation()" class="p-4 px-8 text-sm rounded-full bg-white hover:bg-gray-100 hover:scale-105 transition cursor-pointer">Stop Anim</div>
                 <div @click="throwObjects()" class="p-4 px-8 text-sm rounded-full bg-white hover:bg-gray-100 hover:scale-105 transition cursor-pointer">Roll</div>
+                <div @click="resetOrbitControls()" class="p-4 px-8 text-sm rounded-full bg-white hover:bg-gray-100 hover:scale-105 transition cursor-pointer">Reset Orbit</div>
+            </div>
+        </transition>
+
+        <transition name="fade">
+            <div v-if="showDevTools" class="absolute right-8 top-1 mb-6 pointer-events-auto z-50 flex flex-col items-center justify-center space-y-4">
+                <div @click="nudge('x', -5)" class="p-4 px-8 text-sm rounded-full bg-white hover:bg-gray-100 hover:scale-105 transition cursor-pointer">X -5</div>
+                <div @click="nudge('x', 5)" class="p-4 px-8 text-sm rounded-full bg-white hover:bg-gray-100 hover:scale-105 transition cursor-pointer">X 5</div>
+                <div @click="nudge('y', -5)" class="p-4 px-8 text-sm rounded-full bg-white hover:bg-gray-100 hover:scale-105 transition cursor-pointer">Y -5</div>
+                <div @click="nudge('y', 5)" class="p-4 px-8 text-sm rounded-full bg-white hover:bg-gray-100 hover:scale-105 transition cursor-pointer">Y 5</div>
+                <div @click="nudge('z', -5)" class="p-4 px-8 text-sm rounded-full bg-white hover:bg-gray-100 hover:scale-105 transition cursor-pointer">Z -5</div>
+                <div @click="nudge('z', 5)" class="p-4 px-8 text-sm rounded-full bg-white hover:bg-gray-100 hover:scale-105 transition cursor-pointer">Z 5</div>
             </div>
         </transition>
 
@@ -135,6 +148,10 @@ function rotateObject() {
     canvasInstance.rotateObject()
 }
 
+function groupObjects() {
+    canvasInstance.groupObjects()
+}
+
 function stopAnimation() {
     canvasInstance.stopAnimation()
 }
@@ -145,6 +162,14 @@ function createScreenshot() {
 
 function throwObjects() {
     canvasInstance.throwObjects()
+}
+
+function resetOrbitControls() {
+    canvasInstance.resetOrbitControls()
+}
+
+function nudge(mode, value) {
+    canvasInstance.nudgeRotation(mode, value)
 }
 
 

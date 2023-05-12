@@ -3,10 +3,10 @@
 // ========================================
 import * as THREE from 'three'
 import * as CANNON from 'cannon-es'
-//import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-//import { MapControls } from "three/examples/jsm/controls/OrbitControls";
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import * as BufferGeometryUtils from "three/examples/jsm/utils/BufferGeometryUtils"
 import { generateRandomInteger, getRandomFloatWithExclusion } from '~/assets/js/random.js'
+import { RoundedBoxGeometry} from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
 
 export default class DiceCanvas {
 
@@ -147,7 +147,7 @@ export default class DiceCanvas {
             // TODO: If we can maintain solid color bg's, then we can possibly disable canvas transparency, and use a solid color instead
             alpha: true,
 
-            antialias: false,
+            antialias: true,
             canvas: this.canvasEl,
             //preserveDrawingBuffer: true
         })
@@ -155,7 +155,8 @@ export default class DiceCanvas {
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
         this.renderer.setSize(this.container.width, this.container.height)
         // TODO: Look into setPixelRatio esp when it comes to mobile screens
-        this.renderer.setPixelRatio(2) //window.devicePixelRatio
+        this.renderer.setPixelRatio(window.devicePixelRatio) //2
+        // FYI, if setting setPixelRatio to anything other than 1, be aware that you will see a difference on canvas width/height as defined in the DOM.
         this.scene = new THREE.Scene()
 
         // CAMERA
@@ -172,16 +173,25 @@ export default class DiceCanvas {
         // CONTROLS
         //orbit = new MapControls(camera, canvasEl)
         //orbit.enableDamping = true
-        /*
         this.controls = new OrbitControls(this.camera, this.renderer.domElement)
 
-        this.controls.addEventListener('change', () => {
+
+        // TODO: This needs to live somewhere appropriate.
+        const debounce = (func, time) => {
+            var time = time || 100
+            var timer
+            return function (event) {
+                if (timer) clearTimeout(timer)
+                timer = setTimeout(func, time, event)
+            }
+        }
+
+        this.controls.addEventListener('change', debounce( (e) => {
             this.renderer.render(this.scene, this.camera)
-        })
+        }, 10))
         //this.controls.target.set(0, 0, 0)
-        
+
         this.controls.update()
-        */
 
         // STATS
         /*
@@ -280,6 +290,12 @@ export default class DiceCanvas {
         window.cancelAnimationFrame(this.animReq)
     }
 
+    nudge(mode, value) {
+        this.camera.rotation.z = this.camera.rotation.z + value
+        this.controls.target.set(0,0,0)
+        this.controls.update();
+    }
+
     async buildScene() {
 
         if(this.scene) {
@@ -299,6 +315,7 @@ export default class DiceCanvas {
             this.camera.position.set(0, this.camera.position.y + 20, 30)
             //this.camera.rotation.set(0,10,0)
             this.camera.lookAt(this.scene.position)
+            this.controls.saveState()
         }
 
     }
@@ -307,11 +324,11 @@ export default class DiceCanvas {
     // WORLD FUNCTIONS
     // ----------------------------------
     setLighting() {
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8)
         this.scene.add(ambientLight)
 
-        const topLight = new THREE.PointLight(0xffffff, 0.5)
-        topLight.position.set(0, 150, 20)
+        const topLight = new THREE.PointLight(0xffffff, 0.3)
+        topLight.position.set(0, 200, 0)
         topLight.castShadow = true
         topLight.shadow.mapSize.width = 1024
         topLight.shadow.mapSize.height = 1024
@@ -584,6 +601,8 @@ export default class DiceCanvas {
 
     setupFormation() {
 
+        //this.stopAnimation()
+
         // Base of stack (ie pyramid); blocks get rendered from bottom-left first and get stacked upward.
         // This is to assure that regrdless of number of blocks, we always have a pleasing formation.
         let colBase = this.getPyramidBase(this.objectArray.length)
@@ -595,7 +614,7 @@ export default class DiceCanvas {
         // Offsets to help re-center the entire grouping
         // TODO: Ideally we don't need to do this. In any case, needs scrutiny if it's actually still accurate.
         let xOffset = (colBase * ((this.objectParams.scale/3)*2) + ((this.objectParams.scale) * col) + (col * (this.objectParams.scale/4))) //(colBase * objectParams.scale / 2) // (((floorSize/2) * container.aspect))// - (objectParams.scale/2)
-        let yOffset = 2 * this.objectParams.scale
+        let yOffset = 1 * this.objectParams.scale
 
         // LIGHTING
         // Appears in front of formation, for the screenshot. We do not touch the other scene lights.
@@ -616,8 +635,11 @@ export default class DiceCanvas {
         this.floor.mesh.visible = false
         //floor.mesh.receiveShadow = false
 
+        /*
         this.objectGroupScreenshot = new THREE.Group()
         this.objectGroupScreenshot.name = "objectFormation"
+        this.objectGroupScreenshot.scale.set(2, 2, 2)
+        */
 
         for (var i = 0; i < this.objectArray.length; i++) {
 
@@ -653,31 +675,66 @@ export default class DiceCanvas {
                 col = col + 1
             }
 
-            this.objectGroupScreenshot.add(object.mesh)
+            //this.objectGroupScreenshot.add(object.mesh)
 
         }
 
-        //group.scale.set(2, 2, 2)
 
-        this.scene.add(this.objectGroupScreenshot)
-
-        //this.createScreenshot(group)
+        //this.scene.add(this.objectGroupScreenshot)
+        this.renderer.render(this.scene, this.camera)
+        //this.createScreenshot(this.objectGroupScreenshot)
 
     }
 
+    resetOrbitControls() {
+        this.controls.reset() // Returns camera back to properties of last time this.controls.saveState() was called
+        this.controls.update() // TODO: Needed?
+    }
+
+    groupObjects() {
+        this.objectGroupScreenshot = new THREE.Group()
+        this.objectGroupScreenshot.name = "objectFormation"
+        this.objectGroupScreenshot.scale.set(2, 2, 2)
+
+        // LOOP THROUGH SCENE OBJECTS, ADD TO GROUP
+        // TODO: Must be more efficient way, maybe with below:
+        /*
+        scene.traverse(function(child) {
+            if (child.name === "quadrant") {
+
+            }
+        })
+        */
+        for (var i = 0; i < this.objectArray.length; i++) {
+            let object = this.objectArray[i]
+            this.objectGroupScreenshot.add(object.mesh)
+        }
+
+        this.scene.add(this.objectGroupScreenshot)
+        this.renderer.render(this.scene, this.camera)
+    }
 
     rotateObject() {
-        //this.objectGroupScreenshot.rotateY(THREE.MathUtils.degToRad( this.getRandomRotationPosition() ))
-        //this.objectGroupScreenshot.rotateOnAxis(new THREE.Vector3(0,1,0), THREE.MathUtils.degToRad( this.getRandomRotationPosition() ))
+        if (this.objectGroupScreenshot) {
+            this.objectGroupScreenshot.rotateY(THREE.MathUtils.degToRad( this.getRandomRotationPosition() ))
+            this.objectGroupScreenshot.rotateOnAxis(new THREE.Vector3(0,1,0), THREE.MathUtils.degToRad( this.getRandomRotationPosition() ))
+            this.renderer.render(this.scene, this.camera)
+        }
+    }
+
+    nudgeRotation(mode, value) {
+        if (this.objectGroupScreenshot) {
+            this.objectGroupScreenshot['rotate'+mode.toUpperCase()](THREE.MathUtils.degToRad(value))
+            //this.objectGroupScreenshot.rotateOnAxis(new THREE.Vector3(0,1,0), THREE.MathUtils.degToRad(value))
+            this.renderer.render(this.scene, this.camera)
+        }
     }
 
     async createScreenshot(objectInput) {
 
-        let object = objectInput ? objectInput : this.objectGroupScreenshot
-
         // This needs to be early enough to set image
+        //this.renderer.setPixelRatio(window.devicePixelRatio)  // Need to set this back to 1
         this.renderer.render(this.scene, this.camera)
-
 
         // SETUP SCREENSHOT CANVAS
         let canvasLabel = "canvasScreenshot"
@@ -695,7 +752,6 @@ export default class DiceCanvas {
         }
 
 
-
         // OLD DEV STUFF
         //renderer.setViewport(0, 0, 200, 400)
         //renderer.setSize( 200, 400 )
@@ -710,17 +766,24 @@ export default class DiceCanvas {
         //this.canvasEl.width = this.canvasEl.width * 2
         //this.canvasEl.height = this.canvasEl.height * 2
 
-        let scale = 1//object.scale.x * 1.2
-        object.scale.set(scale,scale,scale)
+        //let scale = 2//object.scale.x * 1.2
+        //object.scale.set(scale,scale,scale)
 
         // Gets 2d bounding box, in screen coordinates, around the capture object
+
+        if (!objectInput) {
+            this.groupObjects()
+        }
+
+        let object = objectInput ? objectInput : this.objectGroupScreenshot
+
         let boundingBox2D = this.computeScreenSpaceBoundingBox(object, this.camera)
 
         const posX = (boundingBox2D.min.x + 1) * (this.container.width / 2)
         const posY = (1 - boundingBox2D.max.y) * (this.container.height / 2)
-        const width = (boundingBox2D.max.x - boundingBox2D.min.x) * (this.container.width / 2) * scale
-        const height = (boundingBox2D.max.y - boundingBox2D.min.y) * (this.container.height / 2) * scale
-        
+        const width = (boundingBox2D.max.x - boundingBox2D.min.x) * (this.container.width / 2)
+        const height = (boundingBox2D.max.y - boundingBox2D.min.y) * (this.container.height / 2)
+
         let offset = 0 //25
         let padding = 0 //50
 
@@ -730,8 +793,11 @@ export default class DiceCanvas {
         ctx.lineWidth = 4
         ctx.strokeStyle = 'red'
 
-        ctx.width = width 
+        ctx.width = width
         ctx.height = height
+
+        overlayCanvas.style.width = (width) + 'px'
+        overlayCanvas.style.height = (height) + 'px'
 
         // CREATE BOX IN SCREENSHOT CANVAS
         //ctx.clearRect(0, 0, this.container.width, this.container.width)
@@ -746,12 +812,12 @@ export default class DiceCanvas {
         //ctx.scale(1 / factor, 1 / factor);
         //ctx.drawImage(img, 0, 0)
 
-
-
-
         // Need to invoke render (re-render) in the moment before capture, otherwise screenshot may be blank
         this.renderer.render(this.scene, this.camera)
         ctx.drawImage(this.canvasEl, posX, posY, width, height, 0, 0, width, height)
+
+        this.renderer.render(this.scene, this.camera)
+        console.log("ctx work is %O", ctx)
 
         // Make temporary <a> link as a way to invoke file download
         const a = document.createElement('a')
@@ -759,6 +825,8 @@ export default class DiceCanvas {
         a.style.display = 'none'
 
         let blobWork = await overlayCanvas.toBlob( (blob) => {
+
+            console.log("blob work is %O", blob)
             //this.saveBlob(blob, `screencapture.png`)
             //const url = window.URL.createObjectURL(blob)
             const url = window.URL.createObjectURL(blob)
@@ -767,6 +835,8 @@ export default class DiceCanvas {
             a.click()
         })
 
+
+        // Clear screenshot canvas
         ctx.clearRect(0, 0, width, height)
 
     }
@@ -931,16 +1001,18 @@ export default class DiceCanvas {
                 cubeMaterials.push(loadItem)
             }
 
-            // MESH: USING BASIC BOX MESH
-            // TODO: Future: We use same rounded-corner mesh as classic dice
-            // TODO: Should this be BoxBufferGeometry ?
-            let object_geometry = new THREE.BoxGeometry(1, 1, 1)
+            // PLAIN; original sharp-edged cube
+            //let object_geometry = new THREE.BoxGeometry(1, 1, 1)
+            //mesh = new THREE.Mesh(object_geometry, cubeMaterials)
+
+            // ROUNDED-EDGE CUBE
+            let object_geometry = new RoundedBoxGeometry(1, 1, 1, 2)
+            cubeMaterials.defines = {"USE_UV":""}
             mesh = new THREE.Mesh(object_geometry, cubeMaterials)
+
             mesh.castShadow = true
             //mesh.receiveShadow = true // Enable if we want dice to cast shadow on other dice. Leaving disabled for better performance.
 
-            // USING CUSTOM ROUNDED-EDGE MESH
-            //mesh = createObjectMesh(useHoles, cubeMaterials)
 
         // CLASSIC DICE (rounded corners, dots, etc)
         } else if (!object || object.type == 'classic') {
@@ -1007,11 +1079,11 @@ export default class DiceCanvas {
 
         if (useHoles) {
             objectMeshGroup.add(innerMesh, outerMesh)
+            return objectMeshGroup
         } else {
-            objectMeshGroup.add(outerMesh)
+            return outerMesh
         }
 
-        return objectMeshGroup
     }
 
     createObjectMesh_BoxGeometry(useHoles) {

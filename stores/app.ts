@@ -148,11 +148,13 @@ export const usePictodiceAppStore = defineStore('PictodiceApp', {
         dice: [
             {
                 name: 'Classic Die',
+                slug: 'classic',
                 type: 'classic', // 'preset' die, or 'custom' for user-made die
                 active: true,
             },
             {
                 name: 'Classic Die PNG',
+                slug: 'classic-bitmap',
                 type: 'preset', // 'preset' die, or 'custom' for user-made die
                 active: true,
                 faces: [
@@ -167,6 +169,7 @@ export const usePictodiceAppStore = defineStore('PictodiceApp', {
             },
             {
                 name: 'Magic Answers',
+                slug: 'magic-answers',
                 type: 'preset', // 'preset' die, or 'custom' for user-made die
                 active: true,
                 faces: [
@@ -181,6 +184,7 @@ export const usePictodiceAppStore = defineStore('PictodiceApp', {
             },
             {
                 name: 'Yoga',
+                slug: 'yoga',
                 type: 'preset',
                 active: true,
                 faces: [
@@ -194,6 +198,7 @@ export const usePictodiceAppStore = defineStore('PictodiceApp', {
             },
             {
                 name: 'Stock Photos',
+                slug: 'stock-photos',
                 type: 'preset',
                 active: true,
                 faces: [
@@ -207,6 +212,7 @@ export const usePictodiceAppStore = defineStore('PictodiceApp', {
             },
             {
                 name: "Emoji's",
+                slug: 'emoji',
                 type: 'preset',
                 active: true,
                 faces: [
