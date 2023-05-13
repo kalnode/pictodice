@@ -1,0 +1,1 @@
+import{b as t,e as s,f as a,t as o,o as c}from"./entry.0cfc88c2.js";const l={class:"w-full h-full flex flex-col items-center p-4 overflow-auto"},r={class:"max-w-lg space-y-4 pb-48 text-black text-opacity-80"},_={__name:"[id]",setup(i){return t(),(e,p)=>(c(),s("div",l,[a("div",r," Dice number is: "+o(e.$route.params.id),1)]))}};export{_ as default};
