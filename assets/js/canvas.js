@@ -152,10 +152,11 @@ export default class DiceCanvas {
             //preserveDrawingBuffer: true
         })
         this.renderer.shadowMap.enabled = true
-        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap // Type of shadow map structure for scene
+
         this.renderer.setSize(this.container.width, this.container.height)
         // TODO: Look into setPixelRatio esp when it comes to mobile screens
-        this.renderer.setPixelRatio(window.devicePixelRatio) //2
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)) //2
         // FYI, if setting setPixelRatio to anything other than 1, be aware that you will see a difference on canvas width/height as defined in the DOM.
         this.scene = new THREE.Scene()
 
@@ -330,10 +331,12 @@ export default class DiceCanvas {
         const topLight = new THREE.PointLight(0xffffff, 0.3)
         topLight.position.set(0, 200, 0)
         topLight.castShadow = true
-        topLight.shadow.mapSize.width = 1024
-        topLight.shadow.mapSize.height = 1024
+        topLight.shadow.mapSize.width = 512
+        topLight.shadow.mapSize.height = 512
         topLight.shadow.camera.near = 80
         topLight.shadow.camera.far = 400
+        topLight.shadow.radius = 8
+        topLight.shadow.blurSamples = 2
         this.scene.add(topLight)
     }
 
@@ -771,7 +774,7 @@ export default class DiceCanvas {
 
         // Gets 2d bounding box, in screen coordinates, around the capture object
 
-        if (!objectInput) {
+        if (!objectInput && this.objectGroupScreenshot) {
             this.groupObjects()
         }
 
@@ -959,7 +962,11 @@ export default class DiceCanvas {
                 } else if (object.faces[i].type == 'image') {
                     mapImage = loader.load(this.baseURL+'images/'+object.faces[i].image_src)
                 }
-                
+
+                // Make textures look sharper when on an angle
+                mapImage.magFilter = THREE.LinearFilter
+                mapImage.anisotropy = this.renderer.capabilities.getMaxAnisotropy()
+
                 let loadItem = new THREE.MeshStandardMaterial({
                     map: mapImage,
                     //alphaTest: 1, // Makes it light passes through transparent parts of png texture.
@@ -1007,6 +1014,10 @@ export default class DiceCanvas {
 
             // ROUNDED-EDGE CUBE
             let object_geometry = new RoundedBoxGeometry(1, 1, 1, 2)
+
+            // TODO: Look into this. Potential performance improvement for mesh that has multiple materials
+            //object_geometry.sortFacesByMaterialIndex()
+
             cubeMaterials.defines = {"USE_UV":""}
             mesh = new THREE.Mesh(object_geometry, cubeMaterials)
 
