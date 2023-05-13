@@ -78,7 +78,7 @@
                                         <IconsBase name="die" class="w-16 h-auto transition group-hover:scale-105" />
                                     </div>
                                     -->
-                                    <img :src="config.app.baseURL+'images/dice_screenshots/test1.png'" class="dice_preview object-contain mb-8 group-focus:scale-105 group-active:scale-105 group-hover:scale-105 transition-transform" />
+                                    <img :src="config.app.baseURL+'images/dice_screenshots/dies/'+die+'.png'" style="max-width: 8rem;" class="dice_preview object-contain mb-8 group-focus:scale-105 group-active:scale-105 group-hover:scale-105 transition-transform" />
                                     <div class="text-lg textInGroupTransitionFix group-hover:underline whitespace-nowrap">
                                         {{ store.dice[die].name }}
                                     </div>

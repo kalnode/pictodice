@@ -41,6 +41,7 @@
                 <div @click="setupFormation()" class="p-4 px-8 text-sm rounded-full bg-white hover:bg-gray-100 hover:scale-105 transition cursor-pointer">Formation</div>
                 <div @click="rotateObject()" class="p-4 px-8 text-sm rounded-full bg-white hover:bg-gray-100 hover:scale-105 transition cursor-pointer">Rotate</div>
                 <div @click="groupObjects()" class="p-4 px-8 text-sm rounded-full bg-white hover:bg-gray-100 hover:scale-105 transition cursor-pointer">Group Objects for Shot</div>
+                <div @click="zoomToGroup()" class="p-4 px-8 text-sm rounded-full bg-white hover:bg-gray-100 hover:scale-105 transition cursor-pointer">Zoom to Group</div>
                 <div @click="createScreenshot()" class="p-4 px-8 text-sm rounded-full bg-white hover:bg-gray-100 hover:scale-105 transition cursor-pointer">Screenshot</div>
                 <div @click="stopAnimation()" class="p-4 px-8 text-sm rounded-full bg-white hover:bg-gray-100 hover:scale-105 transition cursor-pointer">Stop Anim</div>
                 <div @click="throwObjects()" class="p-4 px-8 text-sm rounded-full bg-white hover:bg-gray-100 hover:scale-105 transition cursor-pointer">Roll</div>
@@ -172,5 +173,8 @@ function nudge(mode, value) {
     canvasInstance.nudgeRotation(mode, value)
 }
 
+function zoomToGroup() {
+    canvasInstance.zoomToGroup()
+}
 
 </script>

@@ -52,13 +52,13 @@ function setLimit(newLimit) {
             <client-only>
                 <StaggeredTransition animType='slideUp' :duration="50" tag="div" class="w-full h-full grid gap-6 auto-rows-min" style="grid-template-columns: repeat(auto-fit, minmax(14rem, auto))">
                     <div v-for="(set, index) in itemsToDisplay" :key="'diceset-'+index" :data-index="index">
-                        <NuxtLink :to="'/sets/'+index" class="noHoverOpacity w-full h-full flex flex-col justify-center items-center card group overflow-hidden pt-11 pb-7">
+                        <NuxtLink :to="'/sets/'+index" class="noHoverOpacity w-full h-full flex flex-col justify-end items-center card group overflow-hidden py-8">
                             <!--
                             <div class="mt-4 mb-4 md:mb-8 flex-1 flex items-center">
                                 <IconsBase name="die" class="w-16 h-auto transition group-hover:scale-105" />
                             </div>
                             -->
-                            <img :src="config.app.baseURL+'images/dice_screenshots/test1.png'" class="dice_preview object-contain px-8 md:px-0 py-8 group-focus:scale-105 group-active:scale-105 group-hover:scale-105 transition-transform" />
+                            <img :src="config.app.baseURL+'images/dice_screenshots/sets/' + index +'.png'" class="dice_preview flex-1 object-contain px-4 pt-4 pb-8 group-focus:scale-105 group-active:scale-105 group-hover:scale-105 transition-transform" />
                             <div class="px-2 text-lg textInGroupTransitionFix group-hover:underline line-clamp-2 text-center">
                                 {{ set.name}}
                             </div>

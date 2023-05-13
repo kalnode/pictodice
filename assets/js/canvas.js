@@ -694,10 +694,57 @@ export default class DiceCanvas {
         this.controls.update() // TODO: Needed?
     }
 
+
+    zoomCameraToSelection(camera, controls, selection, fitOffset = 1.2) {
+  
+        const box = new THREE.Box3()
+
+        //const box = selection
+        //for( const object of selection )
+        box.expandByObject(selection)
+        
+        const size = box.getSize( new THREE.Vector3(0,1,0) )
+        const center = box.getCenter( new THREE.Vector3(0,1,0) )
+        
+        const maxSize = Math.max( size.x, size.y, size.z )
+        const fitHeightDistance = maxSize / ( 2 * Math.atan( Math.PI * camera.fov / 360 ) );
+        const fitWidthDistance = fitHeightDistance / camera.aspect;
+        const distance = fitOffset * Math.max( fitHeightDistance, fitWidthDistance );
+        
+        const direction = controls.target.clone()
+          .sub( camera.position )
+          .normalize()
+          .multiplyScalar( distance );
+      
+        controls.maxDistance = distance * 10;
+        controls.target.copy( center );
+        
+        camera.near = distance / 100;
+        camera.far = distance * 100;
+        camera.updateProjectionMatrix();
+      
+        camera.position.copy( controls.target ).sub(direction);
+        
+        controls.update();
+
+    }
+
+
+    zoomToGroup() {
+        this.zoomCameraToSelection(this.camera, this.controls, this.objectGroupScreenshot)
+
+        //this.fitCameraToCenteredObject(this.camera, this.objectGroupScreenshot, 0, this.controls)
+    }
+
+   
+
     groupObjects() {
         this.objectGroupScreenshot = new THREE.Group()
         this.objectGroupScreenshot.name = "objectFormation"
-        this.objectGroupScreenshot.scale.set(2, 2, 2)
+        //this.objectGroupScreenshot.scale.set(2, 2, 2)
+
+
+
 
         // LOOP THROUGH SCENE OBJECTS, ADD TO GROUP
         // TODO: Must be more efficient way, maybe with below:
@@ -714,13 +761,18 @@ export default class DiceCanvas {
         }
 
         this.scene.add(this.objectGroupScreenshot)
+
+
+        //this.zoomCameraToSelection(this.camera, this.controls, this.objectGroupScreenshot)
+
+
         this.renderer.render(this.scene, this.camera)
     }
 
     rotateObject() {
         if (this.objectGroupScreenshot) {
             this.objectGroupScreenshot.rotateY(THREE.MathUtils.degToRad( this.getRandomRotationPosition() ))
-            this.objectGroupScreenshot.rotateOnAxis(new THREE.Vector3(0,1,0), THREE.MathUtils.degToRad( this.getRandomRotationPosition() ))
+            //this.objectGroupScreenshot.rotateOnAxis(new THREE.Vector3(0,1,0), THREE.MathUtils.degToRad( this.getRandomRotationPosition() ))
             this.renderer.render(this.scene, this.camera)
         }
     }
@@ -774,7 +826,8 @@ export default class DiceCanvas {
 
         // Gets 2d bounding box, in screen coordinates, around the capture object
 
-        if (!objectInput && this.objectGroupScreenshot) {
+        if (!objectInput && !this.objectGroupScreenshot) {
+            console.log("createScreenshot making group")
             this.groupObjects()
         }
 

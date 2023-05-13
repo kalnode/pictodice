@@ -129,8 +129,9 @@ ORIGINAL LIGHT TEAL
 }
 
 .dice_preview {
-    @apply max-h-32;
+    /* @apply max-w-xs; */
     /* drop-shadow-2xl */
+    max-width: 12rem;
     filter: drop-shadow(0 10px 25px rgb(159 159 159 / 34%));
 }
 

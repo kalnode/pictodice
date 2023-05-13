@@ -135,7 +135,7 @@ export const usePictodiceAppStore = defineStore('PictodiceApp', {
             {
                 name: 'Much more dice',
                 slug: 'much-more-dice',
-                dies: [ 0, 0, 0, 3, 4 ]
+                dies: [ 3, 0, 0, 0, 4 ]
             },
             {
                 name: 'Whole lotta dice!',
