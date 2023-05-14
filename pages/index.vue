@@ -40,7 +40,7 @@ definePageMeta({
                             <IconsBase name="die" class="w-12 h-auto" />
                             <IconsBase name="die" class="w-12 h-auto" />
                             -->
-                            <img :src="config.app.baseURL+'images/dice_screenshots/test1.png'" class="dice_preview object-contain group-focus:scale-105 group-active:scale-105 group-hover:scale-105 transition-transform" />
+                            <img :src="config.app.baseURL+'images/dice_screenshots/sets/0.png'" class="dice_preview object-contain group-focus:scale-105 group-active:scale-105 group-hover:scale-105 transition-transform" />
                         </div>
                     </NuxtLink>
                     <NuxtLink to="/roll?classic" class="btnapp btn_small hover:scale-105 transition cursor-pointer uppercase whitespace-nowrap textInGroupTransitionFix">
