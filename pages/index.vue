@@ -5,14 +5,15 @@ const store = usePictodiceAppStore()
 const config = useRuntimeConfig()
 const showPresetSection = ref(false)
 definePageMeta({
-    title: 'Pictodice'
+    title: 'Pictodice',
+    //scrollableArea: 'PageHome'
 })
 
 </script>
 <template>
-    <div id="indexWrapper" class="w-full h-full app-padding-x flex flex-col items-center overflow-auto">
+    <div id="PageHome" class="w-full h-full app-width-max app-padding-x m-auto flex flex-col items-center">
 
-        <nav class="w-full max-w-4xl pb-48">
+        <nav class="w-full pb-48">
             <div class="w-full flex flex-col sm:flex-row sm:justify-center my-4 sm:mt-28">
 
                 <section class="relative flex-1 flex justify-center sm:justify-start items-center">
@@ -173,7 +174,7 @@ section {
 
 @media screen and (max-height: 500px) {
 
-    #indexWrapper {
+    #PageHome {
         flex-direction: row;
         /*@apply flex-row;*/
     }

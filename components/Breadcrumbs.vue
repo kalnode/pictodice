@@ -160,10 +160,10 @@ async function findRouteObject(array, key1, key2, value) {
 </template>
 <style scoped>
 .link {
-  @apply p-2 m-2 cursor-pointer underline;
+    @apply p-2 m-2 cursor-pointer underline transition-all;
 }
 
 .link.disabled {
-  @apply pointer-events-none no-underline opacity-50;
+    @apply pointer-events-none no-underline opacity-50;
 }
 </style>

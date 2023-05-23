@@ -20,16 +20,24 @@
 /* ------------------------------ */
 /* CONTAINMENT */
 /* ------------------------------ */
+html {
+    overflow: hidden;
+}
+
 html,body, #__nuxt, #__layout{
     width: 100% !important;
     height: 100% !important;
 }
 
 body {
+    /*
     overflow: hidden;
+    position: fixed;
+    */
+    overflow: auto;
+
     width: 100%;
     height: 100%;
-    position: fixed;
     background-color: var(--bg);
     color: var(--color);
     transition: background-color 0.3s;
@@ -56,7 +64,10 @@ body {
     --border-color: #ddd;
 
     --color-A: #dddddd;
-    --color-B: #333333;
+    --color-B: #bbbbbb;
+    --color-C: #999999;
+    --color-D: #666666;
+    --color-E: #333333;
 }
 
 /*
@@ -106,12 +117,51 @@ ORIGINAL LIGHT TEAL
 }
 
 .app-padding-x {
-    @apply px-8;
+    @apply px-4 sm:px-8;
 }
 
 .app-margin-x-neg {
     @apply -mx-4;
 }
+
+
+.topDevice {
+    top: calc(0em + env(safe-area-inset-top))
+}
+
+
+.bottomDevice {
+    bottom: calc(0em + env(safe-area-inset-bottom))
+    /* fails?: iPhone PWA: check if dash in way */
+    /* works: iPhone Safari browser */
+    /* works: Android chrome */
+    /* works: Android pwa */
+}
+
+
+.stickySlider {
+    transition: transform 0.3s ease-in-out, opacity 0.3s;
+}
+
+.stickySlider.stickySlider-top {
+    padding-top: env(safe-area-inset-top);
+    transform: translate(0px, env(safe-area-inset-top));
+}
+.scrolled-down .stickySlider.stickySlider-top {
+    transform: translate(0px, calc(-100% + env(safe-area-inset-top)));
+}
+
+
+.stickySlider.stickySlider-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+    transform: translate(0px, env(safe-area-inset-bottom));
+}
+
+.scrolled-down .stickySlider.stickySlider-bottom {
+    transform: translate(0px, calc(100% + env(safe-area-inset-bottom)));
+}
+
+
 
 .card {
 
@@ -133,6 +183,11 @@ ORIGINAL LIGHT TEAL
     /* drop-shadow-2xl */
     max-width: 12rem;
     filter: drop-shadow(0 10px 25px rgb(159 159 159 / 34%));
+}
+
+.column_height {
+    /* TODO: 16em is arbitrary, however, instead we may want this to match sticky-footer height. Can we feed in a dynamic var here? */
+    min-height:calc(100vh - 18em)
 }
 
 @media screen and (min-width: 768px) {
@@ -158,7 +213,11 @@ a:not(.noHoverOpacity):hover {
 }
 
 .btnapp {
-    @apply ring-offset-4 focus:outline-none focus:ring-4 ring-[color:var(--color-tertiary)] inline-block rounded-full p-3 m-1 cursor-pointer text-[color:var(--bg-secondary)] bg-[color:var(--color-primary)] hover:opacity-80;
+    @apply ring-offset-4 focus:outline-none focus:ring-4 ring-[color:var(--color-tertiary)] flex rounded-full p-3 m-1 cursor-pointer text-[color:var(--bg-secondary)] bg-[color:var(--color-primary)] hover:opacity-80;
+}
+
+.btnapp-Inverted {
+    @apply ring-offset-4 focus:outline-none focus:ring-4 ring-[color:var(--color-tertiary)] flex rounded-full px-2 py-3 m-1 cursor-pointer text-[color:var(--color-primary)] border-2 border-[color:var(--color-primary)] bg-[color:var(--bg)] hover:bg-[color:var(--color-A)];
 }
 
 .btn_small {
@@ -175,12 +234,20 @@ a:not(.noHoverOpacity):hover {
 /* TITLES, TEXT */
 /* ------------------------------ */
 
+h1, h2, h3 {
+    @apply font-bold;
+}
+
 h1 {
-    @apply text-xl;
+    @apply text-xl sm:text-2xl md:text-3xl;
 }
 
 h2 {
-    @apply text-lg;
+    @apply text-lg sm:text-xl md:text-2xl;
+}
+
+h3 {
+    @apply text-base sm:text-lg md:text-xl;
 }
 
 .textInGroupTransitionFix {

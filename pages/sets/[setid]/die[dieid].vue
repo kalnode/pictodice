@@ -6,12 +6,13 @@ const store = usePictodiceAppStore()
 const config = useRuntimeConfig()
 definePageMeta({
     title: 'Die',
-    breadcrumb: 'Die #%dieid%'
+    breadcrumb: 'Die #%dieid%',
+    scrollableArea: 'PageDie'
 })
 </script>
 
 <template>
-    <div class="w-full h-full relative flex flex-col items-center overflow-auto">
+    <div id="PageDie" class="w-full h-full relative flex flex-col items-center overflow-auto scrollable">
 
         <header class="app-width-max app-padding-x app-padding-x w-full my-8 flex items-end">
             <h1 class="text-3xl font-bold">Die #{{ currentRoute.params.dieid }}</h1>
@@ -21,7 +22,7 @@ definePageMeta({
 
             <section class="flex-1 column_height card card_padding flex justify-center items-center mb-24">
                 <header class="flex items-center mb-2 md:mb-8">
-                    <h2 class="text-3xl font-bold mr-4 ">Faces</h2>
+                    <h2 class="mr-4 ">Die Faces</h2>
                     <h3 class="opacity-70">({{ store.diceSets[currentRoute.params.setid].dies.length }})</h3>
                 </header>
 

@@ -142,15 +142,19 @@ export default class DiceCanvas {
     async initScene() {
 
         // SCENE
-        this.renderer = new THREE.WebGLRenderer({
 
-            // TODO: If we can maintain solid color bg's, then we can possibly disable canvas transparency, and use a solid color instead
-            alpha: true,
+        try {
+            this.renderer = new THREE.WebGLRenderer({
+                // TODO: If we can maintain solid color bg's, then we can possibly disable canvas transparency, and use a solid color instead
+                alpha: true,
+                antialias: true,
+                canvas: this.canvasEl,
+                preserveDrawingBuffer: true
+            })
+        } catch (error) {
+            console.log("initScene ERROR: %O", error)
+        }
 
-            antialias: true,
-            canvas: this.canvasEl,
-            //preserveDrawingBuffer: true
-        })
         this.renderer.shadowMap.enabled = true
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap // Type of shadow map structure for scene
 

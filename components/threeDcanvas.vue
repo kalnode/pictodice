@@ -123,7 +123,7 @@ onMounted ( () => {
             canvasInstance.throwObjects()
         })
 
-    }, 500)
+    }, 1000)
 
 
 })

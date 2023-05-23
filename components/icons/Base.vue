@@ -20,7 +20,9 @@ const icons = {
     grid: defineAsyncComponent(() => import(/* @vite-ignore */'@/components/icons/icons/grid.vue')),
     help: defineAsyncComponent(() => import(/* @vite-ignore */'@/components/icons/icons/help.vue')),
     arrowBack: defineAsyncComponent(() => import(/* @vite-ignore */'@/components/icons/icons/arrowBack.vue')),
-    gear: defineAsyncComponent(() => import(/* @vite-ignore */'@/components/icons/icons/gear.vue'))
+    gear: defineAsyncComponent(() => import(/* @vite-ignore */'@/components/icons/icons/gear.vue')),
+    cart: defineAsyncComponent(() => import(/* @vite-ignore */'@/components/icons/icons/cart.vue')),
+    fullscreen: defineAsyncComponent(() => import(/* @vite-ignore */'@/components/icons/icons/fullscreen.vue'))
 }
 
 const props = defineProps({

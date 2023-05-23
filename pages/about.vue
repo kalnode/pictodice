@@ -15,7 +15,7 @@
             <ColorModePicker />
 
             <section>
-                <h2 class="font-bold">A technical demo by Kal</h2>
+                <h2>A technical demo by Kal</h2>
                 <p>A <span class="italic">'universal'</span>&nbsp;app with one single codebase powering 3 clients:</p>
                 <ul class="ml-4 mt-2 list-disc list-inside">
                     <li>web</li>
@@ -25,7 +25,7 @@
             </section>
 
             <section>
-                <h2 class="font-bold">Technical features</h2>
+                <h2>Technical features</h2>
                 <ul class="ml-4 list-disc list-inside">
                     <li>Uses Vue3/Nuxt3/Pinia/Capacitor</li>
                     <li>Motion, mouse and touch interactions</li>
@@ -37,7 +37,7 @@
             </section>
 
             <section>
-                <h2 class="font-bold">Possible future upgrades:</h2>
+                <h2>Possible future upgrades:</h2>
                 <ul class="ml-4 list-disc list-inside">
                     <li>Real-time 3d rendering with collision detection & lighting</li>
                     <li>Rolling multiple dice at once</li>

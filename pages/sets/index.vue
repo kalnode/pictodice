@@ -6,7 +6,8 @@ const store = usePictodiceAppStore()
 definePageMeta({
     title: 'Dice Sets',
     breadcrumb: 'Dice Sets',
-    name: 'Sets'
+    name: 'Sets',
+    scrollableArea: 'PageDiceSets'
 })
 
 const showItems = ref(false)
@@ -36,7 +37,7 @@ function setLimit(newLimit) {
 </script>
 
 <template>
-    <div v-if="itemsToDisplay" class="w-full h-full flex flex-col items-center pt-1 overflow-auto">
+    <div id="PageDiceSets" v-if="itemsToDisplay" class="w-full h-full flex flex-col items-center pt-1">
 
         <!--
         <div class="flex space-x-4">
@@ -52,7 +53,7 @@ function setLimit(newLimit) {
             <client-only>
                 <StaggeredTransition animType='slideUp' :duration="50" tag="div" class="w-full h-full grid gap-6 auto-rows-min" style="grid-template-columns: repeat(auto-fit, minmax(14rem, auto))">
                     <div v-for="(set, index) in itemsToDisplay" :key="'diceset-'+index" :data-index="index">
-                        <NuxtLink :to="'/sets/'+index" class="noHoverOpacity w-full h-full flex flex-col justify-end items-center card group overflow-hidden py-8">
+                        <NuxtLink :to="'/sets/'+index" class="noHoverOpacity w-full h-full flex flex-col justify-end items-center card group py-8">
                             <!--
                             <div class="mt-4 mb-4 md:mb-8 flex-1 flex items-center">
                                 <IconsBase name="die" class="w-16 h-auto transition group-hover:scale-105" />

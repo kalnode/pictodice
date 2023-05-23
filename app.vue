@@ -4,37 +4,49 @@
         store.safeAreaInset.bottom ? 'padding-bottom:'+(store.safeAreaInset.bottom+store.safeAreaPadding)+'px' : ''
     ]">
 
-        <header class="absolute z-50 w-full flex justify-between items-center pointer-events-none">
+        <!-- HEADER NAV -->
+        <header class="hidden md:block relative w-full">
+            <div class="w-full h-16 bg-white flex justify-center stickySlider stickySlider-top fixed z-50 topDevice border-b" style="box-shadow: 0 -25px 50px -12px rgba(0, 0, 0, 0.79)">
+                <HeaderNav class="app-width-max app-padding-x w-full h-full hidden md:flex" />
+            </div>
+        </header>
 
-            <!-- LEFT -->
-            <div>
-                <!-- BACK ARROW -->
-                <!--
-                <div v-if="currentRoute.name != 'index' && currentRoute.name != 'roll'" @click="router.back()"
-                class="p-4 hover:text-[color:var(--color-primary)] hover:scale-105 transition cursor-pointer pointer-events-auto">
-                    <IconsBase name="arrowBack" class="w-6 h-auto" />
-                </div>
-                -->
+        <!--
+        <header class="absolute z-50 w-full flex justify-between items-center pointer-events-none">
+        </header>
+        -->
+
+        <!-- CONTENT -->
+        <main id="ContentWrapper" class="w-full h-full flex flex-col">
+
+            <div class="hidden md:block w-full h-16" style="min-height: 4rem">&nbsp;</div>
+            <!-- TODO: Look into page-key; why static? -->
+            <!-- :page-key="'pagekey-'+currentRoute.name" -->
+            <!--  page-key="static" -->
+            <div :class="currentRoute.name == 'Roll' ? 'min-h-0 overflow-hidden' : 'min-h-full'" class="flex-1">
+                <NuxtPage />
             </div>
 
-            <!-- CENTER -->
-            <transition name="fade">
-                <!-- TODO: Support page meta here for class, instead of doing stupid route lookups -->
-                <!-- TODO: Is this even necessary? -->
-                <div v-if="showTopTitle && !store.rolling" id="Header"
-                :class="currentRoute.name == 'roll' ? 'absolute z-50' : ''"
-                :style="currentRoute.name == 'index' ? 'top:'+ (store.safeAreaInset.top+store.safeAreaPadding) +'px' : ''"
-                class="w-full flex justify-center p-2 pointer-events-auto">
-                    <NuxtLink :to="currentRoute.name == 'index' ? '/' : currentRoute.name" :key="'title-'+currentRoute.name">
-                        <h1 class="p-1.5 text-3xl font-bold uppercase hover:scale-110 transition-transform">{{ currentRoute.meta.title }}</h1>
-                    </NuxtLink>
-                </div>
-            </transition>
+            <div class="md:hidden w-full h-16" style="min-height: 4rem">&nbsp;</div>
+        </main>
 
-            <!-- RIGHT -->
-            <!--OVERFLOW (triple dots) -->
-            <!-- <div class="absolute right-2 top-1 pointer-events-auto">...</div>-->
-        </header>
+        <!-- NAVIGATION -->
+        <!--
+        <transition name="fade">
+            <nav v-if="!store.rolling" class="z-40 absolute w-full pointer-events-none"
+        :style="'bottom:'+ (store.safeAreaInset.bottom) +'px'">
+                <Navigation class="w-full" />
+            </nav>
+        </transition>
+        -->
+
+        <!-- BOTTOM NAV -->
+        <Footer class="md:hidden stickySlider stickySlider-bottom w-full bg-white fixed z-50 bottomDevice pointer-events-auto border-t" style="box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.79)" />
+
+
+
+        <!-- MODAL -->
+        <Modal />
 
         <!-- MOTION PERMISSION PROMPT (custom; mostly for iOS/Safari use) -->
         <div v-if="store.showPromptMotionPermission"
@@ -50,22 +62,6 @@
             <div>mouseTouchCoords: {{ store.mouseTouchCoords }}</div>
             <div>currentInteraction: {{ store.currentInteraction }}</div>
         </div>
-
-        <!-- CONTENT -->
-        <main class="w-full h-full flex-1">
-            <!-- TODO: Look into page-key; why static? -->
-            <!-- :page-key="'pagekey-'+currentRoute.name" -->
-            <!--  page-key="static" -->
-            <NuxtPage id="Content" />
-        </main>
-
-        <!-- NAVIGATION -->
-        <transition name="fade">
-            <nav v-if="!store.rolling" class="z-40 absolute w-full pointer-events-none"
-        :style="'bottom:'+ (store.safeAreaInset.bottom) +'px'">
-                <Navigation class="w-full" />
-            </nav>
-        </transition>
 
         <!-- OFFLINE EXPERIENCE -->
         <!-- TODO: Look into offline mode using:
@@ -90,19 +86,17 @@
         </div>
         -->
 
-        <!-- MODAL -->
-        <Modal />
-
     </div>
 </template>
 
 
 <script setup>
-import { ref } from 'vue'
+import { ref, nextTick } from 'vue'
 import { Capacitor } from '@capacitor/core'
 import { Motion } from '@capacitor/motion'
 import { usePictodiceAppStore } from '~/stores/app'
 import Stats from 'three/examples/jsm/libs/stats.module.js'
+import { listenScrollDirection } from '~/assets/js/scrollDirection.js'
 
 // ----- FOR DYNAMIC HEADER TITLE -----
 // TODO: Double check if this is correct. Because <Nav> occurs outside of <NuxtPage />, we need this import to make currentRoute reactive, otherwise it never changes after initial landing.
@@ -222,10 +216,6 @@ onMounted (async () => {
 
     }, 200))
 
-
-
-
-
     let gradientBackground = document.getElementById("gradientBackground")
     let gradientMouse = document.getElementById("gradientMouse")
 
@@ -253,11 +243,19 @@ onMounted (async () => {
         setHeaderPadding()
     }
 
-
     setMouseTouchListeners()
     await checkMotionPermission()
 
+    //nextTick( () => {
+        setScrollListener()
+    //})
 
+    watch(currentRoute, value => {
+            console.log("route changed %O", value)
+            setScrollListener()
+        },
+        //{deep: true, immediate: true}
+    )
 
     /*
     stats = new Stats()
@@ -288,13 +286,28 @@ function animate() {
 
 }
 
+function setScrollListener() {
+
+    nextTick( () => {
+        if (currentRoute.meta.scrollableArea) {
+            console.log("attempting set scroll listener %O", currentRoute.meta.scrollableArea)
+            //listenScrollDirection(currentRoute.meta.scrollableArea)
+            listenScrollDirection()
+        } else {
+            console.log("attempting set scroll listener ContentWrapper")
+            //listenScrollDirection("ContentWrapper")
+            listenScrollDirection()
+        }
+    })
+}
+
 
 function setHeaderPadding() {
     // Get final computed values of safe-area from CSS property values (see main.css).
     // For convenient use throughout app.
     store.safeAreaInset.top = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top"))
     store.safeAreaInset.bottom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-bottom"))
-    getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top")
+    //getComputedStyle(document.documentElement).getPropertyValue("--safe-area-inset-top")
     appReady.value = true
 }
 

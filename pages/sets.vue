@@ -9,9 +9,9 @@ definePageMeta({
 </script>
 
 <template>
-    <div class="w-full h-full flex justify-center overflow-hidden">
+    <div class="w-full h-full flex justify-center">
         <div class="w-full flex flex-col items-center">
-            <Breadcrumbs class="app-width-max w-full my-4" />
+            <Breadcrumbs class="app-width-max sticky top-0 w-full my-4 z-40 bg-[color:var(--bg)]" />
             <NuxtPage :key="'subview-'+currentRoute.name" />
         </div>
     </div>
